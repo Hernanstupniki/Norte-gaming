@@ -1,0 +1,63 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: norte-gaming-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: norte_gaming
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${AUTHENTICATION_API_KEY}
+      TZ: ${GENERIC_TIMEZONE}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d norte_gaming"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    container_name: norte-gaming-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      TZ: ${GENERIC_TIMEZONE}
+      DATABASE_URL: postgresql://postgres:${AUTHENTICATION_API_KEY}@db:5432/norte_gaming?schema=public
+      CORS_ORIGIN: https://nortegaming.${DOMAIN_NAME}
+      JWT_ACCESS_SECRET: ${AUTHENTICATION_API_KEY}
+      JWT_REFRESH_SECRET: ${AUTHENTICATION_API_KEY}
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+    volumes:
+      - ./uploads:/app/uploads
+    command: sh -c "npx prisma migrate deploy; node dist/src/main.js"
+    networks:
+      - app
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.norte-api.rule=Host(`nortegaming.${DOMAIN_NAME}`) && (PathPrefix(`/api`) || PathPrefix(`/docs`) || PathPrefix(`/uploads`))
+      - traefik.http.routers.norte-api.entrypoints=web,websecure
+      - traefik.http.routers.norte-api.tls=true
+      - traefik.http.routers.norte-api.tls.certresolver=mytlschallenge
+      - traefik.http.routers.norte-api.priority=100
+      - traefik.http.services.norte-api.loadbalancer.server.port=4000
+
+volumes:
+  postgres_data:
+
+networks:
+  app:
+    driver: bridge
+  proxy:
+    external: true

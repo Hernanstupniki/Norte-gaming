@@ -1,0 +1,266 @@
+DOCUMENTACION COMPLETA - NORTE GAMING FRONTEND
+
+Fecha: 2026-03-16
+Proyecto: Norte Gaming (ecommerce premium gaming - frontend completo)
+Stack: Next.js (App Router), TypeScript, Tailwind CSS v4, estado local con React Context
+
+====================================================================
+1) QUE SE HIZO EN ESTE PROYECTO
+====================================================================
+
+Se construyo un frontend ecommerce completo, navegable y listo para conectar backend real.
+No es un template suelto: incluye flujo de compra visual completo, simulacion funcional
+carrito/favoritos/login, catalogo con filtros y ficha de producto detallada.
+
+Se implementaron estas vistas:
+- Inicio
+- Tienda/Catalogo
+- Categorias
+- Producto individual
+- Carrito
+- Checkout
+- Contacto
+- Nosotros
+- FAQ
+- Login y Registro
+- Not Found
+
+Se implementaron estas funcionalidades frontend:
+- Buscador y filtros por categoria, marca y precio
+- Ordenamiento por destacados, precio, mas vendidos y nuevos
+- Tarjetas de producto reutilizables
+- Carrito lateral tipo drawer + pagina de carrito completa
+- Favoritos persistidos localmente
+- Login/registro simulado (frontend)
+- Checkout visual por pasos
+- Boton flotante de WhatsApp
+- Persistencia en localStorage (carrito/favoritos/sesion)
+
+Se implemento una identidad visual consistente:
+- Paleta blanco/negro/grises con acento rojo
+- Estetica premium minimal + toques retro medidos
+- Bordes marcados, sombras duras y grilla sutil
+- Tipografia tecnica (Rajdhani + Space Mono)
+- Home con hero potente y secciones comerciales reales
+
+====================================================================
+2) COMO SE HIZO (METODO DE IMPLEMENTACION)
+====================================================================
+
+2.1 Inicializacion
+- Se inicio el proyecto con create-next-app en subcarpeta "norte-gaming"
+  porque el nombre de carpeta raiz no cumple restricciones de npm.
+- Se uso App Router, TypeScript, Tailwind y ESLint.
+
+2.2 Arquitectura
+Se separo por capas para escalar:
+- src/types: tipos TS de dominio (Product, Category, Review, etc.)
+- src/lib: utilidades y mock data
+- src/context: estado global (carrito/favoritos/auth)
+- src/components: componentes por dominio (layout/home/shop/auth/common/providers)
+- src/app: rutas y paginas (App Router)
+
+2.3 Estado global
+- StoreContext maneja:
+  - cart
+  - favorites
+  - auth
+  - drawer abierto/cerrado
+- Se persiste en localStorage bajo clave "norte-gaming-store".
+- Se exponen acciones: addToCart, updateQuantity, removeFromCart,
+  toggleFavorite, login, logout, openCart, closeCart.
+
+2.4 Datos mock
+- Se creo un catalogo creible para Argentina (ARS), con:
+  - precios realistas
+  - cuotas
+  - stock
+  - marcas oficiales
+  - badges (oferta/destacado/nuevo/mas-vendido)
+  - specs tecnicas
+  - reseñas
+  - FAQ
+
+2.5 UI/UX
+- Layout global con Topbar + Navbar + Footer + CartDrawer + WhatsApp FAB.
+- Home modular con secciones reutilizables.
+- Product card reutilizable en home, tienda y relacionados.
+- Product detail con galeria mock, variantes, specs, reviews y relacionados.
+
+2.6 Calidad tecnica
+- Se corrigieron errores de lint durante desarrollo.
+- Build productivo valido.
+- Rutas compilando correctamente.
+
+====================================================================
+3) ESTRUCTURA DEL CODIGO (RESUMEN)
+====================================================================
+
+src/
+  app/
+    page.tsx
+    tienda/page.tsx
+    categorias/page.tsx
+    producto/[slug]/page.tsx
+    carrito/page.tsx
+    checkout/page.tsx
+    contacto/page.tsx
+    nosotros/page.tsx
+    faq/page.tsx
+    login/page.tsx
+    registro/page.tsx
+    layout.tsx
+    globals.css
+    not-found.tsx
+  components/
+    auth/
+      auth-panel.tsx
+    common/
+      product-card.tsx
+      product-thumbnail.tsx
+      section-title.tsx
+    home/
+      hero.tsx
+      brand-strip.tsx
+      category-grid.tsx
+      product-showcase.tsx
+      promo-banner.tsx
+      trust-grid.tsx
+      faq-preview.tsx
+    layout/
+      topbar.tsx
+      navbar.tsx
+      footer.tsx
+      whatsapp-fab.tsx
+    providers/
+      app-providers.tsx
+    shop/
+      storefront.tsx
+      cart-drawer.tsx
+      product-detail-client.tsx
+  context/
+    store-context.tsx
+  lib/
+    mock-data.ts
+    utils.ts
+  types/
+    index.ts
+
+====================================================================
+4) COMO ESCALAR ESTE FRONTEND
+====================================================================
+
+4.1 Escalado de arquitectura
+- Agregar capa "services" para separar llamadas a API del UI.
+- Migrar gradualmente de mock-data a fetch real (sin romper componentes).
+- Mantener tipos de dominio centralizados en src/types.
+
+4.2 Escalado de estado
+- Mantener Context para global simple (cart/session).
+- Si crece complejidad (cupones, multi-bodega, promociones), migrar a Zustand
+  o React Query + estado de UI local.
+
+4.3 Escalado de UI
+- Consolidar tokens de diseño (colores, radios, spacing) como variables.
+- Crear sistema de componentes base (Button, Input, Badge, Card, Modal, Drawer).
+- Agregar testing visual de componentes criticos.
+
+4.4 Escalado de performance
+- Pasar catalogo a server data fetching con cache.
+- Paginacion y filtros server-side.
+- Optimizar imagenes reales con next/image y CDN.
+
+4.5 Escalado de calidad
+- Agregar tests:
+  - unitarios para utilidades
+  - integracion para carrito/checkout
+  - E2E para flujo compra
+- Agregar CI (lint + test + build).
+
+====================================================================
+5) COMO REALIZAR EL BACKEND (HOJA DE RUTA RECOMENDADA)
+====================================================================
+
+Objetivo: conectar este frontend a backend real con Supabase + Mercado Pago.
+
+FASE 1 - Base de datos y auth
+1. Crear proyecto Supabase.
+2. Definir tablas:
+   - brands, categories, products, product_images
+   - users_profile, favorites
+   - carts, cart_items
+   - orders, order_items
+   - shipping_addresses
+   - payments
+   - reviews
+3. Activar Auth (email/password + oauth opcional).
+4. Configurar RLS por usuario y por rol admin.
+
+FASE 2 - API y dominio ecommerce
+1. Crear endpoints/route handlers en Next:
+   - GET /api/products
+   - GET /api/products/[slug]
+   - POST /api/cart/items
+   - PATCH /api/cart/items/[id]
+   - DELETE /api/cart/items/[id]
+   - POST /api/orders
+2. Validar stock y precios en backend (nunca confiar en frontend).
+3. Convertir carrito/favoritos de localStorage a persistencia real por usuario.
+
+FASE 3 - Pagos con Mercado Pago
+1. Backend crea preferencia de pago.
+2. Front redirige a checkout de Mercado Pago.
+3. Configurar webhook seguro en backend.
+4. Al confirmar pago:
+   - actualizar payment
+   - actualizar order
+   - descontar stock en transaccion
+
+FASE 4 - Logistica y postventa
+1. Integrar opciones de envio (Correo Argentino/Andreani/OCA).
+2. Guardar tracking y estado de envio.
+3. Panel de ordenes para usuario y admin.
+
+FASE 5 - Endurecimiento productivo
+1. Auditoria de seguridad:
+   - claves privadas solo server
+   - validacion de payload
+   - rate limit en endpoints sensibles
+2. Observabilidad:
+   - logs de pago/webhook
+   - alertas de error
+3. Pruebas E2E del flujo completo compra -> pago -> orden.
+
+====================================================================
+6) PLAN PRACTICO PARA VOS (ORDEN MINIMO RECOMENDADO)
+====================================================================
+
+Paso 1: Supabase schema + Auth + RLS
+Paso 2: Endpoint de productos y detalle
+Paso 3: Carrito real por usuario
+Paso 4: Checkout + creacion de orden
+Paso 5: Mercado Pago + webhook
+Paso 6: Historial de ordenes
+
+Con ese orden, pasas de demo frontend a ecommerce funcional sin rehacer UI.
+
+====================================================================
+7) RIESGOS COMUNES A EVITAR
+====================================================================
+
+- Calcular precios finales solo en frontend (error)
+- Descontar stock solo en frontend (error)
+- No validar webhook de pago (error grave)
+- Guardar secretos en cliente (error grave)
+- No definir RLS en Supabase (error grave)
+
+====================================================================
+8) SIGUIENTE PASO SUGERIDO
+====================================================================
+
+Siguiente iteracion recomendada:
+- Preparar esquema SQL inicial de Supabase
+- Conectar catalogo y detalle de producto a DB real
+- Mantener el mismo diseño y componentes ya construidos
+
+Fin del documento.
