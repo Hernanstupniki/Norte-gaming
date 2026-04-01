@@ -52,6 +52,16 @@ services:
       - traefik.http.routers.norte-api.tls.certresolver=mytlschallenge
       - traefik.http.routers.norte-api.priority=100
       - traefik.http.services.norte-api.loadbalancer.server.port=4000
+      - traefik.http.middlewares.norte-root-redirect.redirectregex.regex=^https?://nortegaming\.${DOMAIN_NAME}/?$
+      - traefik.http.middlewares.norte-root-redirect.redirectregex.replacement=https://nortegaming.${DOMAIN_NAME}/docs
+      - traefik.http.middlewares.norte-root-redirect.redirectregex.permanent=true
+      - traefik.http.routers.norte-root.rule=Host(`nortegaming.${DOMAIN_NAME}`) && Path(`/`)
+      - traefik.http.routers.norte-root.entrypoints=web,websecure
+      - traefik.http.routers.norte-root.tls=true
+      - traefik.http.routers.norte-root.tls.certresolver=mytlschallenge
+      - traefik.http.routers.norte-root.priority=200
+      - traefik.http.routers.norte-root.middlewares=norte-root-redirect
+      - traefik.http.routers.norte-root.service=norte-api
 
 volumes:
   postgres_data:
