@@ -1,6 +1,6 @@
 export type CategorySlug = string;
 
-export type ProductBadge = "oferta" | "destacado" | "nuevo" | "mas-vendido";
+export type ProductBadge = "oferta" | "destacado" | "nuevo" | "mas-vendido" | "sin-stock";
 
 export interface Category {
   slug: CategorySlug;

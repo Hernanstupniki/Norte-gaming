@@ -62,10 +62,7 @@ export const stats: StatItem[] = [
   { label: "Envíos realizados", value: "+32.000" },
 ];
 
-const toInstallments = (price: number) => {
-  const monthly = Math.round(price / 12);
-  return `12x de $${monthly.toLocaleString("es-AR")} sin interés`;
-};
+const toInstallments = (_price: number) => "Medios de pago disponibles";
 
 export const products: Product[] = [
   {

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { ADMIN_SESSION_COOKIE } from "@/lib/admin-session";
 
-const getApiBaseUrl = () => process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+const getApiBaseUrl = () => "http://norte-gaming-api:4000/api";
 
 type MeResponse = {
   role?: string;

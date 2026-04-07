@@ -27,6 +27,7 @@ export function ProductDetailClient({
   const { addToCart, auth, favorites, toggleFavorite } = useStore();
   const isFavorite = favorites.includes(product.id);
   const whatsappHref = buildProductWhatsAppHref(product);
+  const outOfStock = product.stock <= 0;
   const shortDescription = product.shortDescription?.trim() || product.description;
   const fullDescription = product.description?.trim();
 
@@ -43,15 +44,24 @@ export function ProductDetailClient({
   };
 
   const shippingEta = useMemo(
-    () => (product.stock > 10 ? "Llega entre 24 y 72 hs" : "Llega entre 2 y 5 días hábiles"),
-    [product.stock],
+    () =>
+      outOfStock
+        ? "Sin stock por el momento. Consultá disponibilidad por WhatsApp."
+        : product.stock > 10
+          ? "Llega entre 24 y 72 hs"
+          : "Llega entre 2 y 5 días hábiles",
+    [outOfStock, product.stock],
   );
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-6">
       <div className="grid gap-8 lg:grid-cols-2">
         <div>
-          <ProductThumbnail label={selectedImage} className="h-96 border-2 border-black" />
+          <ProductThumbnail
+            label={product.name}
+            imageSrc={selectedImage}
+            className="h-96 border-2 border-black"
+          />
           {safeImages.length > 1 ? (
             <div className="mt-3 flex items-center gap-2">
               <button
@@ -84,8 +94,10 @@ export function ProductDetailClient({
               <p className="text-sm text-zinc-500 line-through">{formatARS(product.previousPrice)}</p>
             ) : null}
             <p className="text-4xl font-black text-zinc-950">{formatARS(product.price)}</p>
-            <p className="text-sm text-zinc-600">{product.installments}</p>
-            <p className="text-sm text-zinc-600">Stock disponible: {product.stock}</p>
+            {product.installments ? <p className="text-sm text-zinc-600">{product.installments}</p> : null}
+            <p className={outOfStock ? "text-sm font-semibold text-red-600" : "text-sm text-zinc-600"}>
+              {outOfStock ? "Sin stock" : `Stock disponible: ${product.stock}`}
+            </p>
           </div>
 
           <div>
@@ -105,9 +117,10 @@ export function ProductDetailClient({
             <button
               type="button"
               onClick={() => addToCart(product.id, product)}
-              className="rounded-md border-2 border-red-700 bg-red-600 px-4 py-3 text-xs font-bold uppercase tracking-widest text-white"
+              disabled={outOfStock}
+              className="rounded-md border-2 border-red-700 bg-red-600 px-4 py-3 text-xs font-bold uppercase tracking-widest text-white disabled:cursor-not-allowed disabled:border-zinc-300 disabled:bg-zinc-300 disabled:text-zinc-600"
             >
-              Agregar al carrito
+              {outOfStock ? "Sin stock" : "Agregar al carrito"}
             </button>
             <a
               href={whatsappHref}
@@ -115,7 +128,7 @@ export function ProductDetailClient({
               rel="noreferrer"
               className="rounded-md border-2 border-[#1FA855] bg-[#25D366] px-4 py-3 text-center text-xs font-bold uppercase tracking-widest text-black"
             >
-              Comprar por WhatsApp
+              {outOfStock ? "Consultar stock por WhatsApp" : "Comprar por WhatsApp"}
             </a>
           </div>
 

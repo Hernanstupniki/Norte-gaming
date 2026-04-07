@@ -13,6 +13,7 @@ import {
   adminUploadProductImage,
 } from "@/lib/admin-api";
 import { brands as carouselBrands } from "@/lib/mock-data";
+import { resolvePublicImageUrl } from "@/lib/public-image-url";
 import { CreateProductDto, ProductImageInputDto, ProductSpecInputDto } from "@/types/backend";
 
 type Brand = { id: string; name: string; slug: string };
@@ -89,7 +90,10 @@ const toFormFromProduct = (product: AdminProductItem): ProductFormState => ({
   categoryId: product.categoryId || "",
   images:
     product.images && product.images.length > 0
-      ? product.images.map((img) => ({ url: img.url || "", ...(img.alt ? { alt: img.alt } : {}) }))
+      ? product.images.map((img) => ({
+          url: resolvePublicImageUrl(img.url) || img.url || "",
+          ...(img.alt ? { alt: img.alt } : {}),
+        }))
       : [{ url: "", alt: "" }],
   specs:
     product.specs && product.specs.length > 0
@@ -275,7 +279,7 @@ export function ProductsAdminClient() {
 
     try {
       const { url } = await adminUploadProductImage(file);
-      updateImage(index, "url", url);
+      updateImage(index, "url", resolvePublicImageUrl(url) || url);
       if (!form.images[index]?.alt) {
         updateImage(index, "alt", file.name.replace(/\.[^/.]+$/, ""));
       }
@@ -554,7 +558,13 @@ export function ProductsAdminClient() {
                       <input type="url" required placeholder="URL" value={image.url || ""} onChange={(event) => updateImage(index, "url", event.target.value)} className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900" />
                       <input type="text" placeholder="Alt" value={image.alt || ""} onChange={(event) => updateImage(index, "alt", event.target.value)} className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900" />
                     </div>
-                    {image.url ? <img src={image.url} alt={image.alt || "Preview"} className="mt-3 h-28 w-full rounded-md object-cover" /> : null}
+                    {image.url ? (
+                      <img
+                        src={resolvePublicImageUrl(image.url) || image.url}
+                        alt={image.alt || "Preview"}
+                        className="mt-3 h-28 w-full rounded-md object-cover"
+                      />
+                    ) : null}
                     {form.images.length > 1 ? <button type="button" onClick={() => removeImage(index)} className="mt-2 text-xs font-semibold text-red-600">Eliminar imagen</button> : null}
                   </div>
                 ))}

@@ -24,8 +24,22 @@ export interface CreateOrderResponse {
   createdAt: string;
 }
 
-const getApiBaseUrl = () =>
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+export interface CreateContactRequest {
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+}
+
+const getApiBaseUrl = () => {
+  // En el servidor Next.js (dentro de Docker), usa el nombre del host del contenedor
+  if (typeof window === "undefined") {
+    return "http://norte-gaming-api:4000/api";
+  }
+  // En el navegador, usa localhost
+  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+};
 
 const parseJson = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {
@@ -99,4 +113,28 @@ export const createOrder = async (
   }
 
   return parseJson<CreateOrderResponse>(response);
+};
+
+export const createContactInquiry = async (payload: CreateContactRequest) => {
+  const response = await fetch(`${getApiBaseUrl()}/contacts`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorPayload = (await response.json().catch(() => null)) as
+      | { message?: string | string[] }
+      | null;
+
+    const message = Array.isArray(errorPayload?.message)
+      ? errorPayload?.message.join(". ")
+      : errorPayload?.message || `Error enviando consulta: ${response.status}`;
+
+    throw new Error(message);
+  }
+
+  return response.json();
 };

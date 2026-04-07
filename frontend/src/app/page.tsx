@@ -5,9 +5,11 @@ import { Hero } from "@/components/home/hero";
 import { ProductShowcase } from "@/components/home/product-showcase";
 import { PromoBanner } from "@/components/home/promo-banner";
 import { TrustGrid } from "@/components/home/trust-grid";
-import { products } from "@/lib/mock-data";
+import { fetchCatalogProducts } from "@/lib/backend-api";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const products = await fetchCatalogProducts();
+
   const featured = products.filter((item) => item.isFeatured).slice(0, 4);
   const offers = products.filter((item) => item.badges.includes("oferta")).slice(0, 4);
   const launchPicks = [...products]

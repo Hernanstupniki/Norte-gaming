@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { resolvePublicImageUrl } from "@/lib/public-image-url";
 import { cn } from "@/lib/utils";
 
 interface ProductThumbnailProps {
@@ -10,16 +11,20 @@ interface ProductThumbnailProps {
 
 export function ProductThumbnail({ label, imageSrc, sizes, className }: ProductThumbnailProps) {
   const safeLabel = (label || "Imagen de producto").trim();
+  const normalizedImageSrc = resolvePublicImageUrl(imageSrc);
+  const normalizedSafeLabel = resolvePublicImageUrl(safeLabel);
   const isValidSource = (value?: string) => {
     if (!value) return false;
     return /^https?:\/\//i.test(value) || value.startsWith("/");
   };
 
-  const source = isValidSource(imageSrc)
-    ? imageSrc
-    : isValidSource(safeLabel)
-      ? safeLabel
+  const source = isValidSource(normalizedImageSrc)
+    ? normalizedImageSrc
+    : isValidSource(normalizedSafeLabel)
+      ? normalizedSafeLabel
       : undefined;
+
+  const isRemoteSource = Boolean(source && /^https?:\/\//i.test(source));
 
   return (
     <div
@@ -34,6 +39,7 @@ export function ProductThumbnail({ label, imageSrc, sizes, className }: ProductT
           alt={safeLabel}
           fill
           sizes={sizes ?? "(max-width: 768px) 100vw, 50vw"}
+          unoptimized={isRemoteSource}
           className="object-contain"
           priority
         />

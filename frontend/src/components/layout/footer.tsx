@@ -46,7 +46,7 @@ export function Footer() {
             </li>
             <li>Mail: NorteGamingba@gmail.com</li>
             <li>Envíos: toda Argentina</li>
-            <li>Soporte: Lun a Sáb 10 a 19 hs</li>
+            <li>Soporte: activo 24/7 (las 24 horas todos los días)</li>
           </ul>
         </div>
         <div>

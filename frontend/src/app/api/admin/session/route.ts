@@ -6,14 +6,17 @@ type SessionBody = {
   token?: string;
 };
 
-const getApiBaseUrl = () => process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+const getServerApiBaseUrl = () =>
+  process.env.INTERNAL_API_URL ||
+  process.env.NEXT_INTERNAL_API_URL ||
+  "http://norte-gaming-api:4000/api";
 
 type MeResponse = {
   role?: string;
 };
 
 const isAdminToken = async (token: string) => {
-  const response = await fetch(`${getApiBaseUrl()}/auth/me`, {
+  const response = await fetch(`${getServerApiBaseUrl()}/auth/me`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -46,10 +49,12 @@ export async function POST(request: Request) {
   }
 
   const cookieStore = await cookies();
+  const requestUrl = new URL(request.url);
+  const isLocalhost = requestUrl.hostname === "localhost" || requestUrl.hostname === "127.0.0.1";
   cookieStore.set(ADMIN_SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === "production" && !isLocalhost,
     path: "/",
     maxAge: 60 * 60 * 8,
   });

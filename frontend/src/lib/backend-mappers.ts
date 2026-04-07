@@ -53,6 +53,10 @@ export interface ApiProduct {
 const toBadges = (apiProduct: ApiProduct): ProductBadge[] => {
   const badges: ProductBadge[] = [];
 
+  if (Number(apiProduct.stock) <= 0) {
+    badges.push("sin-stock");
+  }
+
   if (apiProduct.isOnOffer || Number(apiProduct.previousPrice || 0) > Number(apiProduct.currentPrice)) {
     badges.push("oferta");
   }
@@ -76,10 +80,7 @@ const toBadges = (apiProduct: ApiProduct): ProductBadge[] => {
   return badges;
 };
 
-const toInstallments = (price: number) => {
-  const monthly = Math.round(price / 12);
-  return `12x de $${monthly.toLocaleString("es-AR")} sin interés`;
-};
+const toInstallments = (_price: number) => "Medios de pago disponibles";
 
 export const mapApiProductToProduct = (apiProduct: ApiProduct): Product => {
   const price = Number(apiProduct.currentPrice);

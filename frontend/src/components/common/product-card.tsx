@@ -12,12 +12,14 @@ const badgeStyles: Record<string, string> = {
   destacado: "bg-black text-white",
   nuevo: "bg-zinc-200 text-zinc-900",
   "mas-vendido": "bg-white text-zinc-900 border border-zinc-300",
+  "sin-stock": "bg-red-100 text-red-700 border border-red-300",
 };
 
 export function ProductCard({ product }: { product: Product }) {
   const { addToCart, auth, favorites, toggleFavorite } = useStore();
   const isFavorite = favorites.includes(product.id);
   const whatsappHref = buildProductWhatsAppHref(product);
+  const outOfStock = product.stock <= 0;
 
   return (
     <article className="group flex h-full min-w-0 flex-col rounded-2xl border-2 border-black/10 bg-white p-3 sm:p-4 shadow-[6px_6px_0_#17171712] transition hover:-translate-y-0.5 hover:shadow-[8px_8px_0_#17171720]">
@@ -46,17 +48,20 @@ export function ProductCard({ product }: { product: Product }) {
             <p className="text-xs text-zinc-500 line-through">{formatARS(product.previousPrice)}</p>
           ) : null}
           <p className="text-2xl font-bold text-zinc-950">{formatARS(product.price)}</p>
-          <p className="text-xs text-zinc-600">{product.installments}</p>
-          <p className="mt-1 text-xs text-zinc-500">Stock: {product.stock}</p>
+          {product.installments ? <p className="text-xs text-zinc-600">{product.installments}</p> : null}
+          <p className={`mt-1 text-xs ${outOfStock ? "font-semibold text-red-600" : "text-zinc-500"}`}>
+            {outOfStock ? "Sin stock" : `Stock: ${product.stock}`}
+          </p>
         </div>
 
         <div className="mt-auto flex flex-col gap-2 sm:flex-row sm:items-end">
           <button
             type="button"
             onClick={() => addToCart(product.id, product)}
-            className="w-full rounded-lg border-2 border-black bg-black px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white transition duration-150 hover:bg-zinc-900 active:translate-y-[2px] active:scale-[0.99] sm:flex-1"
+            disabled={outOfStock}
+            className="w-full rounded-lg border-2 border-black bg-black px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white transition duration-150 hover:bg-zinc-900 active:translate-y-[2px] active:scale-[0.99] disabled:cursor-not-allowed disabled:border-zinc-300 disabled:bg-zinc-300 disabled:text-zinc-600 sm:flex-1"
           >
-            Agregar
+            {outOfStock ? "Sin stock" : "Agregar"}
           </button>
           <a
             href={whatsappHref}
@@ -64,7 +69,7 @@ export function ProductCard({ product }: { product: Product }) {
             rel="noreferrer"
             className="w-full rounded-lg border-2 border-[#25D366] bg-[#25D366] px-3 py-2 text-center text-xs font-semibold uppercase tracking-widest text-black transition duration-150 hover:brightness-95 active:translate-y-[2px] active:scale-[0.99] sm:w-auto"
           >
-            WhatsApp
+            {outOfStock ? "Consultar por WhatsApp" : "WhatsApp"}
           </a>
           {auth.isLoggedIn ? (
             <button

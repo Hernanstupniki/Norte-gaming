@@ -39,6 +39,12 @@ JWT_ACCESS_SECRET=change_this_access_secret
 JWT_REFRESH_SECRET=change_this_refresh_secret
 JWT_ACCESS_EXPIRES_IN=15m
 JWT_REFRESH_EXPIRES_IN=7d
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=nortegamingba@gmail.com
+SMTP_PASS=app_password_de_gmail
+CONTACT_RECEIVER_EMAIL=nortegamingba@gmail.com
 ```
 
 ## Instalacion local
