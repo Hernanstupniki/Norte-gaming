@@ -47,9 +47,7 @@ export function ProductDetailClient({
     () =>
       outOfStock
         ? "Sin stock por el momento. Consultá disponibilidad por WhatsApp."
-        : product.stock > 10
-          ? "Llega entre 24 y 72 hs"
-          : "Llega entre 2 y 5 días hábiles",
+        : "Envíos a todo el país con demora estimada de 1 semana.",
     [outOfStock, product.stock],
   );
 
@@ -146,8 +144,8 @@ export function ProductDetailClient({
 
           <div className="grid gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700">
             <p>Envíos: {shippingEta}</p>
-            <p>Pagos: Mercado Pago, tarjeta y transferencia.</p>
-            <p>Retiro: punto de entrega en CABA y GBA.</p>
+            <p>Pagos: distintos medios de pago disponibles (Mercado Pago, tarjetas y transferencia).</p>
+            <p>Retiro: disponible solo en Posadas, Misiones.</p>
           </div>
         </div>
       </div>

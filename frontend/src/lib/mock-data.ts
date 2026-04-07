@@ -62,7 +62,7 @@ export const stats: StatItem[] = [
   { label: "Envíos realizados", value: "+32.000" },
 ];
 
-const toInstallments = (_price: number) => "Medios de pago disponibles";
+const toInstallments = (_price: number) => "Distintos medios de pago disponibles";
 
 export const products: Product[] = [
   {
