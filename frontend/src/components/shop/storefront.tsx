@@ -171,7 +171,7 @@ export function Storefront() {
         result = [...result].sort((a, b) => b.sold - a.sold);
         break;
       case "nuevos":
-        result = [...result].sort((a, b) => Number(b.badges.includes("nuevo")) - Number(a.badges.includes("nuevo")));
+        result = [...result].sort((a, b) => Number(Boolean(b.isFeatured)) - Number(Boolean(a.isFeatured)));
         break;
       default:
         result = [...result].sort((a, b) => Number(Boolean(b.isFeatured)) - Number(Boolean(a.isFeatured)));

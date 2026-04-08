@@ -3,6 +3,7 @@ import { Category, FAQItem, Product, Review, StatItem } from "@/types";
 export const brands = [
   "Logitech",
   "HyperX",
+  "JBL",
   "Razer",
   "Corsair",
   "SteelSeries",
@@ -75,7 +76,7 @@ export const products: Product[] = [
     previousPrice: 329999,
     stock: 8,
     installments: toInstallments(289999),
-    badges: ["oferta", "destacado"],
+    badges: ["destacado"],
     shortDescription: "TKL inalámbrico para esports con switches intercambiables.",
     description:
       "Diseñado para competitivo, el Pro X TKL combina respuesta ultrarrápida, conexión LIGHTSPEED y construcción premium en aluminio.",
@@ -126,7 +127,7 @@ export const products: Product[] = [
     previousPrice: 239999,
     stock: 19,
     installments: toInstallments(219999),
-    badges: ["oferta"],
+    badges: [],
     shortDescription: "Comodidad total y micrófono claro con batería extendida.",
     description:
       "Ideal para largas sesiones de juego, con almohadillas memory foam y audio espacial para ventaja táctica.",
@@ -151,7 +152,7 @@ export const products: Product[] = [
     previousPrice: 979999,
     stock: 5,
     installments: toInstallments(899999),
-    badges: ["destacado", "nuevo"],
+    badges: ["destacado"],
     shortDescription: "27 pulgadas QHD IPS con 300Hz para esports premium.",
     description:
       "Panel veloz y colores precisos para competir y crear. Incluye sincronización adaptativa y baja latencia de entrada.",
@@ -201,7 +202,7 @@ export const products: Product[] = [
     previousPrice: 78999,
     stock: 41,
     installments: toInstallments(69999),
-    badges: ["oferta"],
+    badges: [],
     shortDescription: "Compacto 60% con switches mecánicos y RGB.",
     description:
       "Excelente opción calidad/precio para armar setup competitivo sin romper presupuesto.",
@@ -250,7 +251,7 @@ export const products: Product[] = [
     price: 529999,
     stock: 7,
     installments: toInstallments(529999),
-    badges: ["nuevo"],
+    badges: [],
     shortDescription: "QHD 27 pulgadas con 180Hz y panel rapid IPS.",
     description:
       "Un equilibrio ideal entre rendimiento competitivo y fidelidad de color para uso mixto gaming/productividad.",
@@ -323,7 +324,7 @@ export const products: Product[] = [
     price: 159999,
     stock: 18,
     installments: toInstallments(159999),
-    badges: ["nuevo"],
+    badges: [],
     shortDescription: "Shape ambidiestro con latencia mínima.",
     description:
       "Pensado para aimers competitivos que necesitan ligereza extrema y tracking estable.",
@@ -347,7 +348,7 @@ export const products: Product[] = [
     price: 89999,
     stock: 29,
     installments: toInstallments(89999),
-    badges: ["oferta"],
+    badges: [],
     shortDescription: "Stand premium para auriculares con base de carga.",
     description:
       "Orden y estética para el escritorio con un accesorio sólido y funcional.",

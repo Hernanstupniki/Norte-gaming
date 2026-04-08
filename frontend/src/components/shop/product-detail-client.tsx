@@ -23,7 +23,6 @@ export function ProductDetailClient({
   const safeImages = product.images.length > 0 ? product.images : ["Imagen principal"];
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const selectedImage = safeImages[selectedImageIndex] ?? safeImages[0];
-  const [variant, setVariant] = useState("Negro");
   const { addToCart, auth, favorites, toggleFavorite } = useStore();
   const isFavorite = favorites.includes(product.id);
   const whatsappHref = buildProductWhatsAppHref(product);
@@ -96,19 +95,6 @@ export function ProductDetailClient({
             <p className={outOfStock ? "text-sm font-semibold text-red-600" : "text-sm text-zinc-600"}>
               {outOfStock ? "Sin stock" : `Stock disponible: ${product.stock}`}
             </p>
-          </div>
-
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Variante</label>
-            <select
-              value={variant}
-              onChange={(event) => setVariant(event.target.value)}
-              className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-            >
-              <option>Negro</option>
-              <option>Blanco</option>
-              <option>Gris grafito</option>
-            </select>
           </div>
 
           <div className="grid gap-2 sm:grid-cols-2">

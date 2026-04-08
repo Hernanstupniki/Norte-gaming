@@ -45,6 +45,7 @@ export interface ApiProduct {
   brand: ApiBrand;
   category: ApiCategory;
   specs: ApiProductSpec[];
+  variants?: string[];
   images: ApiProductImage[];
   createdAt?: string;
   reviews?: ApiReview[];
@@ -57,24 +58,12 @@ const toBadges = (apiProduct: ApiProduct): ProductBadge[] => {
     badges.push("sin-stock");
   }
 
-  if (apiProduct.isOnOffer || Number(apiProduct.previousPrice || 0) > Number(apiProduct.currentPrice)) {
-    badges.push("oferta");
-  }
-
   if (apiProduct.isFeatured) {
     badges.push("destacado");
   }
 
   if (apiProduct.soldCount >= 100) {
     badges.push("mas-vendido");
-  }
-
-  if (apiProduct.createdAt) {
-    const createdAt = new Date(apiProduct.createdAt).getTime();
-    const ageDays = (Date.now() - createdAt) / (1000 * 60 * 60 * 24);
-    if (ageDays <= 45) {
-      badges.push("nuevo");
-    }
   }
 
   return badges;
@@ -103,6 +92,7 @@ export const mapApiProductToProduct = (apiProduct: ApiProduct): Product => {
       label: spec.name,
       value: spec.value,
     })),
+    variants: apiProduct.variants?.filter((variant) => variant.trim().length > 0) ?? [],
     images:
       apiProduct.images?.length > 0
         ? apiProduct.images

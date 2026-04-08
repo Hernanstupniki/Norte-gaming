@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsString,
   MaxLength,
   Min,
   MinLength,
@@ -77,6 +78,11 @@ export class CreateProductDto {
   @ValidateNested({ each: true })
   @Type(() => ProductImageInputDto)
   images: ProductImageInputDto[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  variants?: string[];
 
   @IsOptional()
   @IsArray()

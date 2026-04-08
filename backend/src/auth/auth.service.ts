@@ -1,12 +1,16 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
+import nodemailer from 'nodemailer';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -19,11 +23,100 @@ import { JwtPayload } from './types';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly usersService: UsersService,
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
+
+  private buildTransporter() {
+    const host = this.configService.get<string>('SMTP_HOST') || 'smtp.gmail.com';
+    const port = Number(this.configService.get<string>('SMTP_PORT') || '587');
+    const secure = this.configService.get<string>('SMTP_SECURE') === 'true';
+    const user = this.configService.get<string>('SMTP_USER');
+    const pass = this.configService.get<string>('SMTP_PASS');
+
+    if (!user || !pass) {
+      throw new InternalServerErrorException(
+        'Configuracion SMTP incompleta. Revisar SMTP_USER y SMTP_PASS.',
+      );
+    }
+
+    return nodemailer.createTransport({
+      host,
+      port,
+      secure,
+      auth: { user, pass },
+    });
+  }
+
+  private getStoreBaseUrl() {
+    const explicitFrontendUrl =
+      this.configService.get<string>('FRONTEND_URL') ||
+      this.configService.get<string>('PUBLIC_WEB_URL');
+    if (explicitFrontendUrl?.trim()) {
+      return explicitFrontendUrl.trim().replace(/\/+$/, '');
+    }
+
+    const domainName = this.configService.get<string>('DOMAIN_NAME');
+    if (domainName && domainName !== 'localhost') {
+      return `https://nortegaming.${domainName}`;
+    }
+
+    const corsOrigin = this.configService.get<string>('CORS_ORIGIN');
+    if (corsOrigin?.trim()) {
+      return corsOrigin.split(',')[0].trim().replace(/\/+$/, '');
+    }
+
+    return 'http://localhost:3000';
+  }
+
+  private async sendPasswordResetEmail(params: {
+    to: string;
+    firstName: string;
+    token: string;
+    expiresAt: Date;
+  }) {
+    const smtpUser = this.configService.get<string>('SMTP_USER') || params.to;
+    const transporter = this.buildTransporter();
+    const resetLink = `${this.getStoreBaseUrl()}/login?recoverToken=${encodeURIComponent(params.token)}`;
+    const expiresAtLabel = params.expiresAt.toLocaleString('es-AR', {
+      hour12: false,
+      timeZone: this.configService.get<string>('GENERIC_TIMEZONE') || 'America/Argentina/Buenos_Aires',
+    });
+
+    await transporter.sendMail({
+      from: `Norte Gaming <${smtpUser}>`,
+      to: params.to,
+      subject: 'Recuperacion de contrasena - Norte Gaming',
+      text: [
+        `Hola ${params.firstName},`,
+        '',
+        'Recibimos un pedido para recuperar tu contrasena.',
+        `Link de recuperacion: ${resetLink}`,
+        `Token de recuperacion: ${params.token}`,
+        `Vence: ${expiresAtLabel}`,
+        '',
+        'Si no solicitaste este cambio, ignora este mensaje.',
+      ].join('\n'),
+      html: `
+        <h2>Recuperacion de contrasena</h2>
+        <p>Hola <strong>${params.firstName}</strong>,</p>
+        <p>Recibimos un pedido para recuperar tu contrasena.</p>
+        <p>
+          <a href="${resetLink}" target="_blank" rel="noreferrer">
+            Hacer click para restablecer
+          </a>
+        </p>
+        <p><strong>Token de recuperacion:</strong> ${params.token}</p>
+        <p><strong>Vence:</strong> ${expiresAtLabel}</p>
+        <p>Si no solicitaste este cambio, ignora este mensaje.</p>
+      `,
+    });
+  }
 
   private async signTokens(payload: JwtPayload) {
     const accessToken = await this.jwtService.signAsync(payload, {
@@ -192,10 +285,22 @@ export class AuthService {
       },
     });
 
+    try {
+      await this.sendPasswordResetEmail({
+        to: user.email,
+        firstName: user.firstName,
+        token,
+        expiresAt,
+      });
+    } catch (error) {
+      this.logger.error('Error enviando email de recuperacion', error);
+      throw new InternalServerErrorException(
+        'No se pudo enviar el email de recuperacion.',
+      );
+    }
+
     return {
-      message: 'Token de recuperación generado (modo mock).',
-      mockToken: token,
-      expiresAt,
+      message: 'Si el email existe, vas a recibir instrucciones.',
     };
   }
 

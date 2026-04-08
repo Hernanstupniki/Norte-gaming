@@ -72,6 +72,30 @@ export const registerUser = async (payload: {
   );
 };
 
+export const forgotPasswordUser = async (email: string): Promise<{ message: string; mockToken?: string }> => {
+  return request<{ message: string; mockToken?: string }>(
+    "/auth/forgot-password",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    },
+    "No se pudo enviar la recuperación",
+  );
+};
+
+export const resetPasswordUser = async (token: string, newPassword: string): Promise<{ message: string }> => {
+  return request<{ message: string }>(
+    "/auth/reset-password",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, newPassword }),
+    },
+    "No se pudo restablecer la contraseña",
+  );
+};
+
 export const logoutUser = async (accessToken: string) => {
   return request<{ message: string }>(
     "/auth/logout",

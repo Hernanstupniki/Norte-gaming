@@ -76,6 +76,11 @@ async function main() {
       update: {},
       create: { name: 'SteelSeries', slug: 'steelseries', description: 'Equipamiento competitivo SteelSeries' },
     }),
+    prisma.brand.upsert({
+      where: { slug: 'jbl' },
+      update: {},
+      create: { name: 'JBL', slug: 'jbl', description: 'Audio y periféricos JBL para gaming y multimedia' },
+    }),
   ]);
 
   const [mouses, teclados, mouse, teclado, mousepad, auricular, monitores, accesorios] = await Promise.all([

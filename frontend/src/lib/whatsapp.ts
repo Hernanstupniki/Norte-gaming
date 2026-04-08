@@ -12,7 +12,6 @@ export const buildProductWhatsAppHref = (product: Product) => {
     `- Producto: ${product.name}`,
     `- Marca: ${product.brand}`,
     `- Precio: ${formatARS(product.price)}`,
-    `- Link: http://localhost:3000/producto/${product.slug}`,
   ].join("\n");
 
   return buildWhatsAppHref(message);

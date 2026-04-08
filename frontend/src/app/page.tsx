@@ -11,7 +11,7 @@ export default async function HomePage() {
   const products = await fetchCatalogProducts();
 
   const featured = products.filter((item) => item.isFeatured).slice(0, 4);
-  const offers = products.filter((item) => item.badges.includes("oferta")).slice(0, 4);
+  const bestSellers = [...products].sort((a, b) => b.sold - a.sold).slice(0, 4);
   const launchPicks = [...products]
     .sort((a, b) => b.rating - a.rating)
     .slice(0, 4);
@@ -28,10 +28,10 @@ export default async function HomePage() {
         products={featured}
       />
       <ProductShowcase
-        eyebrow="Descuentos"
-        title="Ofertas activas"
-        description="Promociones por tiempo limitado con financiación."
-        products={offers}
+        eyebrow="Top ventas"
+        title="Los más elegidos"
+        description="Los productos con más salida del catálogo Norte Gaming."
+        products={bestSellers}
       />
       <PromoBanner />
       <ProductShowcase

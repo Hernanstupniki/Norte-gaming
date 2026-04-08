@@ -41,6 +41,7 @@ interface ProductFormState {
   categoryId: string;
   images: ProductImageInputDto[];
   specs: ProductSpecInputDto[];
+  variants: string;
 }
 
 const DRAFT_KEY = "norte-gaming-admin-product-draft-v1";
@@ -60,6 +61,7 @@ const initialForm = (): ProductFormState => ({
   categoryId: "",
   images: [{ url: "", alt: "" }],
   specs: [{ name: "", value: "" }],
+  variants: "",
 });
 
 const formatArs = (value: number) =>
@@ -99,6 +101,7 @@ const toFormFromProduct = (product: AdminProductItem): ProductFormState => ({
     product.specs && product.specs.length > 0
       ? product.specs.map((spec) => ({ name: spec.name || "", value: spec.value || "" }))
       : [{ name: "", value: "" }],
+  variants: product.variants?.join("\n") || "",
 });
 
 export function ProductsAdminClient() {
@@ -135,6 +138,11 @@ export function ProductsAdminClient() {
     window.localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
   }, [form, editingProductId]);
 
+  const normalizeDraft = (draft: ProductFormState): ProductFormState => ({
+    ...draft,
+    variants: draft.variants || "",
+  });
+
   const setField = <K extends keyof ProductFormState>(field: K, value: ProductFormState[K]) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
@@ -168,7 +176,7 @@ export function ProductsAdminClient() {
     if (draftRaw) {
       try {
         const draft = JSON.parse(draftRaw) as ProductFormState;
-        setForm(draft);
+        setForm(normalizeDraft(draft));
         return;
       } catch {
         window.localStorage.removeItem(DRAFT_KEY);
@@ -241,7 +249,7 @@ export function ProductsAdminClient() {
         if (draftRaw) {
           try {
             const draft = JSON.parse(draftRaw) as ProductFormState;
-            setForm(draft);
+            setForm(normalizeDraft(draft));
           } catch {
             window.localStorage.removeItem(DRAFT_KEY);
           }
@@ -351,6 +359,11 @@ export function ProductsAdminClient() {
       .map((spec) => ({ name: spec.name.trim(), value: spec.value.trim() }))
       .filter((spec) => spec.name.length > 0 && spec.value.length > 0);
 
+    const variants = form.variants
+      .split(/\r?\n/)
+      .map((variant) => variant.trim())
+      .filter((variant) => variant.length > 0);
+
     return {
       name: form.name.trim(),
       shortDescription: form.shortDescription.trim(),
@@ -365,6 +378,7 @@ export function ProductsAdminClient() {
       brandId: form.brandId,
       categoryId: form.categoryId,
       images,
+      ...(variants.length > 0 ? { variants } : {}),
       ...(specs.length > 0 ? { specs } : {}),
     };
   };
@@ -585,6 +599,20 @@ export function ProductsAdminClient() {
                   </div>
                 ))}
               </div>
+            </section>
+
+            <section className="rounded-xl border border-zinc-200 p-4">
+              <h4 className="text-sm font-bold uppercase tracking-widest text-zinc-600">Variantes opcionales</h4>
+              <p className="mt-2 text-xs text-zinc-500">
+                Una variante por línea. Si dejás este campo vacío, el producto no mostrará selector de variantes.
+              </p>
+              <textarea
+                rows={4}
+                placeholder="Negro\nBlanco\nGris grafito"
+                value={form.variants}
+                onChange={(event) => setField("variants", event.target.value)}
+                className="mt-3 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900"
+              />
             </section>
 
             <button type="submit" disabled={submitting || loadingCatalog || brands.length === 0 || categories.length === 0} className="w-full rounded-lg bg-black px-4 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:opacity-50">

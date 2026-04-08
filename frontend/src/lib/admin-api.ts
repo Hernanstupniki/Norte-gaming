@@ -25,6 +25,7 @@ export interface AdminProductItem {
   category?: { id: string; name: string };
   images?: Array<{ url: string; alt?: string | null }>;
   specs?: Array<{ name: string; value: string }>;
+  variants?: string[];
 }
 
 export interface AdminProductsResponse {

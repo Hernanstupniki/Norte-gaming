@@ -8,9 +8,7 @@ import { Product } from "@/types";
 import { ProductThumbnail } from "./product-thumbnail";
 
 const badgeStyles: Record<string, string> = {
-  oferta: "bg-red-600 text-white",
   destacado: "bg-black text-white",
-  nuevo: "bg-zinc-200 text-zinc-900",
   "mas-vendido": "bg-white text-zinc-900 border border-zinc-300",
   "sin-stock": "bg-red-100 text-red-700 border border-red-300",
 };

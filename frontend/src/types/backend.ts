@@ -22,5 +22,6 @@ export interface CreateProductDto {
   brandId: string;
   categoryId: string;
   images: ProductImageInputDto[];
+  variants?: string[];
   specs?: ProductSpecInputDto[];
 }
