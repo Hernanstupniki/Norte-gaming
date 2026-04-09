@@ -4,11 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useStore } from "@/context/store-context";
-import { categories } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
 const links = [
-  ...categories.slice(0, -1).map((cat) => ({ href: `/tienda?categoria=${cat.slug}`, label: cat.name })),
+  { href: "/tienda?categoria=mousepads", label: "Mousepads" },
+  { href: "/tienda?categoria=auriculares", label: "Auriculares" },
+  { href: "/tienda?categoria=monitores", label: "Monitores" },
   { href: "/nosotros", label: "Nosotros" },
   { href: "/faq", label: "Preguntas frecuentes" },
   { href: "/contacto", label: "Contacto" },
@@ -43,9 +44,6 @@ export function Navbar() {
           <Link href="/" className="font-[var(--font-space-mono)] text-base font-bold uppercase tracking-[0.24em] text-zinc-950 md:text-lg">
             Norte Gaming
           </Link>
-          <span className="rounded border border-red-700 bg-red-700/10 px-1.5 py-0.5 font-[var(--font-space-mono)] text-[10px] font-bold uppercase tracking-[0.12em] text-red-700">
-            Beta
-          </span>
         </div>
 
         <div className="ml-auto flex items-center gap-3">
@@ -114,9 +112,6 @@ export function Navbar() {
             <Link href="/" className="font-[var(--font-space-mono)] text-xl font-bold uppercase tracking-[0.22em] text-white">
               Norte Gaming
             </Link>
-            <span className="rounded border border-red-500 bg-red-500/10 px-2 py-0.5 font-[var(--font-space-mono)] text-[10px] font-bold uppercase tracking-[0.14em] text-red-300">
-              Beta
-            </span>
           </div>
 
           <div className="mx-auto flex w-full max-w-2xl items-center">
@@ -129,7 +124,7 @@ export function Navbar() {
                   submitSearch();
                 }
               }}
-              placeholder="Busca mouse, teclado, auris..."
+                placeholder="Buscá mousepads, auriculares, monitores..."
               className="h-11 w-full rounded-l-md border border-zinc-700 bg-zinc-100 px-4 font-[var(--font-space-mono)] text-sm text-zinc-900 outline-none placeholder:text-zinc-500"
             />
             <button
@@ -211,7 +206,7 @@ export function Navbar() {
                 submitSearch();
               }
             }}
-            placeholder="Buscar perifericos"
+            placeholder="Buscar periféricos"
             className="w-full rounded-md border border-zinc-400 bg-white px-3 py-2 font-[var(--font-space-mono)] text-sm outline-none placeholder:text-zinc-500"
           />
         </div>
@@ -255,7 +250,7 @@ export function Navbar() {
                 submitSearch();
               }
             }}
-            placeholder="Buscar perifericos"
+            placeholder="Buscar periféricos"
             className="mb-3 w-full rounded-md border border-zinc-400 bg-white px-3 py-2 text-sm outline-none placeholder:text-zinc-500"
           />
           <button

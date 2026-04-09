@@ -74,7 +74,7 @@ export default function CarritoPage() {
               <span className="text-zinc-600">Total</span>
               <span className="text-2xl font-black">{formatARS(subtotal)}</span>
             </div>
-            <p className="mt-2 text-xs text-zinc-600">Envío gratis desde $150.000.</p>
+            <p className="mt-2 text-xs text-zinc-600">Productos originales | Envíos a todo el país | Atención rápida por WhatsApp.</p>
             <a
               href={whatsappHref}
               target="_blank"

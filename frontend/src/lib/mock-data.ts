@@ -51,7 +51,7 @@ export const categories: Category[] = [
   {
     slug: "accesorios",
     name: "Accesorios",
-    description: "Webcams, soportes y extras para tu setup.",
+    description: "Webcams, soportes y extras para completar tu setup.",
     heroLabel: "Tu setup completo",
   },
 ];
@@ -205,7 +205,7 @@ export const products: Product[] = [
     badges: [],
     shortDescription: "Compacto 60% con switches mecánicos y RGB.",
     description:
-      "Excelente opción calidad/precio para armar setup competitivo sin romper presupuesto.",
+      "Ideal para empezar o mejorar tu setup con un teclado confiable, buen tacto y gran rendimiento por su rango de precio.",
     specs: [
       { label: "Formato", value: "60%" },
       { label: "Switch", value: "Redragon Red" },
@@ -435,19 +435,19 @@ export const reviews: Review[] = [
 
 export const benefitItems = [
   {
-    title: "Productos originales",
-    description: "Catálogo seleccionado con productos originales y publicación transparente.",
+    title: "Atención por WhatsApp",
+    description: "Respondemos rápido para ayudarte a elegir según lo que jugás y lo que necesitás.",
   },
   {
-    title: "Envíos a todo el país",
-    description: "Cobertura nacional con seguimiento y opciones de retiro.",
+    title: "Seguimiento del pedido",
+    description: "Te acompañamos desde la compra hasta la entrega con información clara del envío.",
   },
   {
-    title: "Atención personalizada",
-    description: "Asesoramiento humano por WhatsApp y soporte postventa real.",
+    title: "Asesoramiento por presupuesto",
+    description: "Te recomendamos opciones que realmente valen la pena dentro de tu rango.",
   },
   {
-    title: "Mejor precio del país",
-    description: "Política de precio competitivo con promociones actualizadas.",
+    title: "Gaming real",
+    description: "Productos elegidos para rendimiento real, no catálogo inflado con relleno.",
   },
 ];
