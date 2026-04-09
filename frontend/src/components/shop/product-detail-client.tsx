@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Product } from "@/types";
 import { ProductThumbnail } from "@/components/common/product-thumbnail";
 import { ProductCard } from "@/components/common/product-card";
@@ -24,12 +23,21 @@ export function ProductDetailClient({
   const safeImages = product.images.length > 0 ? product.images : ["Imagen principal"];
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const selectedImage = safeImages[selectedImageIndex] ?? safeImages[0];
+  const hasMultipleImages = safeImages.length > 1;
   const { addToCart, auth, favorites, toggleFavorite } = useStore();
   const isFavorite = favorites.includes(product.id);
   const whatsappHref = buildProductWhatsAppHref(product);
   const outOfStock = product.stock <= 0;
   const shortDescription = product.shortDescription?.trim() || product.description;
   const fullDescription = product.description?.trim();
+
+  const goToPreviousImage = () => {
+    setSelectedImageIndex((current) => (current === 0 ? safeImages.length - 1 : current - 1));
+  };
+
+  const goToNextImage = () => {
+    setSelectedImageIndex((current) => (current === safeImages.length - 1 ? 0 : current + 1));
+  };
 
   const shippingEta = useMemo(
     () =>
@@ -43,15 +51,36 @@ export function ProductDetailClient({
     <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-6">
       <div className="grid gap-8 lg:grid-cols-2">
         <div>
-          <ProductThumbnail
-            label={product.name}
-            imageSrc={selectedImage}
-            className="h-96 border-2 border-black"
-          />
-          {safeImages.length > 1 ? (
+          <div className="relative">
+            <ProductThumbnail
+              label={product.name}
+              imageSrc={selectedImage}
+              className="h-96 border-2 border-black"
+            />
+            {hasMultipleImages ? (
+              <>
+                <button
+                  type="button"
+                  onClick={goToPreviousImage}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full border-2 border-black bg-white/90 px-3 py-2 text-xl font-bold leading-none text-black transition hover:bg-white"
+                  aria-label="Imagen anterior"
+                >
+                  &lt;
+                </button>
+                <button
+                  type="button"
+                  onClick={goToNextImage}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border-2 border-black bg-white/90 px-3 py-2 text-xl font-bold leading-none text-black transition hover:bg-white"
+                  aria-label="Imagen siguiente"
+                >
+                  &gt;
+                </button>
+              </>
+            ) : null}
+          </div>
+          {hasMultipleImages ? (
             <div className="mt-4 flex flex-wrap gap-2">
               {safeImages.map((image, index) => {
-                const isValidUrl = image.startsWith("http://") || image.startsWith("https://");
                 return (
                   <button
                     key={index}
@@ -65,19 +94,12 @@ export function ProductDetailClient({
                     aria-label={`Ver imagen ${index + 1}`}
                     aria-current={selectedImageIndex === index}
                   >
-                    {isValidUrl ? (
-                      <Image
-                        src={image}
-                        alt={`Imagen ${index + 1}`}
-                        fill
-                        className="object-cover"
-                        sizes="64px"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 bg-gradient-to-br from-zinc-100 to-zinc-200 flex items-center justify-center text-[10px] text-zinc-600 font-medium text-center p-1">
-                        {image}
-                      </div>
-                    )}
+                    <ProductThumbnail
+                      label={`Imagen ${index + 1}`}
+                      imageSrc={image}
+                      sizes="64px"
+                      className="h-full w-full rounded-md border-0"
+                    />
                   </button>
                 );
               })}
