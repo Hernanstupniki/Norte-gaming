@@ -17,8 +17,12 @@ async function bootstrap() {
 
   app.useStaticAssets(uploadsRoot, { prefix: '/uploads/' });
   app.setGlobalPrefix('api');
+  const corsOrigin = process.env.CORS_ORIGIN?.trim();
+  if (process.env.NODE_ENV === 'production' && !corsOrigin) {
+    throw new Error('CORS_ORIGIN es obligatorio en produccion');
+  }
   app.enableCors({
-    origin: process.env.CORS_ORIGIN?.split(',') ?? ['http://localhost:3000'],
+    origin: corsOrigin?.split(',').map((origin) => origin.trim()).filter(Boolean) ?? ['http://localhost:3000'],
     credentials: true,
   });
   app.useGlobalPipes(
@@ -37,7 +41,9 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  if (process.env.NODE_ENV !== 'production') {
+    SwaggerModule.setup('docs', app, document);
+  }
 
   await app.listen(Number(process.env.PORT) || 4000);
 }

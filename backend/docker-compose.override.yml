@@ -2,36 +2,14 @@ services:
   db:
     ports:
       - "5432:5432"
-    environment:
-      POSTGRES_PASSWORD: STUPNIKITARNOSKI789!
-      POSTGRES_DB: norte_gaming
 
   api:
     ports:
       - "4000:4000"
-    environment:
-      NODE_ENV: production
-      CORS_ORIGIN: http://localhost:3000
-      DATABASE_URL: postgresql://postgres:STUPNIKITARNOSKI789!@db:5432/norte_gaming?schema=public
-      PORT: 4000
-      JWT_ACCESS_SECRET: STUPNIKITARNOSKI789!
-      JWT_REFRESH_SECRET: STUPNIKITARNOSKI789!
-      JWT_ACCESS_EXPIRES_IN: 15m
-      JWT_REFRESH_EXPIRES_IN: 7d
-      SMTP_HOST: ${SMTP_HOST}
-      SMTP_PORT: ${SMTP_PORT}
-      SMTP_SECURE: ${SMTP_SECURE}
-      SMTP_USER: ${SMTP_USER}
-      SMTP_PASS: ${SMTP_PASS}
-      CONTACT_RECEIVER_EMAIL: ${CONTACT_RECEIVER_EMAIL}
 
   web:
     build:
       context: ../frontend
       dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_API_URL: http://localhost:4000/api
-    environment:
-      NEXT_PUBLIC_API_URL: http://localhost:4000/api
     ports:
       - "3000:3000"

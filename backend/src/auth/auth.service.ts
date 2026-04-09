@@ -9,7 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import nodemailer from 'nodemailer';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
@@ -32,12 +32,25 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
+  private getRequiredConfig(key: string) {
+    const value = this.configService.get<string>(key);
+    if (!value?.trim()) {
+      throw new InternalServerErrorException(`Falta configurar ${key}`);
+    }
+
+    return value.trim();
+  }
+
+  private hashToken(token: string) {
+    return createHash('sha256').update(token).digest('hex');
+  }
+
   private buildTransporter() {
     const host = this.configService.get<string>('SMTP_HOST') || 'smtp.gmail.com';
     const port = Number(this.configService.get<string>('SMTP_PORT') || '587');
     const secure = this.configService.get<string>('SMTP_SECURE') === 'true';
-    const user = this.configService.get<string>('SMTP_USER');
-    const pass = this.configService.get<string>('SMTP_PASS');
+    const user = this.getRequiredConfig('SMTP_USER');
+    const pass = this.getRequiredConfig('SMTP_PASS');
 
     if (!user || !pass) {
       throw new InternalServerErrorException(
@@ -120,13 +133,13 @@ export class AuthService {
 
   private async signTokens(payload: JwtPayload) {
     const accessToken = await this.jwtService.signAsync(payload, {
-      secret: process.env.JWT_ACCESS_SECRET || 'dev_access_secret',
-      expiresIn: (process.env.JWT_ACCESS_EXPIRES_IN || '15m') as never,
+      secret: this.getRequiredConfig('JWT_ACCESS_SECRET'),
+      expiresIn: this.getRequiredConfig('JWT_ACCESS_EXPIRES_IN') as never,
     });
 
     const refreshToken = await this.jwtService.signAsync(payload, {
-      secret: process.env.JWT_REFRESH_SECRET || 'dev_refresh_secret',
-      expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as never,
+      secret: this.getRequiredConfig('JWT_REFRESH_SECRET'),
+      expiresIn: this.getRequiredConfig('JWT_REFRESH_EXPIRES_IN') as never,
     });
 
     return { accessToken, refreshToken };
@@ -213,7 +226,7 @@ export class AuthService {
       payload = await this.jwtService.verifyAsync<JwtPayload>(
         dto.refreshToken,
         {
-          secret: process.env.JWT_REFRESH_SECRET || 'dev_refresh_secret',
+          secret: this.getRequiredConfig('JWT_REFRESH_SECRET'),
         },
       );
     } catch {
@@ -275,11 +288,12 @@ export class AuthService {
     }
 
     const token = randomUUID().replace(/-/g, '');
+    const tokenHash = this.hashToken(token);
     const expiresAt = new Date(Date.now() + 1000 * 60 * 30);
 
     await this.prisma.passwordResetToken.create({
       data: {
-        token,
+        token: tokenHash,
         userId: user.id,
         expiresAt,
       },
@@ -306,7 +320,7 @@ export class AuthService {
 
   async resetPassword(dto: ResetPasswordDto) {
     const resetToken = await this.prisma.passwordResetToken.findUnique({
-      where: { token: dto.token },
+      where: { token: this.hashToken(dto.token) },
     });
 
     if (!resetToken || resetToken.usedAt || resetToken.expiresAt < new Date()) {
