@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Product } from "@/types";
 import { ProductThumbnail } from "@/components/common/product-thumbnail";
 import { ProductCard } from "@/components/common/product-card";
@@ -30,18 +31,6 @@ export function ProductDetailClient({
   const shortDescription = product.shortDescription?.trim() || product.description;
   const fullDescription = product.description?.trim();
 
-  const goToPreviousImage = () => {
-    setSelectedImageIndex((current) =>
-      current === 0 ? safeImages.length - 1 : current - 1,
-    );
-  };
-
-  const goToNextImage = () => {
-    setSelectedImageIndex((current) =>
-      current === safeImages.length - 1 ? 0 : current + 1,
-    );
-  };
-
   const shippingEta = useMemo(
     () =>
       outOfStock
@@ -60,23 +49,38 @@ export function ProductDetailClient({
             className="h-96 border-2 border-black"
           />
           {safeImages.length > 1 ? (
-            <div className="mt-3 flex items-center gap-2">
-              <button
-                type="button"
-                onClick={goToPreviousImage}
-                className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-bold text-zinc-700 transition hover:border-zinc-950 hover:text-zinc-950"
-                aria-label="Imagen anterior"
-              >
-                &lt;
-              </button>
-              <button
-                type="button"
-                onClick={goToNextImage}
-                className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-bold text-zinc-700 transition hover:border-zinc-950 hover:text-zinc-950"
-                aria-label="Imagen siguiente"
-              >
-                &gt;
-              </button>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {safeImages.map((image, index) => {
+                const isValidUrl = image.startsWith("http://") || image.startsWith("https://");
+                return (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={`relative h-16 w-16 overflow-hidden rounded-lg border-2 transition flex-shrink-0 ${
+                      selectedImageIndex === index
+                        ? "border-black ring-2 ring-black/20"
+                        : "border-zinc-300 hover:border-zinc-500"
+                    }`}
+                    aria-label={`Ver imagen ${index + 1}`}
+                    aria-current={selectedImageIndex === index}
+                  >
+                    {isValidUrl ? (
+                      <Image
+                        src={image}
+                        alt={`Imagen ${index + 1}`}
+                        fill
+                        className="object-cover"
+                        sizes="64px"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-zinc-100 to-zinc-200 flex items-center justify-center text-[10px] text-zinc-600 font-medium text-center p-1">
+                        {image}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           ) : null}
         </div>
