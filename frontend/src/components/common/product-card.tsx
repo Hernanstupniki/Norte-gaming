@@ -20,9 +20,9 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <article className="group flex h-full min-w-0 flex-col rounded-2xl border-2 border-black/10 bg-white p-3 sm:p-4 shadow-[6px_6px_0_#17171712] transition hover:-translate-y-0.5 hover:shadow-[8px_8px_0_#17171720]">
-      <Link href={`/producto/${product.slug}`} className="block space-y-3">
+      <Link href={`/producto/${product.slug}`} className="block space-y-2.5">
         <ProductThumbnail label={product.name} imageSrc={product.images[0]} className="h-44" />
-        <div className="min-h-7 flex flex-wrap content-start gap-2">
+        <div className="flex flex-wrap content-start gap-2">
           {product.badges.map((badge) => (
             <span
               key={badge}
@@ -32,14 +32,14 @@ export function ProductCard({ product }: { product: Product }) {
             </span>
           ))}
         </div>
-        <div className="min-h-16 space-y-1 sm:min-h-20">
+        <div className="space-y-1">
           <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">{product.brand}</p>
           <h3 className="line-clamp-2 text-base font-semibold text-zinc-950">{product.name}</h3>
         </div>
       </Link>
 
-      <div className="mt-4 flex flex-1 flex-col justify-end space-y-3">
-        <div className="min-h-24 sm:min-h-28">
+      <div className="mt-3 space-y-2.5">
+        <div>
           {product.previousPrice ? (
             <p className="text-xs text-zinc-500 line-through">{formatARS(product.previousPrice)}</p>
           ) : null}
@@ -50,7 +50,7 @@ export function ProductCard({ product }: { product: Product }) {
           </p>
         </div>
 
-        <div className="mt-auto flex flex-col gap-2 sm:flex-row sm:items-end">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <button
             type="button"
             onClick={() => addToCart(product.id, product)}
