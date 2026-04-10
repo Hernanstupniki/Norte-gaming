@@ -7,7 +7,8 @@ export function Footer() {
         <div>
           <p className="text-lg font-black uppercase tracking-[0.2em]">Norte Gaming</p>
           <p className="mt-3 text-sm text-zinc-600">
-            Periféricos gamer premium con productos originales, precio competitivo y atención personalizada.
+            Periféricos gamer originales para todo el país, con precios competitivos y atención personalizada antes y
+            después de tu compra.
           </p>
         </div>
         <div>
