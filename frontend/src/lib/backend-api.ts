@@ -4,6 +4,7 @@ import {
   mapApiCategoryToCategory,
   mapApiProductToProduct,
   mapApiReviewToCardReview,
+  normalizeBrandName,
 } from "@/lib/backend-mappers";
 
 interface ProductsResponse {
@@ -77,7 +78,9 @@ export const fetchCatalogBrands = async (): Promise<string[]> => {
   });
 
   const payload = await parseJson<Array<{ name: string }>>(response);
-  return payload.map((brand) => brand.name);
+  return [...new Set(payload.map((brand) => normalizeBrandName(brand.name)))].sort((a, b) =>
+    a.localeCompare(b, "es-AR"),
+  );
 };
 
 export const fetchProductDetailBySlug = async (slug: string) => {

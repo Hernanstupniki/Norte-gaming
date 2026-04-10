@@ -174,9 +174,12 @@ export function ProductDetailClient({
           <h2 className="text-xl font-bold">Especificaciones técnicas</h2>
           <ul className="mt-4 space-y-2 text-sm text-zinc-700">
             {product.specs.map((spec) => (
-              <li key={spec.label} className="flex justify-between rounded border border-zinc-200 bg-white px-3 py-2">
+              <li
+                key={spec.label}
+                className="flex flex-col gap-1 rounded border border-zinc-200 bg-white px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
+              >
                 <span className="font-semibold">{spec.label}</span>
-                <span>{spec.value}</span>
+                <span className="break-words text-zinc-600 sm:text-right">{spec.value}</span>
               </li>
             ))}
           </ul>

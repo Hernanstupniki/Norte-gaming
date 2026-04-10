@@ -51,6 +51,21 @@ export interface ApiProduct {
   reviews?: ApiReview[];
 }
 
+const normalizeBrandName = (value: string) => {
+  const trimmed = value.trim();
+  const lowered = trimmed.toLowerCase();
+
+  if (lowered === "redragon" || lowered === "reddragon") {
+    return "Redragon";
+  }
+
+  if (lowered === "logitech g") {
+    return "Logitech";
+  }
+
+  return trimmed;
+};
+
 const toBadges = (apiProduct: ApiProduct): ProductBadge[] => {
   const badges: ProductBadge[] = [];
 
@@ -79,7 +94,7 @@ export const mapApiProductToProduct = (apiProduct: ApiProduct): Product => {
     id: apiProduct.id,
     slug: apiProduct.slug,
     name: apiProduct.name,
-    brand: apiProduct.brand.name,
+    brand: normalizeBrandName(apiProduct.brand.name),
     category: apiProduct.category.slug || apiProduct.category.name,
     price,
     previousPrice,
@@ -112,6 +127,8 @@ export const mapApiProductToProduct = (apiProduct: ApiProduct): Product => {
     isFeatured: Boolean(apiProduct.isFeatured),
   };
 };
+
+export { normalizeBrandName };
 
 export const mapApiCategoryToCategory = (apiCategory: ApiCategory): Category => {
   const slug = apiCategory.slug || apiCategory.name;

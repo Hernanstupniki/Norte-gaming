@@ -3,7 +3,7 @@ export default function NosotrosPage() {
     <main className="mx-auto w-full max-w-5xl px-4 py-12 md:px-6">
       <h1 className="text-4xl font-black tracking-tight">Nosotros</h1>
       <p className="mt-3 text-zinc-600">
-        Somos de la zona norte de Misiones y arrancamos este proyecto con algo simple: ganas de emprender y ofrecer periféricos que nosotros mismos usaríamos.
+        Somos del norte de la Argentina, desde Misiones, y arrancamos este proyecto con algo simple: ganas de emprender y ofrecer periféricos que nosotros mismos usaríamos.
       </p>
 
       <section className="mt-8 grid gap-4 md:grid-cols-3">

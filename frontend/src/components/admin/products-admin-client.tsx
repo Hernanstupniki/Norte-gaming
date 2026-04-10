@@ -86,7 +86,7 @@ const toFormFromProduct = (product: AdminProductItem): ProductFormState => ({
   sku: product.sku || "",
   stock: String(product.stock ?? "0"),
   isFeatured: Boolean(product.isFeatured),
-  isOnOffer: Boolean(product.isOnOffer),
+  isOnOffer: Boolean(product.isOnOffer) || product.previousPrice !== null,
   isActive: Boolean(product.isActive),
   brandId: product.brandId || "",
   categoryId: product.categoryId || "",
@@ -311,7 +311,8 @@ export function ProductsAdminClient() {
 
   const validateAndBuildPayload = (): CreateProductDto | null => {
     const parsedCurrentPrice = Number(form.currentPrice);
-    const parsedPreviousPrice = form.previousPrice.trim() ? Number(form.previousPrice) : undefined;
+    const useOfferPrice = form.isOnOffer;
+    const parsedPreviousPrice = useOfferPrice && form.previousPrice.trim() ? Number(form.previousPrice) : undefined;
     const parsedStock = Number(form.stock);
 
     if (form.name.trim().length < 3) {
@@ -328,6 +329,10 @@ export function ProductsAdminClient() {
     }
     if (!Number.isFinite(parsedCurrentPrice) || parsedCurrentPrice < 0) {
       setNotice({ tone: "error", text: "Precio actual inválido." });
+      return null;
+    }
+    if (useOfferPrice && parsedPreviousPrice === undefined) {
+      setNotice({ tone: "error", text: "Si el producto está en oferta, completá el precio anterior." });
       return null;
     }
     if (parsedPreviousPrice !== undefined && parsedPreviousPrice < parsedCurrentPrice) {
@@ -369,7 +374,7 @@ export function ProductsAdminClient() {
       shortDescription: form.shortDescription.trim(),
       description: form.description.trim(),
       currentPrice: parsedCurrentPrice,
-      ...(parsedPreviousPrice !== undefined ? { previousPrice: parsedPreviousPrice } : {}),
+      ...(useOfferPrice ? { previousPrice: parsedPreviousPrice } : {}),
       sku: form.sku.trim(),
       stock: parsedStock,
       isFeatured: form.isFeatured,
@@ -524,7 +529,16 @@ export function ProductsAdminClient() {
               <h4 className="text-sm font-bold uppercase tracking-widest text-zinc-600">Precio, stock y clasificación</h4>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <input type="number" step="0.01" min="0" required placeholder="Precio actual" value={form.currentPrice} onChange={(event) => setField("currentPrice", event.target.value)} className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900" />
-                <input type="number" step="0.01" min="0" placeholder="Precio anterior" value={form.previousPrice} onChange={(event) => setField("previousPrice", event.target.value)} className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900" />
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder={form.isOnOffer ? "Precio anterior (tachado)" : "Precio anterior (opcional)"}
+                  value={form.previousPrice}
+                  onChange={(event) => setField("previousPrice", event.target.value)}
+                  disabled={!form.isOnOffer}
+                  className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-400"
+                />
                 <input type="text" required minLength={2} maxLength={80} placeholder="SKU único" value={form.sku} onChange={(event) => setField("sku", event.target.value)} className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900" />
                 <input type="number" min="0" required placeholder="Stock" value={form.stock} onChange={(event) => setField("stock", event.target.value)} className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900" />
                 <select required value={form.brandId} onChange={(event) => setField("brandId", event.target.value)} className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900">
@@ -538,7 +552,20 @@ export function ProductsAdminClient() {
               </div>
               <div className="mt-3 flex flex-wrap gap-4 text-sm text-zinc-700">
                 <label className="flex items-center gap-2"><input type="checkbox" checked={form.isFeatured} onChange={(event) => setField("isFeatured", event.target.checked)} /> Destacado</label>
-                <label className="flex items-center gap-2"><input type="checkbox" checked={form.isOnOffer} onChange={(event) => setField("isOnOffer", event.target.checked)} /> En oferta</label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={form.isOnOffer}
+                    onChange={(event) => {
+                      const checked = event.target.checked;
+                      setField("isOnOffer", checked);
+                      if (!checked) {
+                        setField("previousPrice", "");
+                      }
+                    }}
+                  />
+                  En oferta (mostrar precio tachado)
+                </label>
                 <label className="flex items-center gap-2"><input type="checkbox" checked={form.isActive} onChange={(event) => setField("isActive", event.target.checked)} /> Activo</label>
               </div>
             </section>

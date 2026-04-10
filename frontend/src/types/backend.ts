@@ -13,7 +13,7 @@ export interface CreateProductDto {
   shortDescription: string;
   description: string;
   currentPrice: number;
-  previousPrice?: number;
+  previousPrice?: number | null;
   sku: string;
   stock: number;
   isFeatured?: boolean;

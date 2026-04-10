@@ -16,7 +16,7 @@ export function Hero() {
             Armá un setup que rinda de verdad
           </h1>
           <p className="mt-5 max-w-xl text-base text-zinc-600 md:text-lg">
-            Periféricos gamer seleccionados de verdad para jugar mejor: mouse, teclados, auriculares y monitores con stock real y recomendación honesta.
+            Mouse, teclados, auriculares y monitores para mejorar tu setup con productos que realmente valen la pena.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <Link

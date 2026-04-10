@@ -196,6 +196,13 @@ export class ProductsService {
         await tx.productSpec.deleteMany({ where: { productId: id } });
       }
 
+      const previousPriceValue =
+        dto.isOnOffer === false
+          ? null
+          : dto.previousPrice !== undefined
+            ? new Prisma.Decimal(dto.previousPrice)
+            : undefined;
+
       return tx.product.update({
         where: { id },
         data: {
@@ -208,9 +215,7 @@ export class ProductsService {
               ? new Prisma.Decimal(dto.currentPrice)
               : undefined,
           previousPrice:
-            dto.previousPrice !== undefined
-              ? new Prisma.Decimal(dto.previousPrice)
-              : undefined,
+            previousPriceValue,
           sku: dto.sku,
           stock: dto.stock,
           isFeatured: dto.isFeatured,
