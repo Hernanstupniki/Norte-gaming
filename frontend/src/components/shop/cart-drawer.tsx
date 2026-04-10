@@ -25,11 +25,11 @@ export function CartDrawer() {
         onClick={closeCart}
       />
       <aside
-        className={`fixed right-0 top-0 z-50 h-full w-full max-w-md border-l-2 border-black bg-white p-6 transition-transform duration-300 ${
+        className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col overflow-hidden border-l-2 border-black bg-white p-6 transition-transform duration-300 ${
           isCartOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-bold uppercase tracking-widest">Tu carrito</h3>
           <button
             type="button"
@@ -40,7 +40,7 @@ export function CartDrawer() {
           </button>
         </div>
 
-        <div className="space-y-4 overflow-y-auto pb-28">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain pb-4 pr-1 [touch-action:pan-y]">
           {cartProducts.length === 0 ? (
             <p className="rounded-lg border border-dashed border-zinc-300 p-5 text-sm text-zinc-500">
               Tu carrito está vacío. Explorá el catálogo para sumar periféricos.
@@ -82,7 +82,7 @@ export function CartDrawer() {
           )}
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 border-t-2 border-black bg-white p-6">
+        <div className="mt-4 shrink-0 border-t-2 border-black bg-white pt-4">
           <div className="mb-4 flex items-center justify-between text-sm">
             <span className="text-zinc-600">Subtotal</span>
             <span className="text-lg font-bold text-zinc-950">{formatARS(subtotal)}</span>
