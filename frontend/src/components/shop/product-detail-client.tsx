@@ -24,8 +24,7 @@ export function ProductDetailClient({
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const selectedImage = safeImages[selectedImageIndex] ?? safeImages[0];
   const hasMultipleImages = safeImages.length > 1;
-  const { addToCart, auth, favorites, toggleFavorite } = useStore();
-  const isFavorite = favorites.includes(product.id);
+  const { addToCart } = useStore();
   const whatsappHref = buildProductWhatsAppHref(product);
   const outOfStock = product.stock <= 0;
   const shortDescription = product.shortDescription?.trim() || product.description;
@@ -141,18 +140,6 @@ export function ProductDetailClient({
               {outOfStock ? "Consultar stock por WhatsApp" : "Comprar por WhatsApp"}
             </a>
           </div>
-
-          {auth.isLoggedIn ? (
-            <div className="grid gap-2 sm:grid-cols-1">
-              <button
-                type="button"
-                onClick={() => toggleFavorite(product.id)}
-                className="rounded-md border-2 border-black bg-white px-4 py-3 text-xs font-bold uppercase tracking-widest text-zinc-900"
-              >
-                {isFavorite ? "Deshacer guardado" : "Guardar"}
-              </button>
-            </div>
-          ) : null}
 
           <div className="grid gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700">
             <p>Envíos: {shippingEta}</p>

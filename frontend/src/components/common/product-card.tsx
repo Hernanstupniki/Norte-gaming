@@ -14,8 +14,7 @@ const badgeStyles: Record<string, string> = {
 };
 
 export function ProductCard({ product }: { product: Product }) {
-  const { addToCart, auth, favorites, toggleFavorite } = useStore();
-  const isFavorite = favorites.includes(product.id);
+  const { addToCart } = useStore();
   const whatsappHref = buildProductWhatsAppHref(product);
   const outOfStock = product.stock <= 0;
 
@@ -33,15 +32,15 @@ export function ProductCard({ product }: { product: Product }) {
             </span>
           ))}
         </div>
-        <div className="min-h-24 space-y-1">
+        <div className="min-h-16 space-y-1 sm:min-h-24">
           <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">{product.brand}</p>
           <h3 className="line-clamp-2 text-base font-semibold text-zinc-950">{product.name}</h3>
-          <p className="line-clamp-2 text-xs text-zinc-600">{product.shortDescription}</p>
+          <p className="hidden text-xs text-zinc-600 sm:line-clamp-2 sm:block">{product.shortDescription}</p>
         </div>
       </Link>
 
       <div className="mt-4 flex flex-1 flex-col justify-end space-y-3">
-        <div className="min-h-28">
+        <div className="min-h-24 sm:min-h-28">
           {product.previousPrice ? (
             <p className="text-xs text-zinc-500 line-through">{formatARS(product.previousPrice)}</p>
           ) : null}
@@ -69,15 +68,6 @@ export function ProductCard({ product }: { product: Product }) {
           >
             {outOfStock ? "Consultar por WhatsApp" : "WhatsApp"}
           </a>
-          {auth.isLoggedIn ? (
-            <button
-              type="button"
-              onClick={() => toggleFavorite(product.id)}
-              className="w-full rounded-lg border-2 border-black px-3 py-2 text-xs font-semibold uppercase tracking-widest text-zinc-950 transition duration-150 hover:bg-zinc-100 active:translate-y-[2px] active:scale-[0.99] sm:w-auto"
-            >
-              {isFavorite ? "Guardado" : "Guardar"}
-            </button>
-          ) : null}
         </div>
       </div>
     </article>

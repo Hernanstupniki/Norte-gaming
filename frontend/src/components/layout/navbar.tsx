@@ -21,9 +21,7 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const { auth, cartCount, openCart, logout } = useStore();
-  const navLinks = auth.isLoggedIn
-    ? [...links, { href: "/guardados", label: "Guardados" }]
-    : links;
+  const navLinks = links;
 
   const submitSearch = () => {
     const q = searchTerm.trim();
@@ -222,7 +220,7 @@ export function Navbar() {
               Ver todo
             </Link>
             <Link
-              href={auth.isLoggedIn ? "/guardados" : "/login"}
+              href="/login"
               onClick={() => setMobileOpen(false)}
               className="text-xs font-semibold uppercase tracking-widest text-zinc-700"
             >
