@@ -20,9 +20,12 @@ export const resolvePublicImageUrl = (value?: string) => {
       const isInternalDockerHost = parsed.hostname === "norte-gaming-api";
       const isFrontendHostByMistake =
         (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1") &&
-        parsed.port === "3000";
+        (parsed.port === "3000" || parsed.port === "4000");
+      const isLocalApiHost =
+        (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1") &&
+        parsed.port === "4000";
 
-      if (isInternalDockerHost || isFrontendHostByMistake) {
+      if (isInternalDockerHost || isFrontendHostByMistake || isLocalApiHost) {
         return `${publicBase}${parsed.pathname}`;
       }
     }
