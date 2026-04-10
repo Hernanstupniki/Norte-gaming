@@ -29,7 +29,7 @@ export function ProductThumbnail({ label, imageSrc, sizes, className }: ProductT
   return (
     <div
       className={cn(
-        "relative flex items-center justify-center overflow-hidden rounded-xl border border-zinc-200 bg-gradient-to-br from-white to-zinc-100",
+        "relative flex items-center justify-center overflow-hidden rounded-xl border border-zinc-200 bg-white",
         className,
       )}
     >

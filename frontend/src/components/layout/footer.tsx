@@ -57,10 +57,6 @@ export function Footer() {
             <li>Correo Argentino / Andreani / OCA</li>
             <li>Retiro en punto de entrega</li>
           </ul>
-          <input
-            placeholder="Tu email para novedades"
-            className="mt-4 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-          />
         </div>
       </div>
       <div className="border-t border-zinc-200 px-4 py-4 text-center text-xs uppercase tracking-[0.2em] text-zinc-500">

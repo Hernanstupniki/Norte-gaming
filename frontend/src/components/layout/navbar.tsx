@@ -240,26 +240,6 @@ export function Navbar() {
             </button>
           </div>
 
-          <input
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                event.preventDefault();
-                submitSearch();
-              }
-            }}
-            placeholder="Buscar periféricos"
-            className="mb-3 w-full rounded-md border border-zinc-400 bg-white px-3 py-2 text-sm outline-none placeholder:text-zinc-500"
-          />
-          <button
-            type="button"
-            onClick={submitSearch}
-            className="mb-3 w-full rounded-md border-2 border-black bg-black px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white"
-          >
-            Buscar
-          </button>
-
           <div className="grid gap-2">
             {navLinks.map((link) => (
               <Link
