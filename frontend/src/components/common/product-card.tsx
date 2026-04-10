@@ -22,7 +22,7 @@ export function ProductCard({ product }: { product: Product }) {
     <article className="group flex h-full min-w-0 flex-col rounded-2xl border-2 border-black/10 bg-white p-3 sm:p-4 shadow-[6px_6px_0_#17171712] transition hover:-translate-y-0.5 hover:shadow-[8px_8px_0_#17171720]">
       <Link href={`/producto/${product.slug}`} className="block space-y-2.5">
         <ProductThumbnail label={product.name} imageSrc={product.images[0]} className="h-44" />
-        <div className="flex flex-wrap content-start gap-2">
+        <div className="min-h-7 flex flex-wrap content-start gap-2">
           {product.badges.map((badge) => (
             <span
               key={badge}
