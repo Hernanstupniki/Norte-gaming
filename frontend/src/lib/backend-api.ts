@@ -5,12 +5,6 @@ import {
   mapApiProductToProduct,
   mapApiReviewToCardReview,
 } from "@/lib/backend-mappers";
-import {
-  brands as mockBrands,
-  categories as mockCategories,
-  products as mockProducts,
-  reviews as mockReviews,
-} from "@/lib/mock-data";
 
 interface ProductsResponse {
   data: ApiProduct[];
@@ -49,8 +43,6 @@ const getApiBaseUrl = () => {
   return process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 };
 
-const canUseMockFallback = process.env.NODE_ENV !== "production";
-
 const parseJson = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {
     throw new Error(`Error HTTP ${response.status}`);
@@ -59,97 +51,50 @@ const parseJson = async <T>(response: Response): Promise<T> => {
 };
 
 export const fetchCatalogProducts = async (): Promise<Product[]> => {
-  try {
-    const response = await fetch(`${getApiBaseUrl()}/products`, {
-      cache: "no-store",
-    });
+  const response = await fetch(`${getApiBaseUrl()}/products`, {
+    cache: "no-store",
+  });
 
-    const payload = await parseJson<ProductsResponse>(response);
-    return payload.data.map(mapApiProductToProduct);
-  } catch (error) {
-    if (!canUseMockFallback) {
-      throw error;
-    }
-
-    return mockProducts;
-  }
+  const payload = await parseJson<ProductsResponse>(response);
+  return payload.data.map(mapApiProductToProduct);
 };
 
 export const fetchCatalogCategories = async (): Promise<Category[]> => {
-  try {
-    const response = await fetch(`${getApiBaseUrl()}/categories`, {
-      cache: "no-store",
-    });
+  const response = await fetch(`${getApiBaseUrl()}/categories`, {
+    cache: "no-store",
+  });
 
-    const payload = await parseJson<Array<{ name: string; slug: string; description?: string }>>(response);
-    const mapped = payload.map(mapApiCategoryToCategory);
+  const payload = await parseJson<Array<{ name: string; slug: string; description?: string }>>(response);
+  const mapped = payload.map(mapApiCategoryToCategory);
 
-    const deduped = new Map(mapped.map((category) => [category.slug, category]));
-    return [...deduped.values()];
-  } catch (error) {
-    if (!canUseMockFallback) {
-      throw error;
-    }
-
-    return mockCategories;
-  }
+  const deduped = new Map(mapped.map((category) => [category.slug, category]));
+  return [...deduped.values()];
 };
 
 export const fetchCatalogBrands = async (): Promise<string[]> => {
-  try {
-    const response = await fetch(`${getApiBaseUrl()}/brands`, {
-      cache: "no-store",
-    });
+  const response = await fetch(`${getApiBaseUrl()}/brands`, {
+    cache: "no-store",
+  });
 
-    const payload = await parseJson<Array<{ name: string }>>(response);
-    return payload.map((brand) => brand.name);
-  } catch (error) {
-    if (!canUseMockFallback) {
-      throw error;
-    }
-
-    return mockBrands;
-  }
+  const payload = await parseJson<Array<{ name: string }>>(response);
+  return payload.map((brand) => brand.name);
 };
 
 export const fetchProductDetailBySlug = async (slug: string) => {
-  try {
-    const response = await fetch(`${getApiBaseUrl()}/products/${slug}`, {
-      cache: "no-store",
-    });
+  const response = await fetch(`${getApiBaseUrl()}/products/${slug}`, {
+    cache: "no-store",
+  });
 
-    if (response.status === 404) {
-      return null;
-    }
-
-    const payload = await parseJson<ApiProduct>(response);
-
-    return {
-      product: mapApiProductToProduct(payload),
-      reviewComments: (payload.reviews || []).map(mapApiReviewToCardReview),
-    };
-  } catch (error) {
-    if (!canUseMockFallback) {
-      throw error;
-    }
-
-    const product = mockProducts.find((item) => item.slug === slug);
-    if (!product) {
-      return null;
-    }
-
-    return {
-      product,
-      reviewComments: mockReviews
-        .filter((review) => review.productId === product.id)
-        .map((review) => ({
-          name: review.name,
-          rating: review.rating,
-          comment: review.comment,
-          verified: review.verified,
-        })),
-    };
+  if (response.status === 404) {
+    return null;
   }
+
+  const payload = await parseJson<ApiProduct>(response);
+
+  return {
+    product: mapApiProductToProduct(payload),
+    reviewComments: (payload.reviews || []).map(mapApiReviewToCardReview),
+  };
 };
 
 export const createOrder = async (
