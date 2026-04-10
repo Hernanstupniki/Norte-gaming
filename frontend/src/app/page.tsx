@@ -1,3 +1,5 @@
+import { BrandStrip } from "@/components/home/brand-strip";
+import { CategoryGrid } from "@/components/home/category-grid";
 import { Hero } from "@/components/home/hero";
 import { ProductShowcase } from "@/components/home/product-showcase";
 import { TrustGrid } from "@/components/home/trust-grid";
@@ -15,6 +17,8 @@ export default async function HomePage() {
   return (
     <>
       <Hero />
+      <BrandStrip />
+      <CategoryGrid />
       <ProductShowcase
         eyebrow="Destacados"
         title="Periféricos gamer seleccionados de verdad"

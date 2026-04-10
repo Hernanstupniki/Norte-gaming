@@ -4,12 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useStore } from "@/context/store-context";
+import { categories } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
 const links = [
-  { href: "/tienda?categoria=mousepads", label: "Mousepads" },
-  { href: "/tienda?categoria=auriculares", label: "Auriculares" },
-  { href: "/tienda?categoria=monitores", label: "Monitores" },
+  ...categories.map((cat) => ({ href: `/tienda?categoria=${cat.slug}`, label: cat.name })),
   { href: "/nosotros", label: "Nosotros" },
   { href: "/faq", label: "Preguntas frecuentes" },
   { href: "/contacto", label: "Contacto" },
