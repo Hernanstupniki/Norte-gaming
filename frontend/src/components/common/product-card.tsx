@@ -32,10 +32,9 @@ export function ProductCard({ product }: { product: Product }) {
             </span>
           ))}
         </div>
-        <div className="min-h-16 space-y-1 sm:min-h-24">
+        <div className="min-h-16 space-y-1 sm:min-h-20">
           <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">{product.brand}</p>
           <h3 className="line-clamp-2 text-base font-semibold text-zinc-950">{product.name}</h3>
-          <p className="hidden text-xs text-zinc-600 sm:line-clamp-2 sm:block">{product.shortDescription}</p>
         </div>
       </Link>
 
@@ -47,7 +46,7 @@ export function ProductCard({ product }: { product: Product }) {
           <p className="text-2xl font-bold text-zinc-950">{formatARS(product.price)}</p>
           {product.installments ? <p className="text-xs text-zinc-600">{product.installments}</p> : null}
           <p className={`mt-1 text-xs ${outOfStock ? "font-semibold text-red-600" : "text-zinc-500"}`}>
-            {outOfStock ? "Sin stock" : `Stock: ${product.stock}`}
+            {outOfStock ? "Sin stock" : "Disponible"}
           </p>
         </div>
 
