@@ -20,14 +20,14 @@ export default async function HomePage() {
       <CategoryGrid />
       <ProductShowcase
         eyebrow="Destacados"
-        title="Periféricos gamer seleccionados de verdad"
-        description="Mouse, teclados, auriculares y monitores elegidos para mejorar tu setup con rendimiento real."
+        title="Variedad en periféricos gamer"
+        description="Mouse, teclados, auriculares y monitores originales para armar tu setup a tu medida."
         products={featured}
       />
       <ProductShowcase
         eyebrow="Ofertas"
         title="Ofertas activas"
-        description="Oportunidades reales en productos originales, con stock y precio claro sin vueltas."
+        description="Productos en oferta por tiempo limitado."
         products={offers}
       />
       <TrustGrid />
