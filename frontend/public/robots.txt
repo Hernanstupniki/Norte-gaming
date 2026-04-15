@@ -1,0 +1,16 @@
+# Nord Gaming - Robots.txt
+# Allow all crawlers by default
+
+User-agent: *
+Allow: /
+
+# Sitemap (si existe)
+Sitemap: https://nortegaming.com/sitemap.xml
+
+# Google Search Console
+# No disallow favicon or manifest
+Allow: /favicon.ico
+Allow: /favicon.svg
+Allow: /favicon-48x48.png
+Allow: /apple-touch-icon.png
+Allow: /manifest.webmanifest
