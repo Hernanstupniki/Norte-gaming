@@ -3,7 +3,8 @@ export default function NosotrosPage() {
     <main className="mx-auto w-full max-w-5xl px-4 py-12 md:px-6">
       <h1 className="text-4xl font-black tracking-tight">Nosotros</h1>
       <p className="mt-3 text-zinc-600">
-        Somos del norte de la Argentina, desde Misiones, y arrancamos este proyecto con algo simple: ganas de emprender y ofrecer periféricos que nosotros mismos usaríamos.
+        Somos del norte de la Argentina, de Misiones. Este proyecto nació con una idea simple: emprender y ofrecer
+        periféricos que nosotros mismos usaríamos.
       </p>
 
       <section className="mt-8 grid gap-4 md:grid-cols-3">
@@ -16,7 +17,8 @@ export default function NosotrosPage() {
         <article className="rounded-xl border border-zinc-200 bg-white p-5">
           <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-red-600">Qué buscamos</h2>
           <p className="mt-3 text-sm text-zinc-600">
-            Crecer de forma responsable, con atención cercana y rápida por WhatsApp, y construir confianza compra tras compra.
+            Buscamos crecer de forma responsable, brindar atención cercana y rápida por WhatsApp, y construir
+            confianza compra tras compra.
           </p>
         </article>
         <article className="rounded-xl border border-zinc-200 bg-white p-5">
