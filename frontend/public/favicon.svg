@@ -1,0 +1,16 @@
+<svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <rect width="256" height="256" fill="#000000"/>
+  <g transform="translate(128, 128) scale(2.2)">
+    <!-- N letter -->
+    <g fill="#EF4444">
+      <!-- Left vertical line -->
+      <rect x="-28" y="-32" width="10" height="64" rx="2"/>
+      <!-- Right vertical line -->
+      <rect x="18" y="-32" width="10" height="64" rx="2"/>
+      <!-- Diagonal from bottom-left to top-right -->
+      <path d="M -23 32 L 27 -32" stroke="#EF4444" stroke-width="10" stroke-linecap="round" fill="none"/>
+    </g>
+    <!-- Red stripe on right -->
+    <rect x="32" y="-36" width="8" height="72" fill="#DC2626" rx="2"/>
+  </g>
+</svg>
