@@ -213,13 +213,6 @@ export function Navbar() {
         <div className="border-t border-zinc-300 bg-zinc-100 p-4 lg:hidden">
           <div className="mb-3 flex items-center gap-2">
             <Link
-              href="/tienda"
-              onClick={() => setMobileOpen(false)}
-              className="text-xs font-semibold uppercase tracking-widest text-zinc-700"
-            >
-              Ver todo
-            </Link>
-            <Link
               href="/login"
               onClick={() => setMobileOpen(false)}
               className="text-xs font-semibold uppercase tracking-widest text-zinc-700"
