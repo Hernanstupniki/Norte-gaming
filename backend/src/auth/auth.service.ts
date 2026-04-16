@@ -76,7 +76,16 @@ export class AuthService {
 
     const domainName = this.configService.get<string>('DOMAIN_NAME');
     if (domainName && domainName !== 'localhost') {
-      return `https://nortegaming.${domainName}`;
+      const normalizedDomain = domainName.trim().replace(/\/+$/, '');
+      if (/^https?:\/\//i.test(normalizedDomain)) {
+        return normalizedDomain;
+      }
+
+      if (normalizedDomain.includes('.')) {
+        return `https://${normalizedDomain}`;
+      }
+
+      return `https://nortegaming.${normalizedDomain}`;
     }
 
     const corsOrigin = this.configService.get<string>('CORS_ORIGIN');
