@@ -1,16 +1,10 @@
-<svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-  <rect width="256" height="256" fill="#000000"/>
-  <g transform="translate(128, 128) scale(2.2)">
-    <!-- N letter -->
-    <g fill="#EF4444">
-      <!-- Left vertical line -->
-      <rect x="-28" y="-32" width="10" height="64" rx="2"/>
-      <!-- Right vertical line -->
-      <rect x="18" y="-32" width="10" height="64" rx="2"/>
-      <!-- Diagonal from bottom-left to top-right -->
-      <path d="M -23 32 L 27 -32" stroke="#EF4444" stroke-width="10" stroke-linecap="round" fill="none"/>
-    </g>
-    <!-- Red stripe on right -->
-    <rect x="32" y="-36" width="8" height="72" fill="#DC2626" rx="2"/>
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Norte Gaming favicon">
+  <rect width="512" height="512" fill="#000000"/>
+  <g transform="translate(0, 6)">
+    <path
+      d="M 112 388 V 126 H 182 L 292 286 V 126 H 352 V 388 H 282 L 172 228 V 388 Z"
+      fill="#FFFFFF"
+    />
+    <rect x="356" y="126" width="34" height="262" fill="#EF1D25"/>
   </g>
 </svg>
