@@ -384,7 +384,7 @@ export const faqItems: FAQItem[] = [
   {
     question: "¿Cómo funcionan cambios y devoluciones?",
     answer:
-      "Tenés 10 días para solicitar cambios o devoluciones por falla o disconformidad, según nuestras condiciones de compra.",
+      "Tenés 10 días para solicitar cambios o devoluciones por falla, según nuestras condiciones de compra.",
   },
   {
     question: "¿Cómo sé si hay stock real?",
@@ -394,7 +394,7 @@ export const faqItems: FAQItem[] = [
   {
     question: "¿Cuánto tarda en llegar mi compra?",
     answer:
-      "AMBA: 24/48 hs hábiles. Interior del país: entre 2 y 6 días hábiles según destino y operador logístico.",
+      "La entrega suele demorar entre 4 y 7 días hábiles, según destino y operador logístico.",
   },
 ];
 
