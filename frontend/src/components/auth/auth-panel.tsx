@@ -20,6 +20,7 @@ export function AuthPanel({ mode }: AuthPanelProps) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [resetToken, setResetToken] = useState("");
+  const [resetFromEmailLink, setResetFromEmailLink] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -33,6 +34,7 @@ export function AuthPanel({ mode }: AuthPanelProps) {
     if (!tokenFromUrl) return;
 
     setResetToken(tokenFromUrl);
+    setResetFromEmailLink(true);
     setLoginView("reset");
     setInfo("Completá tu nueva contraseña para finalizar la recuperación.");
   }, [mode, searchParams]);
@@ -79,11 +81,12 @@ export function AuthPanel({ mode }: AuthPanelProps) {
 
     try {
       const result = await forgotPasswordUser(email);
-      setInfo(result.message);
+      setInfo(`${result.message} Revisá tu Gmail y abrí el enlace para continuar.`);
       if (result.mockToken) {
         setResetToken(result.mockToken);
+        setResetFromEmailLink(false);
+        setLoginView("reset");
       }
-      setLoginView("reset");
     } catch (submitError) {
       setError(
         submitError instanceof Error
@@ -112,6 +115,7 @@ export function AuthPanel({ mode }: AuthPanelProps) {
       setNewPassword("");
       setConfirmPassword("");
       setResetToken("");
+      setResetFromEmailLink(false);
       setLoginView("login");
     } catch (submitError) {
       setError(
@@ -127,7 +131,7 @@ export function AuthPanel({ mode }: AuthPanelProps) {
   const title = mode === "login" ? "Ingresar" : "Crear cuenta";
   const description =
     mode === "login"
-      ? "Accedé a tus guardados, historial y seguimiento de compras."
+      ? "Accedé a tu carrito, historial y seguimiento de compras."
       : "Registrate para una experiencia de compra más rápida y personalizada.";
 
   return (
@@ -193,14 +197,16 @@ export function AuthPanel({ mode }: AuthPanelProps) {
             </div>
           ) : mode === "login" && loginView === "reset" ? (
             <div className="space-y-3">
-              <input
-                required
-                type="text"
-                value={resetToken}
-                onChange={(event) => setResetToken(event.target.value)}
-                placeholder="Token de recuperación"
-                className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm"
-              />
+              {!resetFromEmailLink ? (
+                <input
+                  required
+                  type="text"
+                  value={resetToken}
+                  onChange={(event) => setResetToken(event.target.value)}
+                  placeholder="Token de recuperación"
+                  className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm"
+                />
+              ) : null}
               <input
                 required
                 type="password"
@@ -232,6 +238,7 @@ export function AuthPanel({ mode }: AuthPanelProps) {
                 onClick={() => {
                   setLoginView("login");
                   setError(null);
+                  setResetFromEmailLink(false);
                 }}
                 className="w-full rounded-md border border-zinc-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-zinc-700"
               >
