@@ -3,12 +3,24 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { existsSync, mkdirSync } from 'fs';
+import helmet from 'helmet';
 import { join } from 'path';
 import { AppModule } from './app.module';
 import { PrismaClientExceptionFilter } from './common/filters/prisma-client-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.set('trust proxy', 1);
+  app.disable('x-powered-by');
+
+  app.use(
+    helmet({
+      // CSP is better enforced by the frontend app/server; disabling here avoids blocking upload/docs responses.
+      contentSecurityPolicy: false,
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
+
   const uploadsRoot = join(process.cwd(), 'uploads');
   const productUploads = join(uploadsRoot, 'products');
   if (!existsSync(productUploads)) {
