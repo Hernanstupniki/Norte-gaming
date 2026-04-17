@@ -12,40 +12,50 @@ import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { AuthService } from './auth.service';
 
+const AUTH_RATE_LIMITS = {
+  register: { limit: 3, ttl: 10 * 60_000 },
+  login: { limit: 5, ttl: 15 * 60_000 },
+  refresh: { limit: 20, ttl: 60_000 },
+  forgotPassword: { limit: 3, ttl: 15 * 60_000 },
+  resetPassword: { limit: 5, ttl: 15 * 60_000 },
+  changePassword: { limit: 5, ttl: 10 * 60_000 },
+};
+
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Throttle({ default: AUTH_RATE_LIMITS.register })
   @Post('register')
   register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
   }
 
   @Public()
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Throttle({ default: AUTH_RATE_LIMITS.login })
   @Post('login')
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
 
   @Public()
+  @Throttle({ default: AUTH_RATE_LIMITS.refresh })
   @Post('refresh')
   refresh(@Body() dto: RefreshTokenDto) {
     return this.authService.refresh(dto);
   }
 
   @Public()
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Throttle({ default: AUTH_RATE_LIMITS.forgotPassword })
   @Post('forgot-password')
   forgotPassword(@Body() dto: ForgotPasswordDto) {
     return this.authService.forgotPassword(dto);
   }
 
   @Public()
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Throttle({ default: AUTH_RATE_LIMITS.resetPassword })
   @Post('reset-password')
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto);
@@ -60,6 +70,7 @@ export class AuthController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: AUTH_RATE_LIMITS.changePassword })
   @Patch('change-password')
   changePassword(
     @CurrentUser('sub') userId: string,
