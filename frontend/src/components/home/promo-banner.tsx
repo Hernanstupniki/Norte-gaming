@@ -24,7 +24,7 @@ export function PromoBanner() {
               href="/tienda"
               className="rounded-md border-2 border-red-600 bg-red-600 px-5 py-3 text-xs font-bold uppercase tracking-widest text-white"
             >
-              Ver catálogo
+              Ver productos
             </Link>
             <Link
               href={whatsappHref}

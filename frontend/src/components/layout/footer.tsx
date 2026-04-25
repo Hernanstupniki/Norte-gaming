@@ -45,7 +45,7 @@ export function Footer() {
                 @nortegaming_
               </a>
             </li>
-            <li>Mail: NorteGamingba@gmail.com</li>
+            <li>Mail: nortegamingba@gmail.com</li>
             <li>Envíos: toda Argentina</li>
             <li>Soporte: activo 24/7 (las 24 horas todos los días)</li>
           </ul>

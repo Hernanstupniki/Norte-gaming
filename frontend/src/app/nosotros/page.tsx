@@ -11,7 +11,7 @@ export default function NosotrosPage() {
         <article className="rounded-xl border border-zinc-200 bg-white p-5">
           <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-red-600">Cómo trabajamos</h2>
           <p className="mt-3 text-sm text-zinc-600">
-            Seleccionamos productos con foco en calidad, rendimiento y durabilidad. Publicamos stock real y precios claros, sin vueltas.
+            Seleccionamos productos con foco en calidad, rendimiento y durabilidad. Publicamos stock real y precios claros.
           </p>
         </article>
         <article className="rounded-xl border border-zinc-200 bg-white p-5">

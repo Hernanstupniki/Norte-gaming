@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ProductThumbnail } from "@/components/common/product-thumbnail";
 
-const badges = ["Productos originales", "Asesoramiento real", "Envíos a todo el país", "Atención por WhatsApp"];
+const badges = ["Productos originales", "Envíos a todo el país", "Atención por WhatsApp"];
 
 export function Hero() {
   return (
@@ -13,17 +13,17 @@ export function Hero() {
             Norte Gaming / Argentina
           </p>
           <h1 className="mt-5 text-4xl font-black leading-tight tracking-tight text-zinc-950 md:text-5xl">
-            Armá un setup que rinda de verdad
+            Equipá tu setup con productos originales
           </h1>
           <p className="mt-5 max-w-xl text-base text-zinc-600 md:text-lg">
-            Mouse, teclados, auriculares y monitores para mejorar tu setup con productos que realmente valen la pena.
+            Encontrá productos originales para mejorar tu setup, con asesoramiento real y atención rápida por WhatsApp.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <Link
               href="/tienda"
               className="rounded-md border-2 border-red-600 bg-red-600 px-5 py-3 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-[4px_4px_0_#111] transition hover:-translate-y-0.5"
             >
-              Ver catálogo
+              Ver productos
             </Link>
             <Link
               href="/nosotros"
