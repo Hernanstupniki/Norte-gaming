@@ -9,6 +9,9 @@ import {
 
 interface ProductsResponse {
   data: ApiProduct[];
+  page: number;
+  limit: number;
+  totalPages: number;
 }
 
 export interface CreateOrderRequest {
@@ -52,12 +55,22 @@ const parseJson = async <T>(response: Response): Promise<T> => {
 };
 
 export const fetchCatalogProducts = async (): Promise<Product[]> => {
-  const response = await fetch(`${getApiBaseUrl()}/products`, {
-    cache: "no-store",
-  });
+  const allProducts: ApiProduct[] = [];
+  let page = 1;
+  let totalPages = 1;
 
-  const payload = await parseJson<ProductsResponse>(response);
-  return payload.data.map(mapApiProductToProduct);
+  do {
+    const response = await fetch(`${getApiBaseUrl()}/products?page=${page}&limit=100`, {
+      cache: "no-store",
+    });
+
+    const payload = await parseJson<ProductsResponse>(response);
+    allProducts.push(...payload.data);
+    totalPages = payload.totalPages || 1;
+    page += 1;
+  } while (page <= totalPages);
+
+  return allProducts.map(mapApiProductToProduct);
 };
 
 export const fetchCatalogCategories = async (): Promise<Category[]> => {
