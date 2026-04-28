@@ -314,3 +314,4 @@ export class ProductsService {
 
     return sales;
   }
+}
