@@ -129,6 +129,13 @@ export class ProductsService {
       throw new NotFoundException('Producto no encontrado');
     }
 
+    if (role !== Role.ADMIN) {
+      await this.prisma.product.update({
+        where: { id: product.id },
+        data: { viewCount: { increment: 1 } },
+      });
+    }
+
     return this.filterMissingUploadImages(product);
   }
 
@@ -313,5 +320,16 @@ export class ProductsService {
     });
 
     return sales;
+  }
+
+  async getMostViewedProducts(limit = 10) {
+    const products = await this.prisma.product.findMany({
+      where: { deletedAt: null },
+      include: this.includeData,
+      orderBy: [{ viewCount: 'desc' }, { updatedAt: 'desc' }],
+      take: limit,
+    });
+
+    return products.map((product) => this.filterMissingUploadImages(product));
   }
 }

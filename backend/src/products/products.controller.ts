@@ -43,6 +43,13 @@ export class ProductsController {
     return this.productsService.getSalesHistory();
   }
 
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN)
+  @Get('admin/most-viewed')
+  getMostViewedProducts(@Query('limit') limit?: string) {
+    return this.productsService.getMostViewedProducts(limit ? Number(limit) : 10);
+  }
+
   @Public()
   @Get(':slug')
   bySlugPublic(@Param('slug') slug: string) {

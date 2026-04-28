@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { AdminProductItem, adminListProducts, adminGetSalesHistory } from "@/lib/admin-api";
+import {
+  AdminProductItem,
+  adminListProducts,
+  adminGetSalesHistory,
+  adminGetMostViewedProducts,
+} from "@/lib/admin-api";
 
 interface SalesRecord {
   id: string;
@@ -32,6 +37,7 @@ type CategoryMetric = {
 export default function AdminMetricasPage() {
   const [products, setProducts] = useState<AdminProductItem[]>([]);
   const [sales, setSales] = useState<SalesRecord[]>([]);
+  const [mostViewed, setMostViewed] = useState<AdminProductItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,13 +48,15 @@ export default function AdminMetricasPage() {
       setLoading(true);
       setError(null);
       try {
-        const [productsResult, salesResult] = await Promise.all([
+        const [productsResult, salesResult, viewedResult] = await Promise.all([
           adminListProducts(),
           adminGetSalesHistory(),
+          adminGetMostViewedProducts(6),
         ]);
         if (!cancelled) {
           setProducts(productsResult.data);
           setSales(salesResult);
+          setMostViewed(viewedResult);
         }
       } catch (err) {
         if (!cancelled) {
@@ -89,6 +97,12 @@ export default function AdminMetricasPage() {
     const totalSold = sales.reduce((acc, s) => acc + Number(s.quantity || 0), 0);
     const salesWithRevenue = sales.length;
     const avgRevenue = salesWithRevenue > 0 ? totalRevenue / salesWithRevenue : 0;
+    const topViewed = mostViewed.map((product) => ({
+      id: product.id,
+      name: product.name,
+      sku: product.sku,
+      viewCount: product.viewCount || 0,
+    }));
 
     const byCategoryMap = new Map<string, number>();
     for (const product of products) {
@@ -140,8 +154,9 @@ export default function AdminMetricasPage() {
       salesWithRevenue,
       byCategory,
       topSold,
+      topViewed,
     };
-  }, [products, sales]);
+  }, [products, sales, mostViewed]);
 
   return (
     <section className="space-y-6">
@@ -247,6 +262,29 @@ export default function AdminMetricasPage() {
                 })}
                 {metrics.topSold.length === 0 ? (
                   <p className="text-xs sm:text-sm text-zinc-500">Sin datos de ventas todavía.</p>
+                ) : null}
+              </div>
+            </section>
+
+            <section className="rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-3 sm:p-5 shadow-sm">
+              <h3 className="text-base sm:text-lg font-black text-zinc-950">Top productos más vistos</h3>
+              <div className="mt-3 space-y-2">
+                {metrics.topViewed.map((product) => (
+                  <div key={product.id} className="rounded-lg border border-zinc-200 p-2 sm:p-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-xs sm:text-sm font-semibold text-zinc-900">{product.name}</p>
+                        <p className="text-xs text-zinc-500">SKU: {product.sku}</p>
+                      </div>
+                      <div className="text-right whitespace-nowrap">
+                        <p className="text-xs text-zinc-600">Vistas</p>
+                        <p className="text-xs sm:text-sm font-bold text-blue-700">{product.viewCount}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {metrics.topViewed.length === 0 ? (
+                  <p className="text-xs sm:text-sm text-zinc-500">Todavía no hay datos de vistas.</p>
                 ) : null}
               </div>
             </section>

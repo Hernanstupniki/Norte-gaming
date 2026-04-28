@@ -137,6 +137,7 @@ model Product {
   stock            Int
   variants         String[]      @default([])
   soldCount        Int           @default(0)
+  viewCount        Int           @default(0)
   isFeatured       Boolean       @default(false)
   isOnOffer        Boolean       @default(false)
   isActive         Boolean       @default(true)

@@ -26,6 +26,7 @@ export interface AdminProductItem {
   images?: Array<{ url: string; alt?: string | null }>;
   specs?: Array<{ name: string; value: string }>;
   variants?: string[];
+  viewCount: number;
 }
 
 export interface AdminProductsResponse {
@@ -234,6 +235,21 @@ export const adminGetSalesHistory = async () => {
   }
 
   return response.json();
+
+  export const adminGetMostViewedProducts = async (limit = 10) => {
+    const response = await fetch(
+      `${getAdminProxyUrl("products/admin/most-viewed")}?limit=${limit}`,
+      {
+        cache: "no-store",
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(await readApiError(response, "Failed to fetch most viewed products"));
+    }
+
+    return (await response.json()) as AdminProductItem[];
+  };
 };
 
 export const adminDeleteProduct = async (productId: string) => {
