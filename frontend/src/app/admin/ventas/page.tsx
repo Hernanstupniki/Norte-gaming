@@ -1,14 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AdminProductItem, adminListProducts, adminUpdateProductSoldCount } from "@/lib/admin-api";
+import { AdminProductItem, adminListProducts, adminRegisterSale, adminGetSalesHistory } from "@/lib/admin-api";
 
 interface SaleRecord {
   id: string;
   productId: string;
-  productName: string;
   quantity: number;
-  timestamp: Date;
+  unitPrice: string | number;
+  totalPrice: string | number;
+  createdAt: string;
+  product?: {
+    id: string;
+    name: string;
+    sku: string;
+  };
 }
 
 export default function AdminVentasPage() {
@@ -21,19 +27,23 @@ export default function AdminVentasPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [sales, setSales] = useState<SaleRecord[]>([]);
 
-  // Cargar productos
+  // Cargar productos y historial de ventas
   useEffect(() => {
     let cancelled = false;
 
     const load = async () => {
       try {
-        const result = await adminListProducts();
+        const [productsResult, salesResult] = await Promise.all([
+          adminListProducts(),
+          adminGetSalesHistory(),
+        ]);
         if (!cancelled) {
-          setProducts(result.data);
+          setProducts(productsResult.data);
+          setSales(salesResult);
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Error cargando productos");
+          setError(err instanceof Error ? err.message : "Error cargando datos");
         }
       } finally {
         if (!cancelled) {
@@ -74,28 +84,21 @@ export default function AdminVentasPage() {
         return;
       }
 
-      const currentSoldCount = Number((product as { soldCount?: number }).soldCount || 0);
-      const newSoldCount = currentSoldCount + qty;
+      const price = Number(product.currentPrice || 0);
 
-      await adminUpdateProductSoldCount(selectedProductId, newSoldCount);
+      await adminRegisterSale(selectedProductId, qty, price);
 
-      // Agregar a historial de ventas
-      const newSale: SaleRecord = {
-        id: `${Date.now()}`,
-        productId: selectedProductId,
-        productName: product.name,
-        quantity: qty,
-        timestamp: new Date(),
-      };
-
-      setSales([newSale, ...sales]);
       setSuccess(`✓ Registrado: ${product.name} x${qty}`);
       setSelectedProductId("");
       setQuantity("");
 
-      // Recargar productos para ver cambios
-      const result = await adminListProducts();
-      setProducts(result.data);
+      // Recargar productos e historial de ventas
+      const [productsResult, salesResult] = await Promise.all([
+        adminListProducts(),
+        adminGetSalesHistory(),
+      ]);
+      setProducts(productsResult.data);
+      setSales(salesResult);
 
       // Limpiar mensaje de éxito
       setTimeout(() => setSuccess(null), 3000);
@@ -193,15 +196,22 @@ export default function AdminVentasPage() {
 
       {sales.length > 0 ? (
         <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-          <h3 className="text-lg font-black text-zinc-950">Ventas registradas hoy</h3>
+          <h3 className="text-lg font-black text-zinc-950">Historial de ventas</h3>
           <div className="mt-4 space-y-2">
             {sales.map((sale) => (
               <div key={sale.id} className="flex items-center justify-between gap-3 rounded-lg border border-zinc-200 px-3 py-2">
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-zinc-900">{sale.productName}</p>
-                  <p className="text-xs text-zinc-500">{sale.timestamp.toLocaleTimeString("es-AR")}</p>
+                  <p className="truncate text-sm font-semibold text-zinc-900">{sale.product?.name || "Producto eliminado"}</p>
+                  <p className="text-xs text-zinc-500">
+                    {new Date(sale.createdAt).toLocaleString("es-AR")}
+                  </p>
                 </div>
-                <p className="text-sm font-bold text-zinc-900">x{sale.quantity}</p>
+                <div className="text-right">
+                  <p className="text-xs text-zinc-600">x{sale.quantity}</p>
+                  <p className="text-sm font-bold text-emerald-700">
+                    ${Number(sale.totalPrice).toLocaleString("es-AR")}
+                  </p>
+                </div>
               </div>
             ))}
           </div>

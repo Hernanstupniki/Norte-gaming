@@ -1,7 +1,21 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { AdminProductItem, adminListProducts } from "@/lib/admin-api";
+import { AdminProductItem, adminListProducts, adminGetSalesHistory } from "@/lib/admin-api";
+
+interface SalesRecord {
+  id: string;
+  productId: string;
+  quantity: number;
+  unitPrice: string | number;
+  totalPrice: string | number;
+  createdAt: string;
+  product?: {
+    id: string;
+    name: string;
+    sku: string;
+  };
+}
 
 const formatArs = (value: number) =>
   new Intl.NumberFormat("es-AR", {
@@ -17,6 +31,7 @@ type CategoryMetric = {
 
 export default function AdminMetricasPage() {
   const [products, setProducts] = useState<AdminProductItem[]>([]);
+  const [sales, setSales] = useState<SalesRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,9 +42,13 @@ export default function AdminMetricasPage() {
       setLoading(true);
       setError(null);
       try {
-        const result = await adminListProducts();
+        const [productsResult, salesResult] = await Promise.all([
+          adminListProducts(),
+          adminGetSalesHistory(),
+        ]);
         if (!cancelled) {
-          setProducts(result.data);
+          setProducts(productsResult.data);
+          setSales(salesResult);
         }
       } catch (err) {
         if (!cancelled) {
@@ -60,17 +79,16 @@ export default function AdminMetricasPage() {
       const price = Number(p.currentPrice || 0);
       return acc + p.stock * (Number.isFinite(price) ? price : 0);
     }, 0);
-    const totalSold = products.reduce((acc, p) => acc + Number((p as { soldCount?: number }).soldCount || 0), 0);
-    
-    // Calcular ganancias totales y por producto
-    const totalRevenue = products.reduce((acc, p) => {
-      const price = Number(p.currentPrice || 0);
-      const sold = Number((p as { soldCount?: number }).soldCount || 0);
-      const revenue = price * sold;
-      return acc + (Number.isFinite(revenue) ? revenue : 0);
+
+    // Calcular ganancias desde la tabla SalesRecord
+    const totalRevenue = sales.reduce((acc, s) => {
+      const price = Number(s.totalPrice || 0);
+      return acc + (Number.isFinite(price) ? price : 0);
     }, 0);
-    const productsWithSales = products.filter((p) => Number((p as { soldCount?: number }).soldCount || 0) > 0).length;
-    const avgRevenue = productsWithSales > 0 ? totalRevenue / productsWithSales : 0;
+
+    const totalSold = sales.reduce((acc, s) => acc + Number(s.quantity || 0), 0);
+    const salesWithRevenue = sales.length;
+    const avgRevenue = salesWithRevenue > 0 ? totalRevenue / salesWithRevenue : 0;
 
     const byCategoryMap = new Map<string, number>();
     for (const product of products) {
@@ -82,12 +100,30 @@ export default function AdminMetricasPage() {
       .sort((a, b) => b.count - a.count)
       .slice(0, 6);
 
-    const topSold = [...products]
-      .map((p) => ({
-        ...p,
-        revenue: Number(p.currentPrice || 0) * Number((p as { soldCount?: number }).soldCount || 0),
+    // Top productos por ingresos totales (desde SalesRecord)
+    const productRevenueMap = new Map<string, { revenue: number; soldCount: number; name: string; sku: string }>();
+    sales.forEach((s) => {
+      const productId = s.productId;
+      const current = productRevenueMap.get(productId) || {
+        revenue: 0,
+        soldCount: 0,
+        name: s.product?.name || "Producto desconocido",
+        sku: s.product?.sku || "N/A",
+      };
+      current.revenue += Number(s.totalPrice || 0);
+      current.soldCount += Number(s.quantity || 0);
+      productRevenueMap.set(productId, current);
+    });
+
+    const topSold = [...productRevenueMap.entries()]
+      .map(([productId, data]) => ({
+        id: productId,
+        name: data.name,
+        sku: data.sku,
+        revenue: data.revenue,
+        soldCount: data.soldCount,
       }))
-      .sort((a, b) => Number((b as { soldCount?: number }).soldCount || 0) - Number((a as { soldCount?: number }).soldCount || 0))
+      .sort((a, b) => b.revenue - a.revenue)
       .slice(0, 6);
 
     return {
@@ -101,11 +137,11 @@ export default function AdminMetricasPage() {
       totalSold,
       totalRevenue,
       avgRevenue,
-      productsWithSales,
+      salesWithRevenue,
       byCategory,
       topSold,
     };
-  }, [products]);
+  }, [products, sales]);
 
   return (
     <section className="space-y-6">
@@ -152,16 +188,16 @@ export default function AdminMetricasPage() {
               <p className="mt-2 text-3xl font-black text-emerald-900">{formatArs(metrics.totalRevenue)}</p>
             </article>
             <article className="rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-blue-700">Ganancia promedio</p>
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-blue-700">Ganancia promedio por venta</p>
               <p className="mt-2 text-3xl font-black text-blue-900">{formatArs(metrics.avgRevenue)}</p>
-              <p className="mt-1 text-xs text-blue-600">({metrics.productsWithSales} productos)</p>
+              <p className="mt-1 text-xs text-blue-600">({metrics.salesWithRevenue} ventas registradas)</p>
             </article>
             <article className="rounded-2xl border border-purple-200 bg-purple-50 p-4 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-purple-700">Margen promedio</p>
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-purple-700">Rendimiento ventas</p>
               <p className="mt-2 text-3xl font-black text-purple-900">
-                {metrics.avgRevenue > 0 ? ((metrics.avgRevenue / metrics.inventoryValue) * 100).toFixed(1) : "0"}%
+                {metrics.inventoryValue > 0 ? ((metrics.totalRevenue / metrics.inventoryValue) * 100).toFixed(1) : "0"}%
               </p>
-              <p className="mt-1 text-xs text-purple-600">(ventas vs inventario)</p>
+              <p className="mt-1 text-xs text-purple-600">(ingresos vs inventario)</p>
             </article>
           </div>
 
@@ -189,9 +225,8 @@ export default function AdminMetricasPage() {
               <h3 className="text-lg font-black text-zinc-950">Top productos por ventas</h3>
               <div className="mt-4 space-y-3">
                 {metrics.topSold.map((product) => {
-                  const soldCount = Number((product as { soldCount?: number }).soldCount || 0);
                   const revenue = (product as { revenue?: number }).revenue || 0;
-                  const price = Number(product.currentPrice || 0);
+                  const soldCount = (product as { soldCount?: number }).soldCount || 0;
                   return (
                     <div key={product.id} className="rounded-lg border border-zinc-200 p-3">
                       <div className="flex items-center justify-between gap-2">
@@ -205,14 +240,7 @@ export default function AdminMetricasPage() {
                         </div>
                       </div>
                       <div className="mt-2 flex items-center justify-between text-xs text-zinc-600">
-                        <span>Precio: {formatArs(price)}</span>
-                        <span>
-                          {soldCount > 0 ? (
-                            <span className="inline-block rounded bg-zinc-100 px-2 py-1">
-                              {((revenue / (revenue || 1)) * 100).toFixed(0)}% de ingresos
-                            </span>
-                          ) : null}
-                        </span>
+                        <span>Precio promedio: {formatArs(revenue / (soldCount || 1))}</span>
                       </div>
                     </div>
                   );

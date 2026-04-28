@@ -204,6 +204,38 @@ export const adminUpdateProductSoldCount = async (
   return response.json();
 };
 
+export const adminRegisterSale = async (
+  productId: string,
+  quantity: number,
+  unitPrice: number,
+) => {
+  const response = await fetch(getAdminProxyUrl("products/admin/register-sale"), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ productId, quantity, unitPrice }),
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response, "Failed to register sale"));
+  }
+
+  return response.json();
+};
+
+export const adminGetSalesHistory = async () => {
+  const response = await fetch(getAdminProxyUrl("products/admin/sales-history"), {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response, "Failed to fetch sales history"));
+  }
+
+  return response.json();
+};
+
 export const adminDeleteProduct = async (productId: string) => {
   const response = await fetch(getAdminProxyUrl(`products/${productId}`), {
     method: "DELETE",
