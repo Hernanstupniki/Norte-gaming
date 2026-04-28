@@ -260,4 +260,36 @@ export class ProductsService {
       data: { deletedAt: new Date(), isActive: false },
     });
   }
+
+  async registerSale(productId: string, quantity: number, unitPrice: number) {
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Producto no encontrado');
+    }
+
+    const totalPrice = quantity * unitPrice;
+
+    // Crear registro de venta
+    const saleRecord = await this.prisma.salesRecord.create({
+      data: {
+        productId,
+        quantity,
+        unitPrice: new Prisma.Decimal(unitPrice.toString()),
+        totalPrice: new Prisma.Decimal(totalPrice.toString()),
+      },
+    });
+
+    // Actualizar soldCount del producto
+    await this.prisma.product.update({
+      where: { id: productId },
+      data: {
+        soldCount: product.soldCount + quantity,
+      },
+    });
+
+    return saleRecord;
+  }
 }
