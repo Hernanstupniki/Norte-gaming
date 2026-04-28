@@ -61,6 +61,16 @@ export default function AdminMetricasPage() {
       return acc + p.stock * (Number.isFinite(price) ? price : 0);
     }, 0);
     const totalSold = products.reduce((acc, p) => acc + Number((p as { soldCount?: number }).soldCount || 0), 0);
+    
+    // Calcular ganancias totales y por producto
+    const totalRevenue = products.reduce((acc, p) => {
+      const price = Number(p.currentPrice || 0);
+      const sold = Number((p as { soldCount?: number }).soldCount || 0);
+      const revenue = price * sold;
+      return acc + (Number.isFinite(revenue) ? revenue : 0);
+    }, 0);
+    const productsWithSales = products.filter((p) => Number((p as { soldCount?: number }).soldCount || 0) > 0).length;
+    const avgRevenue = productsWithSales > 0 ? totalRevenue / productsWithSales : 0;
 
     const byCategoryMap = new Map<string, number>();
     for (const product of products) {
@@ -73,6 +83,10 @@ export default function AdminMetricasPage() {
       .slice(0, 6);
 
     const topSold = [...products]
+      .map((p) => ({
+        ...p,
+        revenue: Number(p.currentPrice || 0) * Number((p as { soldCount?: number }).soldCount || 0),
+      }))
       .sort((a, b) => Number((b as { soldCount?: number }).soldCount || 0) - Number((a as { soldCount?: number }).soldCount || 0))
       .slice(0, 6);
 
@@ -85,6 +99,9 @@ export default function AdminMetricasPage() {
       totalUnits,
       inventoryValue,
       totalSold,
+      totalRevenue,
+      avgRevenue,
+      productsWithSales,
       byCategory,
       topSold,
     };
@@ -129,6 +146,25 @@ export default function AdminMetricasPage() {
             </article>
           </div>
 
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-700">Ganancias totales</p>
+              <p className="mt-2 text-3xl font-black text-emerald-900">{formatArs(metrics.totalRevenue)}</p>
+            </article>
+            <article className="rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-sm">
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-blue-700">Ganancia promedio</p>
+              <p className="mt-2 text-3xl font-black text-blue-900">{formatArs(metrics.avgRevenue)}</p>
+              <p className="mt-1 text-xs text-blue-600">({metrics.productsWithSales} productos)</p>
+            </article>
+            <article className="rounded-2xl border border-purple-200 bg-purple-50 p-4 shadow-sm">
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-purple-700">Margen promedio</p>
+              <p className="mt-2 text-3xl font-black text-purple-900">
+                {metrics.avgRevenue > 0 ? ((metrics.avgRevenue / metrics.inventoryValue) * 100).toFixed(1) : "0"}%
+              </p>
+              <p className="mt-1 text-xs text-purple-600">(ventas vs inventario)</p>
+            </article>
+          </div>
+
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
               <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-700">Activos</p>
@@ -154,13 +190,30 @@ export default function AdminMetricasPage() {
               <div className="mt-4 space-y-3">
                 {metrics.topSold.map((product) => {
                   const soldCount = Number((product as { soldCount?: number }).soldCount || 0);
+                  const revenue = (product as { revenue?: number }).revenue || 0;
+                  const price = Number(product.currentPrice || 0);
                   return (
-                    <div key={product.id} className="flex items-center justify-between gap-3 rounded-lg border border-zinc-200 px-3 py-2">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-zinc-900">{product.name}</p>
-                        <p className="text-xs text-zinc-500">SKU: {product.sku}</p>
+                    <div key={product.id} className="rounded-lg border border-zinc-200 p-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-zinc-900">{product.name}</p>
+                          <p className="text-xs text-zinc-500">SKU: {product.sku}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-zinc-600">{soldCount} unidades</p>
+                          <p className="text-sm font-bold text-emerald-700">{formatArs(revenue)}</p>
+                        </div>
                       </div>
-                      <p className="text-sm font-bold text-zinc-900">{soldCount}</p>
+                      <div className="mt-2 flex items-center justify-between text-xs text-zinc-600">
+                        <span>Precio: {formatArs(price)}</span>
+                        <span>
+                          {soldCount > 0 ? (
+                            <span className="inline-block rounded bg-zinc-100 px-2 py-1">
+                              {((revenue / (revenue || 1)) * 100).toFixed(0)}% de ingresos
+                            </span>
+                          ) : null}
+                        </span>
+                      </div>
                     </div>
                   );
                 })}
