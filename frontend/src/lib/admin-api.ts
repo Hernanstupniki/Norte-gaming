@@ -185,6 +185,25 @@ export const adminUpdateProduct = async (
   return response.json();
 };
 
+export const adminUpdateProductSoldCount = async (
+  productId: string,
+  newSoldCount: number,
+) => {
+  const response = await fetch(getAdminProxyUrl(`products/${productId}`), {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ soldCount: newSoldCount }),
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response, "Failed to update sales count"));
+  }
+
+  return response.json();
+};
+
 export const adminDeleteProduct = async (productId: string) => {
   const response = await fetch(getAdminProxyUrl(`products/${productId}`), {
     method: "DELETE",

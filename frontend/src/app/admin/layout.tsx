@@ -6,6 +6,7 @@ import { AdminLogoutButton } from "@/components/admin/admin-logout-button";
 
 const navItems = [
   { href: "/admin/productos", label: "Productos" },
+  { href: "/admin/ventas", label: "Registrar ventas" },
   { href: "/admin/metricas", label: "Métricas" },
   { href: "/admin/categorias", label: "Categorías" },
   { href: "/admin/marcas", label: "Marcas" },
