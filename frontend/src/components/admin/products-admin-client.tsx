@@ -790,7 +790,67 @@ export function ProductsAdminClient() {
 
           {loadingProducts ? <p className="text-sm text-zinc-600">Cargando productos...</p> : null}
 
-          <div className="overflow-x-auto rounded-lg border border-zinc-200">
+          <div className="space-y-3 md:hidden">
+            {filteredProducts.map((product) => (
+              <article
+                key={product.id}
+                className={`rounded-xl border border-zinc-200 bg-zinc-50 p-3 ${product.stock <= 0 ? "bg-red-50/60" : product.stock <= 5 ? "bg-amber-50/60" : "bg-zinc-50"}`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-zinc-950">{product.name}</p>
+                    <p className="text-xs text-zinc-600">SKU: {product.sku}</p>
+                    <p className="mt-1 text-xs text-zinc-600">{product.brand?.name || "-"} · {product.category?.name || "-"}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-zinc-600">Stock</p>
+                    <p className="text-sm font-bold text-zinc-950">{product.stock}</p>
+                  </div>
+                </div>
+
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <div>
+                    <p className="text-xs text-zinc-600">Precio</p>
+                    <p className="text-sm font-semibold text-zinc-900">{formatArs(Number(product.currentPrice || 0))}</p>
+                  </div>
+                  <span
+                    className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
+                      product.isActive ? "bg-zinc-100 text-zinc-800" : "bg-zinc-200 text-zinc-600"
+                    }`}
+                  >
+                    {product.isActive ? "Activo" : "Inactivo"}
+                  </span>
+                </div>
+
+                <div className="mt-3 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleEdit(product)}
+                    className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-2 text-xs font-semibold text-zinc-700"
+                    aria-label={`Editar ${product.name}`}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void handleDelete(product)}
+                    className="flex-1 rounded-md border border-red-300 bg-white px-3 py-2 text-xs font-semibold text-red-700"
+                    aria-label={`Eliminar ${product.name}`}
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </article>
+            ))}
+
+            {filteredProducts.length === 0 && !loadingProducts ? (
+              <p className="rounded-lg border border-dashed border-zinc-300 px-3 py-6 text-center text-sm text-zinc-500">
+                No hay productos para mostrar.
+              </p>
+            ) : null}
+          </div>
+
+          <div className="hidden overflow-x-auto rounded-lg border border-zinc-200 md:block">
             <table className="w-full min-w-[720px] border-collapse text-xs sm:text-sm">
               <thead className="bg-zinc-50 text-left text-zinc-600">
                 <tr>
