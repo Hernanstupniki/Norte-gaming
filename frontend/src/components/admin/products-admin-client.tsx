@@ -20,6 +20,7 @@ type Brand = { id: string; name: string; slug: string };
 type Category = { id: string; name: string; slug: string };
 type NoticeTone = "success" | "error" | "info";
 type AdminTab = "create" | "manage";
+type ListFilter = "all" | "active" | "low-stock" | "out-of-stock";
 
 interface NoticeState {
   tone: NoticeTone;
@@ -106,6 +107,7 @@ const toFormFromProduct = (product: AdminProductItem): ProductFormState => ({
 
 export function ProductsAdminClient() {
   const [tab, setTab] = useState<AdminTab>("create");
+  const [listFilter, setListFilter] = useState<ListFilter>("all");
   const [brands, setBrands] = useState<Brand[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<AdminProductItem[]>([]);
@@ -122,6 +124,11 @@ export function ProductsAdminClient() {
 
   const currentPrice = Number(form.currentPrice || 0);
   const imageCount = form.images.filter((img) => (img.url || "").trim().length > 0).length;
+  const totalProducts = products.length;
+  const activeProducts = products.filter((item) => item.isActive).length;
+  const featuredProducts = products.filter((item) => item.isFeatured).length;
+  const lowStockProducts = products.filter((item) => item.stock > 0 && item.stock <= 5).length;
+  const outOfStockProducts = products.filter((item) => item.stock <= 0).length;
 
   const selectedBrand = useMemo(
     () => brands.find((item) => item.id === form.brandId)?.name || "Sin marca",
@@ -132,6 +139,15 @@ export function ProductsAdminClient() {
     () => categories.find((item) => item.id === form.categoryId)?.name || "Sin categoría",
     [categories, form.categoryId],
   );
+
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) => {
+      if (listFilter === "active") return product.isActive;
+      if (listFilter === "low-stock") return product.stock > 0 && product.stock <= 5;
+      if (listFilter === "out-of-stock") return product.stock <= 0;
+      return true;
+    });
+  }, [listFilter, products]);
 
   useEffect(() => {
     if (editingProductId) return;
@@ -499,6 +515,21 @@ export function ProductsAdminClient() {
         </div>
       </div>
 
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        {[
+          { label: "Total", value: totalProducts, tone: "border-zinc-200 bg-white text-zinc-950" },
+          { label: "Activos", value: activeProducts, tone: "border-emerald-200 bg-emerald-50 text-emerald-800" },
+          { label: "Destacados", value: featuredProducts, tone: "border-blue-200 bg-blue-50 text-blue-800" },
+          { label: "Stock bajo", value: lowStockProducts, tone: "border-amber-200 bg-amber-50 text-amber-900" },
+          { label: "Sin stock", value: outOfStockProducts, tone: "border-red-200 bg-red-50 text-red-800" },
+        ].map((stat) => (
+          <article key={stat.label} className={`rounded-2xl border p-4 shadow-sm ${stat.tone}`}>
+            <p className="text-xs font-bold uppercase tracking-[0.22em] opacity-70">{stat.label}</p>
+            <p className="mt-2 text-3xl font-black leading-none">{stat.value}</p>
+          </article>
+        ))}
+      </div>
+
       {notice ? <div className={`rounded-lg px-4 py-3 text-sm ${noticeClass(notice.tone)}`}>{notice.text}</div> : null}
 
       {tab === "create" ? (
@@ -691,6 +722,48 @@ export function ProductsAdminClient() {
         </div>
       ) : (
         <div className="space-y-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 className="text-lg font-black text-zinc-950">Listado y control rápido</h3>
+              <p className="text-sm text-zinc-600">
+                Mostrando {filteredProducts.length} de {products.length} productos.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={startNewProduct}
+              className="rounded-md border border-black bg-black px-4 py-2 text-sm font-semibold text-white"
+            >
+              Nuevo producto
+            </button>
+          </div>
+
+          <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtros de stock">
+            {[
+              { id: "all", label: "Todos" },
+              { id: "active", label: "Activos" },
+              { id: "low-stock", label: "Stock bajo" },
+              { id: "out-of-stock", label: "Sin stock" },
+            ].map((filter) => {
+              const active = listFilter === filter.id;
+              return (
+                <button
+                  key={filter.id}
+                  type="button"
+                  onClick={() => setListFilter(filter.id as ListFilter)}
+                  aria-pressed={active}
+                  className={`rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-widest transition ${
+                    active
+                      ? "border border-black bg-black text-white"
+                      : "border border-zinc-300 bg-zinc-50 text-zinc-600 hover:bg-zinc-100"
+                  }`}
+                >
+                  {filter.label}
+                </button>
+              );
+            })}
+          </div>
+
           <form onSubmit={handleSearch} className="flex flex-wrap items-center gap-2">
             <input
               type="text"
@@ -729,24 +802,47 @@ export function ProductsAdminClient() {
                 </tr>
               </thead>
               <tbody>
-                {products.map((product) => (
-                  <tr key={product.id} className="border-t border-zinc-200">
+                {filteredProducts.map((product) => (
+                  <tr
+                    key={product.id}
+                    className={`border-t border-zinc-200 ${product.stock <= 0 ? "bg-red-50/40" : product.stock <= 5 ? "bg-amber-50/40" : ""}`}
+                  >
                     <td className="px-3 py-2 font-medium text-zinc-900">{product.name}</td>
                     <td className="px-3 py-2 text-zinc-700">{product.sku}</td>
                     <td className="px-3 py-2 text-zinc-700">{product.brand?.name || "-"}</td>
                     <td className="px-3 py-2 text-zinc-700">{product.category?.name || "-"}</td>
                     <td className="px-3 py-2 text-zinc-700">{formatArs(Number(product.currentPrice || 0))}</td>
-                    <td className="px-3 py-2 text-zinc-700">{product.stock}</td>
-                    <td className="px-3 py-2 text-zinc-700">{product.isActive ? "Activo" : "Inactivo"}</td>
+                    <td className="px-3 py-2 text-zinc-700">
+                      <span
+                        className={`inline-flex min-w-12 justify-center rounded-full px-2 py-1 text-xs font-semibold ${
+                          product.stock <= 0
+                            ? "bg-red-100 text-red-700"
+                            : product.stock <= 5
+                              ? "bg-amber-100 text-amber-900"
+                              : "bg-emerald-100 text-emerald-800"
+                        }`}
+                      >
+                        {product.stock}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 text-zinc-700">
+                      <span
+                        className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
+                          product.isActive ? "bg-zinc-100 text-zinc-800" : "bg-zinc-200 text-zinc-600"
+                        }`}
+                      >
+                        {product.isActive ? "Activo" : "Inactivo"}
+                      </span>
+                    </td>
                     <td className="px-3 py-2">
                       <div className="flex gap-2">
-                        <button type="button" onClick={() => handleEdit(product)} className="rounded-md border border-zinc-300 px-2 py-1 text-xs font-semibold text-zinc-700">Editar</button>
-                        <button type="button" onClick={() => void handleDelete(product)} className="rounded-md border border-red-300 px-2 py-1 text-xs font-semibold text-red-700">Eliminar</button>
+                        <button type="button" onClick={() => handleEdit(product)} className="rounded-md border border-zinc-300 px-2 py-1 text-xs font-semibold text-zinc-700" aria-label={`Editar ${product.name}`}>Editar</button>
+                        <button type="button" onClick={() => void handleDelete(product)} className="rounded-md border border-red-300 px-2 py-1 text-xs font-semibold text-red-700" aria-label={`Eliminar ${product.name}`}>Eliminar</button>
                       </div>
                     </td>
                   </tr>
                 ))}
-                {products.length === 0 && !loadingProducts ? (
+                {filteredProducts.length === 0 && !loadingProducts ? (
                   <tr>
                     <td colSpan={8} className="px-3 py-8 text-center text-zinc-500">No hay productos para mostrar.</td>
                   </tr>
