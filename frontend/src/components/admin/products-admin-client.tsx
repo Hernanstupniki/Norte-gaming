@@ -479,7 +479,7 @@ export function ProductsAdminClient() {
   if (sessionInvalid) {
     return (
       <div className="mx-auto max-w-md rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Norte Gaming CMS Pro</p>
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Panel de acceso</p>
         <h2 className="mt-2 text-2xl font-black text-zinc-950">Sesión expirada</h2>
         <p className="mt-1 text-sm text-zinc-600">Volvé a iniciar sesión para seguir usando el panel.</p>
         <a href="/admin/login" className="mt-6 inline-block rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white">
@@ -491,10 +491,11 @@ export function ProductsAdminClient() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm md:p-5">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Norte Gaming CMS Pro</p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Catálogo</p>
           <h2 className="text-2xl font-black text-zinc-950">Gestión de productos</h2>
+          <p className="text-sm text-zinc-600">Creá, editá y controlá stock desde un solo módulo.</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -518,13 +519,13 @@ export function ProductsAdminClient() {
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         {[
           { label: "Total", value: totalProducts, tone: "border-zinc-200 bg-white text-zinc-950" },
-          { label: "Activos", value: activeProducts, tone: "border-emerald-200 bg-emerald-50 text-emerald-800" },
-          { label: "Destacados", value: featuredProducts, tone: "border-blue-200 bg-blue-50 text-blue-800" },
-          { label: "Stock bajo", value: lowStockProducts, tone: "border-amber-200 bg-amber-50 text-amber-900" },
-          { label: "Sin stock", value: outOfStockProducts, tone: "border-red-200 bg-red-50 text-red-800" },
+          { label: "Activos", value: activeProducts, tone: "border-zinc-200 bg-white text-zinc-950" },
+          { label: "Destacados", value: featuredProducts, tone: "border-zinc-200 bg-white text-zinc-950" },
+          { label: "Stock bajo", value: lowStockProducts, tone: "border-zinc-200 bg-white text-zinc-950" },
+          { label: "Sin stock", value: outOfStockProducts, tone: "border-zinc-200 bg-white text-zinc-950" },
         ].map((stat) => (
           <article key={stat.label} className={`rounded-2xl border p-4 shadow-sm ${stat.tone}`}>
-            <p className="text-xs font-bold uppercase tracking-[0.22em] opacity-70">{stat.label}</p>
+            <p className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">{stat.label}</p>
             <p className="mt-2 text-3xl font-black leading-none">{stat.value}</p>
           </article>
         ))}
@@ -724,7 +725,7 @@ export function ProductsAdminClient() {
         <div className="space-y-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h3 className="text-lg font-black text-zinc-950">Listado y control rápido</h3>
+              <h3 className="text-lg font-black text-zinc-950">Listado de productos</h3>
               <p className="text-sm text-zinc-600">
                 Mostrando {filteredProducts.length} de {products.length} productos.
               </p>
