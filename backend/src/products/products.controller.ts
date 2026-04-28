@@ -36,6 +36,13 @@ export class ProductsController {
     return this.productsService.list(query, Role.ADMIN);
   }
 
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN)
+  @Get('admin/sales-history')
+  getSalesHistory() {
+    return this.productsService.getSalesHistory();
+  }
+
   @Public()
   @Get(':slug')
   bySlugPublic(@Param('slug') slug: string) {

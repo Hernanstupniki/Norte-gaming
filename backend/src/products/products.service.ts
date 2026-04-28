@@ -280,6 +280,9 @@ export class ProductsService {
         unitPrice: new Prisma.Decimal(unitPrice.toString()),
         totalPrice: new Prisma.Decimal(totalPrice.toString()),
       },
+      include: {
+        product: true,
+      },
     });
 
     // Actualizar soldCount del producto
@@ -292,4 +295,22 @@ export class ProductsService {
 
     return saleRecord;
   }
-}
+
+  async getSalesHistory(limit = 100) {
+    const sales = await this.prisma.salesRecord.findMany({
+      include: {
+        product: {
+          select: {
+            id: true,
+            name: true,
+            sku: true,
+            currentPrice: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
+
+    return sales;
+  }
