@@ -153,6 +153,7 @@ model Product {
   wishlistItems    WishlistItem[]
   orderItems       OrderItem[]
   reviews          Review[]
+  salesRecords     SalesRecord[]
 
   @@index([brandId])
   @@index([categoryId])
@@ -367,5 +368,18 @@ model Contact {
   updatedAt  DateTime     @updatedAt
 
   @@index([status])
+  @@index([createdAt])
+}
+
+model SalesRecord {
+  id         String   @id @default(uuid())
+  productId  String
+  quantity   Int
+  unitPrice  Decimal  @db.Decimal(12, 2)
+  totalPrice Decimal  @db.Decimal(12, 2)
+  createdAt  DateTime @default(now())
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
   @@index([createdAt])
 }
