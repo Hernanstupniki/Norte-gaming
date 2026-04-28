@@ -112,27 +112,27 @@ export default function AdminVentasPage() {
   const selectedProduct = products.find((p) => p.id === selectedProductId);
 
   return (
-    <section className="space-y-6">
-      <header className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm md:p-6">
-        <p className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">Ventas</p>
-        <h2 className="mt-2 text-3xl font-black tracking-tight text-zinc-950">Registrar ventas</h2>
-        <p className="mt-2 text-sm text-zinc-600 md:text-base">
+    <section className="space-y-4 md:space-y-6">
+      <header className="rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-4 sm:p-5 md:p-6 shadow-sm">
+        <p className="text-xs font-bold uppercase tracking-[0.1em] text-zinc-500">Ventas</p>
+        <h2 className="mt-2 text-2xl sm:text-3xl font-black tracking-tight text-zinc-950">Registrar ventas</h2>
+        <p className="mt-2 text-xs sm:text-sm text-zinc-600 md:text-base">
           Anota aquí los productos que vendiste para actualizar tus ganancias.
         </p>
       </header>
 
       {error ? (
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 shadow-sm">{error}</div>
+        <div className="rounded-xl sm:rounded-2xl border border-red-200 bg-red-50 p-3 sm:p-4 text-xs sm:text-sm text-red-700 shadow-sm">{error}</div>
       ) : null}
 
       {success ? (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 shadow-sm">{success}</div>
+        <div className="rounded-xl sm:rounded-2xl border border-emerald-200 bg-emerald-50 p-3 sm:p-4 text-xs sm:text-sm text-emerald-700 shadow-sm">{success}</div>
       ) : null}
 
-      <form onSubmit={handleSubmit} className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="md:col-span-2">
-            <label htmlFor="product" className="block text-sm font-semibold text-zinc-900">
+      <form onSubmit={handleSubmit} className="rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-4 sm:p-5 shadow-sm">
+        <div className="grid gap-3 sm:gap-4 grid-cols-1">
+          <div>
+            <label htmlFor="product" className="block text-xs sm:text-sm font-semibold text-zinc-900">
               Producto vendido
             </label>
             <select
@@ -140,7 +140,7 @@ export default function AdminVentasPage() {
               value={selectedProductId}
               onChange={(e) => setSelectedProductId(e.target.value)}
               disabled={loading}
-              className="mt-2 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-950 focus:outline-none"
+              className="mt-1.5 sm:mt-2 w-full rounded-lg border border-zinc-300 bg-white px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm focus:border-zinc-950 focus:outline-none"
             >
               <option value="">Selecciona un producto...</option>
               {products.map((p) => (
@@ -152,16 +152,16 @@ export default function AdminVentasPage() {
           </div>
 
           {selectedProduct && (
-            <div className="md:col-span-2 rounded-lg border border-blue-200 bg-blue-50 p-3">
+            <div className="rounded-lg border border-blue-200 bg-blue-50 p-2.5 sm:p-3">
               <p className="text-xs font-semibold text-blue-700">Precio actual:</p>
-              <p className="mt-1 text-lg font-bold text-blue-900">
+              <p className="mt-0.5 sm:mt-1 text-lg sm:text-xl font-bold text-blue-900">
                 ${Number(selectedProduct.currentPrice).toLocaleString("es-AR")}
               </p>
             </div>
           )}
 
           <div>
-            <label htmlFor="quantity" className="block text-sm font-semibold text-zinc-900">
+            <label htmlFor="quantity" className="block text-xs sm:text-sm font-semibold text-zinc-900">
               Cantidad vendida
             </label>
             <input
@@ -171,14 +171,14 @@ export default function AdminVentasPage() {
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
               placeholder="Ej: 2"
-              className="mt-2 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-950 focus:outline-none"
+              className="mt-1.5 sm:mt-2 w-full rounded-lg border border-zinc-300 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm focus:border-zinc-950 focus:outline-none"
             />
           </div>
 
           {selectedProduct && quantity && !isNaN(parseInt(quantity)) ? (
-            <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-2.5 sm:p-3">
               <p className="text-xs font-semibold text-emerald-700">Ganancia estimada:</p>
-              <p className="mt-1 text-lg font-bold text-emerald-900">
+              <p className="mt-0.5 sm:mt-1 text-lg sm:text-xl font-bold text-emerald-900">
                 ${(Number(selectedProduct.currentPrice) * parseInt(quantity)).toLocaleString("es-AR")}
               </p>
             </div>
@@ -188,27 +188,27 @@ export default function AdminVentasPage() {
         <button
           type="submit"
           disabled={submitting || !selectedProductId || !quantity}
-          className="mt-4 w-full rounded-lg bg-zinc-950 py-2 text-sm font-semibold text-white transition hover:bg-zinc-900 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="mt-3 sm:mt-4 w-full rounded-lg bg-zinc-950 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white transition hover:bg-zinc-900 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {submitting ? "Registrando..." : "Registrar venta"}
         </button>
       </form>
 
       {sales.length > 0 ? (
-        <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-          <h3 className="text-lg font-black text-zinc-950">Historial de ventas</h3>
-          <div className="mt-4 space-y-2">
+        <section className="rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-4 sm:p-5 shadow-sm">
+          <h3 className="text-base sm:text-lg font-black text-zinc-950">Historial de ventas</h3>
+          <div className="mt-3 sm:mt-4 space-y-2">
             {sales.map((sale) => (
-              <div key={sale.id} className="flex items-center justify-between gap-3 rounded-lg border border-zinc-200 px-3 py-2">
+              <div key={sale.id} className="flex items-center justify-between gap-2 sm:gap-3 rounded-lg border border-zinc-200 px-2.5 sm:px-3 py-1.5 sm:py-2">
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-zinc-900">{sale.product?.name || "Producto eliminado"}</p>
+                  <p className="truncate text-xs sm:text-sm font-semibold text-zinc-900">{sale.product?.name || "Producto eliminado"}</p>
                   <p className="text-xs text-zinc-500">
                     {new Date(sale.createdAt).toLocaleString("es-AR")}
                   </p>
                 </div>
-                <div className="text-right">
+                <div className="text-right whitespace-nowrap">
                   <p className="text-xs text-zinc-600">x{sale.quantity}</p>
-                  <p className="text-sm font-bold text-emerald-700">
+                  <p className="text-xs sm:text-sm font-bold text-emerald-700">
                     ${Number(sale.totalPrice).toLocaleString("es-AR")}
                   </p>
                 </div>

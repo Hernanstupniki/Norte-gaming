@@ -145,10 +145,10 @@ export default function AdminMetricasPage() {
 
   return (
     <section className="space-y-6">
-      <header className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm md:p-6">
+      <header className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm md:p-5 md:p-6">
         <p className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">Métricas</p>
-        <h2 className="mt-2 text-3xl font-black tracking-tight text-zinc-950">Panel de métricas</h2>
-        <p className="mt-2 text-sm text-zinc-600 md:text-base">
+        <h2 className="mt-2 text-2xl font-black tracking-tight text-zinc-950 md:text-3xl">Panel de métricas</h2>
+        <p className="mt-2 text-xs text-zinc-600 md:text-base">
           Resumen de catálogo, stock y rendimiento para tomar decisiones rápidas.
         </p>
       </header>
@@ -163,113 +163,113 @@ export default function AdminMetricasPage() {
 
       {!loading && !error ? (
         <>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <article className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">Productos totales</p>
-              <p className="mt-2 text-3xl font-black text-zinc-950">{metrics.total}</p>
+          <div className="grid gap-2 sm:gap-3 grid-cols-2 sm:grid-cols-4">
+            <article className="rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-3 sm:p-4 shadow-sm">
+              <p className="text-xs font-bold uppercase tracking-[0.1em] text-zinc-500">Productos</p>
+              <p className="mt-1 text-2xl sm:text-3xl font-black text-zinc-950">{metrics.total}</p>
             </article>
-            <article className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">Unidades en stock</p>
-              <p className="mt-2 text-3xl font-black text-zinc-950">{metrics.totalUnits}</p>
+            <article className="rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-3 sm:p-4 shadow-sm">
+              <p className="text-xs font-bold uppercase tracking-[0.1em] text-zinc-500">Stock</p>
+              <p className="mt-1 text-2xl sm:text-3xl font-black text-zinc-950">{metrics.totalUnits}</p>
             </article>
-            <article className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">Valor inventario</p>
-              <p className="mt-2 text-3xl font-black text-zinc-950">{formatArs(metrics.inventoryValue)}</p>
+            <article className="rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-3 sm:p-4 shadow-sm">
+              <p className="text-xs font-bold uppercase tracking-[0.1em] text-zinc-500">Inventario</p>
+              <p className="mt-1 text-lg sm:text-3xl font-black text-zinc-950">{formatArs(metrics.inventoryValue)}</p>
             </article>
-            <article className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">Unidades vendidas</p>
-              <p className="mt-2 text-3xl font-black text-zinc-950">{metrics.totalSold}</p>
+            <article className="rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-3 sm:p-4 shadow-sm">
+              <p className="text-xs font-bold uppercase tracking-[0.1em] text-zinc-500">Vendidas</p>
+              <p className="mt-1 text-2xl sm:text-3xl font-black text-zinc-950">{metrics.totalSold}</p>
             </article>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-700">Ganancias totales</p>
-              <p className="mt-2 text-3xl font-black text-emerald-900">{formatArs(metrics.totalRevenue)}</p>
+          <div className="grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-3">
+            <article className="rounded-xl sm:rounded-2xl border border-emerald-200 bg-emerald-50 p-3 sm:p-4 shadow-sm">
+              <p className="text-xs font-bold uppercase tracking-[0.1em] text-emerald-700">Ganancias totales</p>
+              <p className="mt-1 text-2xl sm:text-3xl font-black text-emerald-900">{formatArs(metrics.totalRevenue)}</p>
             </article>
-            <article className="rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-blue-700">Ganancia promedio por venta</p>
-              <p className="mt-2 text-3xl font-black text-blue-900">{formatArs(metrics.avgRevenue)}</p>
-              <p className="mt-1 text-xs text-blue-600">({metrics.salesWithRevenue} ventas registradas)</p>
+            <article className="rounded-xl sm:rounded-2xl border border-blue-200 bg-blue-50 p-3 sm:p-4 shadow-sm">
+              <p className="text-xs font-bold uppercase tracking-[0.1em] text-blue-700">Ganancia promedio</p>
+              <p className="mt-1 text-lg sm:text-2xl font-black text-blue-900">{formatArs(metrics.avgRevenue)}</p>
+              <p className="mt-0.5 text-xs text-blue-600">({metrics.salesWithRevenue} ventas)</p>
             </article>
-            <article className="rounded-2xl border border-purple-200 bg-purple-50 p-4 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-purple-700">Rendimiento ventas</p>
-              <p className="mt-2 text-3xl font-black text-purple-900">
+            <article className="rounded-xl sm:rounded-2xl border border-purple-200 bg-purple-50 p-3 sm:p-4 shadow-sm">
+              <p className="text-xs font-bold uppercase tracking-[0.1em] text-purple-700">Rendimiento</p>
+              <p className="mt-1 text-2xl sm:text-3xl font-black text-purple-900">
                 {metrics.inventoryValue > 0 ? ((metrics.totalRevenue / metrics.inventoryValue) * 100).toFixed(1) : "0"}%
               </p>
-              <p className="mt-1 text-xs text-purple-600">(ingresos vs inventario)</p>
+              <p className="mt-0.5 text-xs text-purple-600">(ingresos vs inv.)</p>
             </article>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-700">Activos</p>
-              <p className="mt-2 text-2xl font-black text-emerald-900">{metrics.active}</p>
+          <div className="grid gap-2 sm:gap-3 grid-cols-2 sm:grid-cols-4">
+            <article className="rounded-xl sm:rounded-2xl border border-emerald-200 bg-emerald-50 p-3 sm:p-4 shadow-sm">
+              <p className="text-xs font-bold uppercase tracking-[0.1em] text-emerald-700">Activos</p>
+              <p className="mt-1 text-2xl font-black text-emerald-900">{metrics.active}</p>
             </article>
-            <article className="rounded-2xl border border-zinc-300 bg-zinc-50 p-4 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-700">Inactivos</p>
-              <p className="mt-2 text-2xl font-black text-zinc-900">{metrics.inactive}</p>
+            <article className="rounded-xl sm:rounded-2xl border border-zinc-300 bg-zinc-50 p-3 sm:p-4 shadow-sm">
+              <p className="text-xs font-bold uppercase tracking-[0.1em] text-zinc-700">Inactivos</p>
+              <p className="mt-1 text-2xl font-black text-zinc-900">{metrics.inactive}</p>
             </article>
-            <article className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-700">Stock bajo</p>
-              <p className="mt-2 text-2xl font-black text-amber-900">{metrics.lowStock}</p>
+            <article className="rounded-xl sm:rounded-2xl border border-amber-200 bg-amber-50 p-3 sm:p-4 shadow-sm">
+              <p className="text-xs font-bold uppercase tracking-[0.1em] text-amber-700">Stock bajo</p>
+              <p className="mt-1 text-2xl font-black text-amber-900">{metrics.lowStock}</p>
             </article>
-            <article className="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-red-700">Sin stock</p>
-              <p className="mt-2 text-2xl font-black text-red-900">{metrics.outOfStock}</p>
+            <article className="rounded-xl sm:rounded-2xl border border-red-200 bg-red-50 p-3 sm:p-4 shadow-sm">
+              <p className="text-xs font-bold uppercase tracking-[0.1em] text-red-700">Sin stock</p>
+              <p className="mt-1 text-2xl font-black text-red-900">{metrics.outOfStock}</p>
             </article>
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-              <h3 className="text-lg font-black text-zinc-950">Top productos por ventas</h3>
-              <div className="mt-4 space-y-3">
+            <section className="rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-3 sm:p-5 shadow-sm">
+              <h3 className="text-base sm:text-lg font-black text-zinc-950">Top productos por ventas</h3>
+              <div className="mt-3 space-y-2">
                 {metrics.topSold.map((product) => {
                   const revenue = (product as { revenue?: number }).revenue || 0;
                   const soldCount = (product as { soldCount?: number }).soldCount || 0;
                   return (
-                    <div key={product.id} className="rounded-lg border border-zinc-200 p-3">
+                    <div key={product.id} className="rounded-lg border border-zinc-200 p-2 sm:p-3">
                       <div className="flex items-center justify-between gap-2">
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold text-zinc-900">{product.name}</p>
+                          <p className="truncate text-xs sm:text-sm font-semibold text-zinc-900">{product.name}</p>
                           <p className="text-xs text-zinc-500">SKU: {product.sku}</p>
                         </div>
-                        <div className="text-right">
-                          <p className="text-xs text-zinc-600">{soldCount} unidades</p>
-                          <p className="text-sm font-bold text-emerald-700">{formatArs(revenue)}</p>
+                        <div className="text-right whitespace-nowrap">
+                          <p className="text-xs text-zinc-600">{soldCount}u</p>
+                          <p className="text-xs sm:text-sm font-bold text-emerald-700">{formatArs(revenue)}</p>
                         </div>
                       </div>
-                      <div className="mt-2 flex items-center justify-between text-xs text-zinc-600">
-                        <span>Precio promedio: {formatArs(revenue / (soldCount || 1))}</span>
+                      <div className="mt-1.5 text-xs text-zinc-600 overflow-x-auto">
+                        <span>Prom: {formatArs(revenue / (soldCount || 1))}</span>
                       </div>
                     </div>
                   );
                 })}
                 {metrics.topSold.length === 0 ? (
-                  <p className="text-sm text-zinc-500">Sin datos de ventas todavía.</p>
+                  <p className="text-xs sm:text-sm text-zinc-500">Sin datos de ventas todavía.</p>
                 ) : null}
               </div>
             </section>
 
-            <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-              <h3 className="text-lg font-black text-zinc-950">Distribución por categoría</h3>
-              <div className="mt-4 space-y-3">
+            <section className="rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-3 sm:p-5 shadow-sm">
+              <h3 className="text-base sm:text-lg font-black text-zinc-950">Distribución por categoría</h3>
+              <div className="mt-3 space-y-2.5">
                 {metrics.byCategory.map((category) => {
                   const width = metrics.total > 0 ? Math.max(8, Math.round((category.count / metrics.total) * 100)) : 0;
                   return (
-                    <div key={category.name} className="space-y-1">
-                      <div className="flex items-center justify-between text-sm">
-                        <p className="font-semibold text-zinc-800">{category.name}</p>
-                        <p className="text-zinc-600">{category.count}</p>
+                    <div key={category.name} className="space-y-0.5">
+                      <div className="flex items-center justify-between text-xs sm:text-sm">
+                        <p className="font-semibold text-zinc-800 truncate">{category.name}</p>
+                        <p className="text-zinc-600 ml-2">{category.count}</p>
                       </div>
-                      <div className="h-2 rounded-full bg-zinc-100">
-                        <div className="h-2 rounded-full bg-zinc-900" style={{ width: `${width}%` }} />
+                      <div className="h-1.5 sm:h-2 rounded-full bg-zinc-100">
+                        <div className="h-1.5 sm:h-2 rounded-full bg-zinc-900" style={{ width: `${width}%` }} />
                       </div>
                     </div>
                   );
                 })}
                 {metrics.byCategory.length === 0 ? (
-                  <p className="text-sm text-zinc-500">No hay categorías para mostrar.</p>
+                  <p className="text-xs sm:text-sm text-zinc-500">No hay categorías para mostrar.</p>
                 ) : null}
               </div>
             </section>
