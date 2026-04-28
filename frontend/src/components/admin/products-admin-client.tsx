@@ -478,11 +478,11 @@ export function ProductsAdminClient() {
 
   if (sessionInvalid) {
     return (
-      <div className="mx-auto max-w-md rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+      <div className="mx-auto max-w-md rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-4 sm:p-6 shadow-sm">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Panel de acceso</p>
-        <h2 className="mt-2 text-2xl font-black text-zinc-950">Sesión expirada</h2>
-        <p className="mt-1 text-sm text-zinc-600">Volvé a iniciar sesión para seguir usando el panel.</p>
-        <a href="/admin/login" className="mt-6 inline-block rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white">
+        <h2 className="mt-2 text-2xl sm:text-3xl font-black text-zinc-950">Sesión expirada</h2>
+        <p className="mt-1 text-xs sm:text-sm text-zinc-600">Volvé a iniciar sesión para seguir usando el panel.</p>
+        <a href="/admin/login" className="mt-4 sm:mt-6 inline-block rounded-lg bg-black px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white">
           Ir al login
         </a>
       </div>
@@ -490,33 +490,33 @@ export function ProductsAdminClient() {
   }
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm md:p-5">
+    <div className="space-y-4 sm:space-y-5">
+      <div className="flex flex-col gap-3 rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-3 sm:p-4 md:p-5 shadow-sm">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Catálogo</p>
-          <h2 className="text-2xl font-black text-zinc-950">Gestión de productos</h2>
-          <p className="text-sm text-zinc-600">Creá, editá y controlá stock desde un solo módulo.</p>
+          <p className="text-xs font-bold uppercase tracking-[0.1em] text-zinc-500">Catálogo</p>
+          <h2 className="text-xl sm:text-2xl font-black text-zinc-950">Gestión de productos</h2>
+          <p className="text-xs sm:text-sm text-zinc-600">Creá, editá y controlá stock desde un solo módulo.</p>
         </div>
 
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={startNewProduct}
-            className={`rounded-md px-3 py-2 text-sm font-semibold ${tab === "create" ? "bg-black text-white" : "border border-zinc-300 text-zinc-700"}`}
+            className={`rounded-md px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold ${tab === "create" ? "bg-black text-white" : "border border-zinc-300 text-zinc-700"}`}
           >
             Nuevo producto
           </button>
           <button
             type="button"
             onClick={() => setTab("manage")}
-            className={`rounded-md px-3 py-2 text-sm font-semibold ${tab === "manage" ? "bg-black text-white" : "border border-zinc-300 text-zinc-700"}`}
+            className={`rounded-md px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold ${tab === "manage" ? "bg-black text-white" : "border border-zinc-300 text-zinc-700"}`}
           >
             Gestionar
           </button>
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-5">
         {[
           { label: "Total", value: totalProducts, tone: "border-zinc-200 bg-white text-zinc-950" },
           { label: "Activos", value: activeProducts, tone: "border-zinc-200 bg-white text-zinc-950" },
@@ -524,20 +524,20 @@ export function ProductsAdminClient() {
           { label: "Stock bajo", value: lowStockProducts, tone: "border-zinc-200 bg-white text-zinc-950" },
           { label: "Sin stock", value: outOfStockProducts, tone: "border-zinc-200 bg-white text-zinc-950" },
         ].map((stat) => (
-          <article key={stat.label} className={`rounded-2xl border p-4 shadow-sm ${stat.tone}`}>
-            <p className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">{stat.label}</p>
-            <p className="mt-2 text-3xl font-black leading-none">{stat.value}</p>
+          <article key={stat.label} className={`rounded-xl sm:rounded-2xl border p-3 sm:p-4 shadow-sm ${stat.tone}`}>
+            <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.1em] text-zinc-500">{stat.label}</p>
+            <p className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-black leading-none">{stat.value}</p>
           </article>
         ))}
       </div>
 
-      {notice ? <div className={`rounded-lg px-4 py-3 text-sm ${noticeClass(notice.tone)}`}>{notice.text}</div> : null}
+      {notice ? <div className={`rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm ${noticeClass(notice.tone)}`}>{notice.text}</div> : null}
 
       {tab === "create" ? (
-        <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <form onSubmit={handleSubmit} className="space-y-5 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-black text-zinc-950">{editingProductId ? "Editar producto" : "Crear producto"}</h3>
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-4 sm:p-6 shadow-sm">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <h3 className="text-lg sm:text-xl font-black text-zinc-950">{editingProductId ? "Editar producto" : "Crear producto"}</h3>
               {editingProductId ? (
                 <button
                   type="button"
@@ -546,7 +546,7 @@ export function ProductsAdminClient() {
                     resetForm();
                     setNotice({ tone: "info", text: "Edición cancelada. Volviste al borrador." });
                   }}
-                  className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-700"
+                  className="rounded-md border border-zinc-300 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-zinc-700"
                 >
                   Cancelar edición
                 </button>
@@ -555,7 +555,7 @@ export function ProductsAdminClient() {
 
             {loadingCatalog ? <p className="text-sm text-blue-700">Cargando marcas y categorías...</p> : null}
 
-            <section className="rounded-xl border border-zinc-200 p-4">
+            <section className="rounded-xl border border-zinc-200 p-3 sm:p-4">
               <h4 className="text-sm font-bold uppercase tracking-widest text-zinc-600">Datos básicos</h4>
               <div className="mt-3 grid gap-3">
                 <input type="text" required minLength={3} placeholder="Nombre" value={form.name} onChange={(event) => setField("name", event.target.value)} className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900" />
@@ -564,7 +564,7 @@ export function ProductsAdminClient() {
               </div>
             </section>
 
-            <section className="rounded-xl border border-zinc-200 p-4">
+            <section className="rounded-xl border border-zinc-200 p-3 sm:p-4">
               <h4 className="text-sm font-bold uppercase tracking-widest text-zinc-600">Precio, stock y clasificación</h4>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <input type="number" step="0.01" min="0" required placeholder="Precio actual" value={form.currentPrice} onChange={(event) => setField("currentPrice", event.target.value)} className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900" />
@@ -609,10 +609,10 @@ export function ProductsAdminClient() {
               </div>
             </section>
 
-            <section className="rounded-xl border border-zinc-200 p-4">
+            <section className="rounded-xl border border-zinc-200 p-3 sm:p-4">
               <div className="mb-3 flex items-center justify-between">
                 <h4 className="text-sm font-bold uppercase tracking-widest text-zinc-600">Imágenes</h4>
-                <button type="button" onClick={addImage} className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-100">+ Imagen</button>
+                <button type="button" onClick={addImage} className="rounded-md border border-zinc-300 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-100">+ Imagen</button>
               </div>
               <div className="space-y-3">
                 {form.images.map((image, index) => (
@@ -651,10 +651,10 @@ export function ProductsAdminClient() {
               </div>
             </section>
 
-            <section className="rounded-xl border border-zinc-200 p-4">
+            <section className="rounded-xl border border-zinc-200 p-3 sm:p-4">
               <div className="mb-3 flex items-center justify-between">
                 <h4 className="text-sm font-bold uppercase tracking-widest text-zinc-600">Especificaciones</h4>
-                <button type="button" onClick={addSpec} className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-100">+ Especificación</button>
+                <button type="button" onClick={addSpec} className="rounded-md border border-zinc-300 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-100">+ Especificación</button>
               </div>
               <div className="space-y-2">
                 {form.specs.map((spec, index) => (
@@ -667,7 +667,7 @@ export function ProductsAdminClient() {
               </div>
             </section>
 
-            <section className="rounded-xl border border-zinc-200 p-4">
+            <section className="rounded-xl border border-zinc-200 p-3 sm:p-4">
               <h4 className="text-sm font-bold uppercase tracking-widest text-zinc-600">Variantes opcionales</h4>
               <p className="mt-2 text-xs text-zinc-500">
                 Una variante por línea. Si dejás este campo vacío, el producto no mostrará selector de variantes.
@@ -686,8 +686,8 @@ export function ProductsAdminClient() {
             </button>
           </form>
 
-          <aside className="h-fit rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm lg:sticky lg:top-6">
-            <h4 className="text-lg font-black text-zinc-950">Resumen</h4>
+          <aside className="h-fit rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-4 sm:p-6 shadow-sm lg:sticky lg:top-6">
+            <h4 className="text-base sm:text-lg font-black text-zinc-950">Resumen</h4>
             <div className="mt-4 space-y-3 text-sm text-zinc-700">
               <div>
                 <p className="text-xs uppercase tracking-widest text-zinc-500">Nombre</p>
@@ -722,18 +722,18 @@ export function ProductsAdminClient() {
           </aside>
         </div>
       ) : (
-        <div className="space-y-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="space-y-4 rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-4 sm:p-6 shadow-sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h3 className="text-lg font-black text-zinc-950">Listado de productos</h3>
-              <p className="text-sm text-zinc-600">
+              <h3 className="text-base sm:text-lg font-black text-zinc-950">Listado de productos</h3>
+              <p className="text-xs sm:text-sm text-zinc-600">
                 Mostrando {filteredProducts.length} de {products.length} productos.
               </p>
             </div>
             <button
               type="button"
               onClick={startNewProduct}
-              className="rounded-md border border-black bg-black px-4 py-2 text-sm font-semibold text-white"
+              className="w-full sm:w-auto rounded-md border border-black bg-black px-3 py-2 text-xs sm:text-sm font-semibold text-white"
             >
               Nuevo producto
             </button>
@@ -753,7 +753,7 @@ export function ProductsAdminClient() {
                   type="button"
                   onClick={() => setListFilter(filter.id as ListFilter)}
                   aria-pressed={active}
-                  className={`rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-widest transition ${
+                  className={`rounded-full px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-xs font-semibold uppercase tracking-widest transition ${
                     active
                       ? "border border-black bg-black text-white"
                       : "border border-zinc-300 bg-zinc-50 text-zinc-600 hover:bg-zinc-100"
@@ -765,41 +765,43 @@ export function ProductsAdminClient() {
             })}
           </div>
 
-          <form onSubmit={handleSearch} className="flex flex-wrap items-center gap-2">
+          <form onSubmit={handleSearch} className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <input
               type="text"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Buscar por nombre o descripción"
-              className="min-w-[260px] flex-1 rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900"
+              className="w-full min-w-0 flex-1 rounded-lg border border-zinc-300 px-3 py-2 text-xs sm:text-sm outline-none focus:border-zinc-900"
             />
-            <button type="submit" className="rounded-md bg-black px-4 py-2 text-sm font-semibold text-white">Buscar</button>
-            <button
-              type="button"
-              onClick={async () => {
-                setSearch("");
-                await loadProducts("");
-              }}
-              className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-semibold text-zinc-700"
-            >
-              Limpiar
-            </button>
+            <div className="flex gap-2">
+              <button type="submit" className="flex-1 rounded-md bg-black px-3 py-2 text-xs sm:text-sm font-semibold text-white">Buscar</button>
+              <button
+                type="button"
+                onClick={async () => {
+                  setSearch("");
+                  await loadProducts("");
+                }}
+                className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-xs sm:text-sm font-semibold text-zinc-700"
+              >
+                Limpiar
+              </button>
+            </div>
           </form>
 
           {loadingProducts ? <p className="text-sm text-zinc-600">Cargando productos...</p> : null}
 
           <div className="overflow-x-auto rounded-lg border border-zinc-200">
-            <table className="w-full min-w-[820px] border-collapse text-sm">
+            <table className="w-full min-w-[720px] border-collapse text-xs sm:text-sm">
               <thead className="bg-zinc-50 text-left text-zinc-600">
                 <tr>
-                  <th className="px-3 py-2">Nombre</th>
-                  <th className="px-3 py-2">SKU</th>
-                  <th className="px-3 py-2">Marca</th>
-                  <th className="px-3 py-2">Categoría</th>
-                  <th className="px-3 py-2">Precio</th>
-                  <th className="px-3 py-2">Stock</th>
-                  <th className="px-3 py-2">Estado</th>
-                  <th className="px-3 py-2">Acciones</th>
+                  <th className="px-2 sm:px-3 py-2">Nombre</th>
+                  <th className="px-2 sm:px-3 py-2">SKU</th>
+                  <th className="px-2 sm:px-3 py-2">Marca</th>
+                  <th className="px-2 sm:px-3 py-2">Categoría</th>
+                  <th className="px-2 sm:px-3 py-2">Precio</th>
+                  <th className="px-2 sm:px-3 py-2">Stock</th>
+                  <th className="px-2 sm:px-3 py-2">Estado</th>
+                  <th className="px-2 sm:px-3 py-2">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -808,12 +810,12 @@ export function ProductsAdminClient() {
                     key={product.id}
                     className={`border-t border-zinc-200 ${product.stock <= 0 ? "bg-red-50/40" : product.stock <= 5 ? "bg-amber-50/40" : ""}`}
                   >
-                    <td className="px-3 py-2 font-medium text-zinc-900">{product.name}</td>
-                    <td className="px-3 py-2 text-zinc-700">{product.sku}</td>
-                    <td className="px-3 py-2 text-zinc-700">{product.brand?.name || "-"}</td>
-                    <td className="px-3 py-2 text-zinc-700">{product.category?.name || "-"}</td>
-                    <td className="px-3 py-2 text-zinc-700">{formatArs(Number(product.currentPrice || 0))}</td>
-                    <td className="px-3 py-2 text-zinc-700">
+                    <td className="px-2 sm:px-3 py-2 font-medium text-zinc-900">{product.name}</td>
+                    <td className="px-2 sm:px-3 py-2 text-zinc-700">{product.sku}</td>
+                    <td className="px-2 sm:px-3 py-2 text-zinc-700">{product.brand?.name || "-"}</td>
+                    <td className="px-2 sm:px-3 py-2 text-zinc-700">{product.category?.name || "-"}</td>
+                    <td className="px-2 sm:px-3 py-2 text-zinc-700">{formatArs(Number(product.currentPrice || 0))}</td>
+                    <td className="px-2 sm:px-3 py-2 text-zinc-700">
                       <span
                         className={`inline-flex min-w-12 justify-center rounded-full px-2 py-1 text-xs font-semibold ${
                           product.stock <= 0
@@ -826,7 +828,7 @@ export function ProductsAdminClient() {
                         {product.stock}
                       </span>
                     </td>
-                    <td className="px-3 py-2 text-zinc-700">
+                    <td className="px-2 sm:px-3 py-2 text-zinc-700">
                       <span
                         className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
                           product.isActive ? "bg-zinc-100 text-zinc-800" : "bg-zinc-200 text-zinc-600"
@@ -835,10 +837,10 @@ export function ProductsAdminClient() {
                         {product.isActive ? "Activo" : "Inactivo"}
                       </span>
                     </td>
-                    <td className="px-3 py-2">
-                      <div className="flex gap-2">
-                        <button type="button" onClick={() => handleEdit(product)} className="rounded-md border border-zinc-300 px-2 py-1 text-xs font-semibold text-zinc-700" aria-label={`Editar ${product.name}`}>Editar</button>
-                        <button type="button" onClick={() => void handleDelete(product)} className="rounded-md border border-red-300 px-2 py-1 text-xs font-semibold text-red-700" aria-label={`Eliminar ${product.name}`}>Eliminar</button>
+                    <td className="px-2 sm:px-3 py-2">
+                      <div className="flex flex-col gap-1 sm:flex-row sm:gap-2">
+                        <button type="button" onClick={() => handleEdit(product)} className="rounded-md border border-zinc-300 px-2 py-1 text-[11px] sm:text-xs font-semibold text-zinc-700" aria-label={`Editar ${product.name}`}>Editar</button>
+                        <button type="button" onClick={() => void handleDelete(product)} className="rounded-md border border-red-300 px-2 py-1 text-[11px] sm:text-xs font-semibold text-red-700" aria-label={`Eliminar ${product.name}`}>Eliminar</button>
                       </div>
                     </td>
                   </tr>
