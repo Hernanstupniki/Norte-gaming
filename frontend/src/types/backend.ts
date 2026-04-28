@@ -16,6 +16,7 @@ export interface CreateProductDto {
   previousPrice?: number | null;
   sku: string;
   stock: number;
+  soldCount?: number;
   isFeatured?: boolean;
   isOnOffer?: boolean;
   isActive?: boolean;

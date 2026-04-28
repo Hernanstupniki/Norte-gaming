@@ -52,6 +52,12 @@ export class CreateProductDto {
   stock: number;
 
   @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  soldCount?: number;
+
+  @IsOptional()
   @Type(() => Boolean)
   @IsBoolean()
   isFeatured?: boolean;
