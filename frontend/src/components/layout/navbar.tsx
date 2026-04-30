@@ -36,6 +36,30 @@ export function Navbar() {
     setMobileOpen(false);
   };
 
+  // Close mobile menu when clicking outside or pressing Escape
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const onDocumentClick = (e: MouseEvent) => {
+      const target = e.target as Node | null;
+      if (!target) return;
+      if (mobileMenuRef.current && mobileMenuRef.current.contains(target)) return;
+      if (mobileButtonRef.current && mobileButtonRef.current.contains(target)) return;
+      setMobileOpen(false);
+    };
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileOpen(false);
+    };
+
+    document.addEventListener('click', onDocumentClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('click', onDocumentClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [mobileOpen]);
+
   return (
     <header className="sticky top-0 z-30 border-b border-zinc-300 bg-zinc-100">
       <div className="mx-auto flex w-full max-w-7xl items-center gap-4 px-4 py-4 md:px-6 lg:hidden">
@@ -254,27 +278,3 @@ export function Navbar() {
     </header>
   );
 }
-
-  // Close mobile menu when clicking outside or pressing Escape
-  useEffect(() => {
-    if (!mobileOpen) return;
-
-    const onDocumentClick = (e: MouseEvent) => {
-      const target = e.target as Node | null;
-      if (!target) return;
-      if (mobileMenuRef.current && mobileMenuRef.current.contains(target)) return;
-      if (mobileButtonRef.current && mobileButtonRef.current.contains(target)) return;
-      setMobileOpen(false);
-    };
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setMobileOpen(false);
-    };
-
-    document.addEventListener('click', onDocumentClick);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('click', onDocumentClick);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [mobileOpen]);
