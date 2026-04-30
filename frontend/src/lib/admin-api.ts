@@ -263,3 +263,25 @@ export const adminDeleteProduct = async (productId: string) => {
 
   return response.json();
 };
+
+export const adminGetProductBySlug = async (slug: string) => {
+  const response = await fetch(getAdminProxyUrl(`products/admin/by-slug/${encodeURIComponent(slug)}`));
+  if (!response.ok) {
+    const err = new Error('Not found');
+    // @ts-ignore
+    err.status = response.status;
+    throw err;
+  }
+  return response.json() as Promise<AdminProductItem>;
+};
+
+export const adminGetProductBySku = async (sku: string) => {
+  const response = await fetch(getAdminProxyUrl(`products/admin/by-sku/${encodeURIComponent(sku)}`));
+  if (!response.ok) {
+    const err = new Error('Not found');
+    // @ts-ignore
+    err.status = response.status;
+    throw err;
+  }
+  return response.json() as Promise<AdminProductItem>;
+};

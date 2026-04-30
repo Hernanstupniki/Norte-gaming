@@ -420,6 +420,30 @@ export function ProductsAdminClient() {
         await adminUpdateProduct(editingProductId, payload);
         setNotice({ tone: "success", text: "Producto actualizado correctamente." });
       } else {
+        // Validate slug/sku uniqueness before creating
+        const slugToCheck = payload.name.trim().toLowerCase().replace(/\s+/g, '-');
+        try {
+          const existingBySlug = await adminGetProductBySlug(slugToCheck);
+          if (existingBySlug) {
+            setNotice({ tone: 'error', text: 'No se pudo guardar el producto: el slug ya existe.' });
+            setSubmitting(false);
+            return;
+          }
+        } catch (err) {
+          // 404 is expected (not found), ignore
+        }
+
+        try {
+          const existingBySku = await adminGetProductBySku(payload.sku.trim());
+          if (existingBySku) {
+            setNotice({ tone: 'error', text: 'No se pudo guardar el producto: el SKU ya existe.' });
+            setSubmitting(false);
+            return;
+          }
+        } catch (err) {
+          // ignore not found
+        }
+
         await adminCreateProduct(payload);
         setNotice({ tone: "success", text: "Producto creado correctamente." });
       }
