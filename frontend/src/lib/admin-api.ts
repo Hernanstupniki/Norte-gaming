@@ -341,6 +341,27 @@ export const adminUpdateUser = async (userId: string, payload: Partial<AdminUser
   return response.json() as Promise<AdminUserItem>;
 };
 
+export const adminCreateUser = async (payload: {
+  email: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+  phone?: string;
+  role?: string;
+}) => {
+  const response = await fetch(getAdminProxyUrl('users'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response, 'Failed to create user'));
+  }
+
+  return response.json() as Promise<AdminUserItem>;
+};
+
 export const adminGetProductBySlug = async (slug: string) => {
   const response = await fetch(getAdminProxyUrl(`products/admin/by-slug/${encodeURIComponent(slug)}`));
   if (!response.ok) {

@@ -1,8 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { Prisma, Role, User } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { AdminCreateUserDto } from './dto/admin-create-user.dto';
 import { PaginatedResponse } from '../common/api-response';
 
 @Injectable()
@@ -139,6 +141,40 @@ export class UsersService {
       limit: query.limit,
       totalPages: Math.ceil(total / query.limit),
     };
+  }
+
+  async adminCreateUser(dto: AdminCreateUserDto) {
+    const existing = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (existing && !existing.deletedAt) {
+      throw new ConflictException('El email ya está registrado');
+    }
+
+    const passwordHash = await bcrypt.hash(dto.password, 10);
+
+    return this.prisma.user.create({
+      data: {
+        email: dto.email,
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        passwordHash,
+        phone: dto.phone,
+        role: dto.role ?? Role.CLIENT,
+        isActive: true,
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phone: true,
+        role: true,
+        isActive: true,
+        createdAt: true,
+      },
+    });
   }
 
   async adminSetStatus(userId: string, isActive: boolean) {

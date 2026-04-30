@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Patch,
+  Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -16,6 +17,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { AdminUpdateUserStatusDto } from './dto/admin-update-user-status.dto';
 import { AdminUpdateUserDto } from './dto/admin-update-user.dto';
+import { AdminCreateUserDto } from './dto/admin-create-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UsersService } from './users.service';
 
@@ -40,6 +42,12 @@ export class UsersController {
   @Roles(Role.ADMIN)
   listUsers(@Query() query: PaginationQueryDto) {
     return this.usersService.listUsers(query);
+  }
+
+  @Post()
+  @Roles(Role.ADMIN)
+  createUser(@Body() dto: AdminCreateUserDto) {
+    return this.usersService.adminCreateUser(dto);
   }
 
   @Get(':id')

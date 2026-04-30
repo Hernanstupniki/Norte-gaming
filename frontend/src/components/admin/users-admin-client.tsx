@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { adminListUsers, adminSetUserStatus, adminGetUserById, adminUpdateUser, AdminUserItem } from "@/lib/admin-api";
+import { adminListUsers, adminSetUserStatus, adminGetUserById, adminUpdateUser, adminCreateUser, AdminUserItem } from "@/lib/admin-api";
 
 export function UsersAdminClient() {
   const [users, setUsers] = useState<AdminUserItem[]>([]);
@@ -10,6 +10,8 @@ export function UsersAdminClient() {
   const [limit] = useState(50);
   const [search, setSearch] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
   const load = async (p = 1, q = "") => {
     setLoading(true);
@@ -18,6 +20,8 @@ export function UsersAdminClient() {
       const res = await adminListUsers({ page: p, limit, q });
       setUsers(res.data);
       setPage(res.page);
+      setTotal(res.total);
+      setTotalPages(res.totalPages);
     } catch (err: any) {
       setError(err?.message || "Error cargando usuarios");
     } finally {
@@ -43,6 +47,16 @@ export function UsersAdminClient() {
   const [selectedUser, setSelectedUser] = useState<AdminUserItem | null>(null);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const [creatingUser, setCreatingUser] = useState(false);
+  const [createFormData, setCreateFormData] = useState({
+    email: "",
+    firstName: "",
+    lastName: "",
+    password: "",
+    phone: "",
+    role: "CLIENT",
+  });
 
   const openDetails = async (userId: string) => {
     setError(null);
@@ -73,6 +87,32 @@ export function UsersAdminClient() {
 
   const onFieldChange = (field: keyof AdminUserItem, value: any) => {
     setSelectedUser((prev) => (prev ? { ...prev, [field]: value } : prev));
+  };
+
+  const handleCreateUser = async () => {
+    if (!createFormData.email || !createFormData.firstName || !createFormData.lastName || !createFormData.password) {
+      setError("Completa los campos obligatorios");
+      return;
+    }
+    setSaving(true);
+    setError(null);
+    try {
+      const newUser = await adminCreateUser({
+        email: createFormData.email,
+        firstName: createFormData.firstName,
+        lastName: createFormData.lastName,
+        password: createFormData.password,
+        phone: createFormData.phone || undefined,
+        role: createFormData.role,
+      });
+      setUsers((prev) => [newUser, ...prev]);
+      setCreateFormData({ email: "", firstName: "", lastName: "", password: "", phone: "", role: "CLIENT" });
+      setCreatingUser(false);
+    } catch (err: any) {
+      setError(err?.message || "No se pudo crear el usuario");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -107,10 +147,82 @@ export function UsersAdminClient() {
             >
               Limpiar
             </button>
+            <button
+              className="px-3 py-2 bg-zinc-900 text-white rounded-lg font-medium"
+              onClick={() => setCreatingUser(!creatingUser)}
+            >
+              {creatingUser ? "Cancelar" : "+ Crear usuario"}
+            </button>
           </div>
         </div>
 
-        {error && <div className="text-red-600 mb-2">{error}</div>}
+        {error && <div className="text-red-600 mb-2 text-sm">{error}</div>}
+
+        {creatingUser && (
+          <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-4 sm:p-5 mb-4">
+            <h2 className="text-lg font-bold mb-3">Crear nuevo usuario</h2>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <input
+                className="border rounded-lg px-3 py-2 text-sm"
+                value={createFormData.email}
+                placeholder="Email (obligatorio)"
+                onChange={(e) => setCreateFormData({ ...createFormData, email: e.target.value })}
+              />
+              <input
+                className="border rounded-lg px-3 py-2 text-sm"
+                value={createFormData.firstName}
+                placeholder="Nombre (obligatorio)"
+                onChange={(e) => setCreateFormData({ ...createFormData, firstName: e.target.value })}
+              />
+              <input
+                className="border rounded-lg px-3 py-2 text-sm"
+                value={createFormData.lastName}
+                placeholder="Apellido (obligatorio)"
+                onChange={(e) => setCreateFormData({ ...createFormData, lastName: e.target.value })}
+              />
+              <input
+                className="border rounded-lg px-3 py-2 text-sm"
+                value={createFormData.password}
+                type="password"
+                placeholder="Contraseña (obligatorio)"
+                onChange={(e) => setCreateFormData({ ...createFormData, password: e.target.value })}
+              />
+              <input
+                className="border rounded-lg px-3 py-2 text-sm"
+                value={createFormData.phone}
+                placeholder="Teléfono"
+                onChange={(e) => setCreateFormData({ ...createFormData, phone: e.target.value })}
+              />
+              <select
+                className="border rounded-lg px-3 py-2 text-sm"
+                value={createFormData.role}
+                onChange={(e) => setCreateFormData({ ...createFormData, role: e.target.value })}
+              >
+                <option value="CLIENT">CLIENT</option>
+                <option value="ADMIN">ADMIN</option>
+              </select>
+            </div>
+
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+              <button
+                className="px-4 py-2 bg-zinc-900 text-white rounded-lg font-medium text-sm"
+                onClick={() => void handleCreateUser()}
+                disabled={saving}
+              >
+                {saving ? "Creando..." : "Crear usuario"}
+              </button>
+              <button
+                className="px-4 py-2 bg-zinc-100 rounded-lg font-medium text-sm"
+                onClick={() => {
+                  setCreatingUser(false);
+                  setCreateFormData({ email: "", firstName: "", lastName: "", password: "", phone: "", role: "CLIENT" });
+                }}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-3 md:hidden">
           {loading ? (
@@ -210,6 +322,42 @@ export function UsersAdminClient() {
               )}
             </tbody>
           </table>
+        </div>
+
+        <div className="mt-4 flex flex-col gap-3 items-center justify-between md:flex-row">
+          <div className="text-sm text-zinc-600">
+            Mostrando {users.length} de {total} usuarios (página {page} de {totalPages})
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row items-center justify-center">
+            <button
+              className="px-4 py-2 border rounded-lg font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => void load(page - 1, search)}
+              disabled={page <= 1 || loading}
+            >
+              ← Anterior
+            </button>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                value={page}
+                onChange={(e) => {
+                  const p = parseInt(e.target.value);
+                  if (p >= 1 && p <= totalPages) void load(p, search);
+                }}
+                className="border rounded-lg px-3 py-2 w-16 text-center text-sm"
+              />
+              <span className="text-sm text-zinc-600">/ {totalPages}</span>
+            </div>
+            <button
+              className="px-4 py-2 border rounded-lg font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => void load(page + 1, search)}
+              disabled={page >= totalPages || loading}
+            >
+              Siguiente →
+            </button>
+          </div>
         </div>
       </div>
       {editing && selectedUser && (
