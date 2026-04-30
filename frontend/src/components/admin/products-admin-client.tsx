@@ -7,6 +7,8 @@ import {
   adminDeleteProduct,
   adminGetBrands,
   adminGetCategories,
+  adminGetProductBySlug,
+  adminGetProductBySku,
   adminListProducts,
   AdminProductItem,
   adminUpdateProduct,
