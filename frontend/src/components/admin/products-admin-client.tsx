@@ -129,6 +129,8 @@ export function ProductsAdminClient() {
   const featuredProducts = products.filter((item) => item.isFeatured).length;
   const lowStockProducts = products.filter((item) => item.stock > 0 && item.stock <= 5).length;
   const outOfStockProducts = products.filter((item) => item.stock <= 0).length;
+  const differentTypesCount = new Set(products.map((item) => item.categoryId)).size;
+  const inStockProducts = products.filter((item) => item.stock > 0).length;
 
   const selectedBrand = useMemo(
     () => brands.find((item) => item.id === form.brandId)?.name || "Sin marca",
@@ -516,12 +518,11 @@ export function ProductsAdminClient() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-4">
         {[
           { label: "Total", value: totalProducts, tone: "border-zinc-200 bg-white text-zinc-950" },
-          { label: "Activos", value: activeProducts, tone: "border-zinc-200 bg-white text-zinc-950" },
-          { label: "Destacados", value: featuredProducts, tone: "border-zinc-200 bg-white text-zinc-950" },
-          { label: "Stock bajo", value: lowStockProducts, tone: "border-zinc-200 bg-white text-zinc-950" },
+          { label: "Diferentes tipos", value: differentTypesCount, tone: "border-zinc-200 bg-white text-zinc-950" },
+          { label: "En stock", value: inStockProducts, tone: "border-zinc-200 bg-white text-zinc-950" },
           { label: "Sin stock", value: outOfStockProducts, tone: "border-zinc-200 bg-white text-zinc-950" },
         ].map((stat) => (
           <article key={stat.label} className={`rounded-xl sm:rounded-2xl border p-3 sm:p-4 shadow-sm ${stat.tone}`}>
@@ -918,3 +919,5 @@ export function ProductsAdminClient() {
     </div>
   );
 }
+
+
