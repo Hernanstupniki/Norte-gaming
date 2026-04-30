@@ -65,6 +65,13 @@ export class ProductsController {
 
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
+  @Get('admin/by-sku/:sku')
+  bySkuAdmin(@Param('sku') sku: string) {
+    return this.productsService.findBySku(sku);
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN)
   @Post()
   create(@Body() dto: CreateProductDto) {
     return this.productsService.create(dto);

@@ -343,6 +343,16 @@ export class ProductsService {
     return sales;
   }
 
+  async findBySku(sku: string) {
+    const product = await this.prisma.product.findFirst({
+      where: { sku, deletedAt: null },
+      include: this.includeData,
+    });
+
+    if (!product) return null;
+    return this.filterMissingUploadImages(product);
+  }
+
   async getMostViewedProducts(limit = 10) {
     const products = await this.prisma.product.findMany({
       where: { deletedAt: null },
