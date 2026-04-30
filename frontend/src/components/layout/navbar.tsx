@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useStore } from "@/context/store-context";
 import { categories } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
@@ -20,6 +20,8 @@ export function Navbar() {
   const [searchTerm, setSearchTerm] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const mobileMenuRef = useRef<HTMLDivElement | null>(null);
+  const mobileButtonRef = useRef<HTMLButtonElement | null>(null);
   const { auth, cartCount, openCart, logout } = useStore();
   const navLinks = links;
 
@@ -89,6 +91,7 @@ export function Navbar() {
 
           <button
             type="button"
+            ref={mobileButtonRef}
             onClick={() => setMobileOpen((current) => !current)}
             className="text-zinc-900"
             aria-expanded={mobileOpen}
@@ -210,7 +213,7 @@ export function Navbar() {
       ) : null}
 
       {mobileOpen ? (
-        <div className="border-t border-zinc-300 bg-zinc-100 p-4 lg:hidden">
+        <div ref={mobileMenuRef} className="border-t border-zinc-300 bg-zinc-100 p-4 lg:hidden">
           <div className="mb-3 flex items-center gap-2">
             <Link
               href="/login"
@@ -251,3 +254,27 @@ export function Navbar() {
     </header>
   );
 }
+
+  // Close mobile menu when clicking outside or pressing Escape
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const onDocumentClick = (e: MouseEvent) => {
+      const target = e.target as Node | null;
+      if (!target) return;
+      if (mobileMenuRef.current && mobileMenuRef.current.contains(target)) return;
+      if (mobileButtonRef.current && mobileButtonRef.current.contains(target)) return;
+      setMobileOpen(false);
+    };
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileOpen(false);
+    };
+
+    document.addEventListener('click', onDocumentClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('click', onDocumentClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [mobileOpen]);
