@@ -37,6 +37,25 @@ export interface AdminProductsResponse {
   totalPages: number;
 }
 
+export interface AdminUserItem {
+  id: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  email: string;
+  phone?: string | null;
+  role?: string | null;
+  isActive: boolean;
+  createdAt?: string;
+}
+
+export interface AdminUsersResponse {
+  data: AdminUserItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 const getApiBaseUrl = () =>
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 
@@ -262,6 +281,64 @@ export const adminDeleteProduct = async (productId: string) => {
   }
 
   return response.json();
+};
+
+export const adminListUsers = async (params: { page?: number; limit?: number; q?: string } = {}) => {
+  const page = params.page ?? 1;
+  const limit = params.limit ?? 50;
+  const q = params.q ? `&search=${encodeURIComponent(params.q)}` : "";
+  const response = await fetch(`${getAdminProxyUrl(`users`)}?page=${page}&limit=${limit}${q}`, {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response, "Failed to fetch users"));
+  }
+
+  return (await response.json()) as AdminUsersResponse;
+};
+
+export const adminSetUserStatus = async (userId: string, isActive: boolean) => {
+  const response = await fetch(getAdminProxyUrl(`users/${userId}/status`), {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ isActive }),
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response, "Failed to update user status"));
+  }
+
+  return response.json() as Promise<AdminUserItem>;
+};
+
+export const adminGetUserById = async (userId: string) => {
+  const response = await fetch(getAdminProxyUrl(`users/${userId}`), { cache: 'no-store' });
+  if (!response.ok) {
+    throw new Error(await readApiError(response, 'Failed to fetch user'));
+  }
+  return response.json() as Promise<AdminUserItem>;
+};
+
+export const adminUpdateUser = async (userId: string, payload: Partial<AdminUserItem>) => {
+  const body: any = {};
+  if (payload.firstName !== undefined) body.firstName = payload.firstName;
+  if (payload.lastName !== undefined) body.lastName = payload.lastName;
+  if (payload.phone !== undefined) body.phone = payload.phone;
+  if (payload.role !== undefined) body.role = payload.role;
+  if (payload.isActive !== undefined) body.isActive = payload.isActive;
+
+  const response = await fetch(getAdminProxyUrl(`users/${userId}`), {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response, 'Failed to update user'));
+  }
+
+  return response.json() as Promise<AdminUserItem>;
 };
 
 export const adminGetProductBySlug = async (slug: string) => {

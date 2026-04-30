@@ -148,7 +148,7 @@ export function Storefront() {
 
   const filtered = useMemo(() => {
     let result = products.filter((product) => {
-      const matchSearch = `${product.name} ${product.brand}`
+      const matchSearch = `${product.name} ${product.brand} ${product.category}`
         .toLowerCase()
         .includes(search.toLowerCase());
       const matchCategory =

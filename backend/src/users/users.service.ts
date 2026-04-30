@@ -155,4 +155,39 @@ export class UsersService {
       },
     });
   }
+
+  async adminUpdateUser(userId: string, dto: Partial<{
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    role?: Role;
+    isActive?: boolean;
+  }>) {
+    const existing = await this.prisma.user.findFirst({ where: { id: userId, deletedAt: null } });
+    if (!existing) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    const allowed: any = {};
+    if (dto.firstName !== undefined) allowed.firstName = dto.firstName;
+    if (dto.lastName !== undefined) allowed.lastName = dto.lastName;
+    if (dto.phone !== undefined) allowed.phone = dto.phone;
+    if (dto.role !== undefined) allowed.role = dto.role;
+    if (dto.isActive !== undefined) allowed.isActive = dto.isActive;
+
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: allowed,
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phone: true,
+        role: true,
+        isActive: true,
+        updatedAt: true,
+      },
+    });
+  }
 }

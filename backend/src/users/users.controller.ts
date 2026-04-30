@@ -15,6 +15,7 @@ import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { AdminUpdateUserStatusDto } from './dto/admin-update-user-status.dto';
+import { AdminUpdateUserDto } from './dto/admin-update-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UsersService } from './users.service';
 
@@ -45,6 +46,12 @@ export class UsersController {
   @Roles(Role.ADMIN)
   byId(@Param('id') id: string) {
     return this.usersService.getPublicProfileById(id);
+  }
+
+  @Patch(':id')
+  @Roles(Role.ADMIN)
+  updateUser(@Param('id') id: string, @Body() dto: AdminUpdateUserDto) {
+    return this.usersService.adminUpdateUser(id, dto);
   }
 
   @Patch(':id/status')
