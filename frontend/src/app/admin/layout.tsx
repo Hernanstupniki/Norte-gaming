@@ -52,23 +52,6 @@ export default function AdminLayout({
           <h1 className="mt-2 text-2xl font-black tracking-tight text-zinc-950 md:text-3xl">Norte Gaming</h1>
           <p className="mt-2 text-xs text-zinc-600 md:text-sm">Gestión centralizada del catálogo.</p>
 
-          <div className="mt-4 rounded-xl border border-zinc-900 bg-zinc-950 p-3 text-white shadow-sm md:p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-400">Cuentas de clientes</p>
-                <h2 className="mt-1 text-lg font-black tracking-tight">Gestionar usuarios</h2>
-                <p className="mt-1 text-xs text-zinc-300">Ver datos, editar perfiles y activar o desactivar cuentas.</p>
-              </div>
-              <div className="rounded-lg bg-white/10 px-2 py-1 text-sm font-mono">{userCount === null ? '—' : userCount}</div>
-            </div>
-            <Link
-              href="/admin/usuarios"
-              className="mt-3 inline-flex rounded-lg bg-white px-3 py-2 text-xs font-bold text-zinc-950 transition hover:bg-zinc-100"
-            >
-              Abrir panel de usuarios
-            </Link>
-          </div>
-
           <nav className="mt-4 space-y-1 md:mt-5 md:space-y-2" aria-label="Secciones del panel">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
@@ -88,21 +71,6 @@ export default function AdminLayout({
               );
             })}
           </nav>
-
-          <div className="mt-4 hidden">
-            <div className="rounded-lg border border-zinc-100 bg-zinc-50 p-3 text-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-xs text-zinc-500">Cuentas</div>
-                  <div className="text-sm font-semibold">Clientes</div>
-                </div>
-                <div className="text-sm font-mono text-zinc-700">{userCount === null ? '—' : userCount}</div>
-              </div>
-              <div className="mt-2">
-                <Link href="/admin/usuarios" className="text-xs text-zinc-700 hover:underline">Ir a gestión de usuarios</Link>
-              </div>
-            </div>
-          </div>
 
           <div className="mt-4 border-t border-zinc-200 pt-3 md:mt-6 md:pt-4">
             <AdminLogoutButton />
