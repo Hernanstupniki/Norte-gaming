@@ -11,6 +11,8 @@ import {
   adminGetProductBySku,
   adminListProducts,
   AdminProductItem,
+  AdminBrandItem,
+  AdminCategoryItem,
   adminUpdateProduct,
   adminUploadProductImage,
 } from "@/lib/admin-api";
@@ -110,8 +112,8 @@ const toFormFromProduct = (product: AdminProductItem): ProductFormState => ({
 export function ProductsAdminClient() {
   const [tab, setTab] = useState<AdminTab>("create");
   const [listFilter, setListFilter] = useState<ListFilter>("all");
-  const [brands, setBrands] = useState<Brand[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [brands, setBrands] = useState<AdminBrandItem[]>([]);
+  const [categories, setCategories] = useState<AdminCategoryItem[]>([]);
   const [products, setProducts] = useState<AdminProductItem[]>([]);
   const [form, setForm] = useState<ProductFormState>(initialForm());
   const [notice, setNotice] = useState<NoticeState | null>(null);
@@ -238,7 +240,7 @@ export function ProductsAdminClient() {
         if (cancelled) return;
 
         const existingNames = new Set(
-          brandsData.map((item: Brand) => item.name.trim().toLowerCase()),
+          brandsData.map((item: AdminBrandItem) => item.name.trim().toLowerCase()),
         );
         const missingCarouselBrands = carouselBrands.filter(
           (name) => !existingNames.has(name.trim().toLowerCase()),
