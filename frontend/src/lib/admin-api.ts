@@ -56,6 +56,26 @@ export interface AdminUsersResponse {
   totalPages: number;
 }
 
+export interface AdminCategoryItem {
+  id: string;
+  name: string;
+  description?: string | null;
+  slug?: string;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface AdminBrandItem {
+  id: string;
+  name: string;
+  description?: string | null;
+  slug?: string;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 const getApiBaseUrl = () =>
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 
@@ -120,7 +140,7 @@ export const adminGetBrands = async () => {
     throw new Error(await readApiError(response, "Failed to fetch brands"));
   }
 
-  return response.json();
+  return response.json() as Promise<AdminBrandItem[]>;
 };
 
 export const adminCreateBrand = async (payload: {
@@ -139,6 +159,35 @@ export const adminCreateBrand = async (payload: {
     throw new Error(await readApiError(response, "Failed to create brand"));
   }
 
+  return response.json() as Promise<AdminBrandItem>;
+};
+
+export const adminUpdateBrand = async (
+  brandId: string,
+  payload: { name?: string; description?: string },
+) => {
+  const response = await fetch(getAdminProxyUrl(`brands/${brandId}`), {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response, "Failed to update brand"));
+  }
+
+  return response.json() as Promise<AdminBrandItem>;
+};
+
+export const adminDeleteBrand = async (brandId: string) => {
+  const response = await fetch(getAdminProxyUrl(`brands/${brandId}`), {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response, "Failed to delete brand"));
+  }
+
   return response.json();
 };
 
@@ -149,6 +198,49 @@ export const adminGetCategories = async () => {
 
   if (!response.ok) {
     throw new Error(await readApiError(response, "Failed to fetch categories"));
+  }
+
+  return response.json() as Promise<AdminCategoryItem[]>;
+};
+
+export const adminCreateCategory = async (payload: { name: string; description?: string }) => {
+  const response = await fetch(getAdminProxyUrl("categories"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response, "Failed to create category"));
+  }
+
+  return response.json() as Promise<AdminCategoryItem>;
+};
+
+export const adminUpdateCategory = async (
+  categoryId: string,
+  payload: { name?: string; description?: string },
+) => {
+  const response = await fetch(getAdminProxyUrl(`categories/${categoryId}`), {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response, "Failed to update category"));
+  }
+
+  return response.json() as Promise<AdminCategoryItem>;
+};
+
+export const adminDeleteCategory = async (categoryId: string) => {
+  const response = await fetch(getAdminProxyUrl(`categories/${categoryId}`), {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response, "Failed to delete category"));
   }
 
   return response.json();
@@ -336,27 +428,6 @@ export const adminUpdateUser = async (userId: string, payload: Partial<AdminUser
 
   if (!response.ok) {
     throw new Error(await readApiError(response, 'Failed to update user'));
-  }
-
-  return response.json() as Promise<AdminUserItem>;
-};
-
-export const adminCreateUser = async (payload: {
-  email: string;
-  firstName: string;
-  lastName: string;
-  password: string;
-  phone?: string;
-  role?: string;
-}) => {
-  const response = await fetch(getAdminProxyUrl('users'), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    throw new Error(await readApiError(response, 'Failed to create user'));
   }
 
   return response.json() as Promise<AdminUserItem>;
