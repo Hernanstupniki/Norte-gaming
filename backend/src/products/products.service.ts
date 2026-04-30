@@ -50,6 +50,24 @@ export class ProductsService {
     specs: { orderBy: { position: 'asc' as const } },
   };
 
+  private async generateUniqueSlug(name: string, excludeId?: string) {
+    const base = toSlug(name);
+    let slug = base;
+    let i = 1;
+
+    while (true) {
+      const found = await this.prisma.product.findFirst({ where: { slug } });
+      if (!found || (excludeId && found.id === excludeId)) {
+        return slug;
+      }
+      slug = `${base}-${i}`;
+      i += 1;
+      if (i > 1000) break;
+    }
+
+    return `${base}-${Date.now()}`;
+  }
+
   async list(query: ProductsQueryDto, role?: Role) {
     const where: Prisma.ProductWhereInput = {
       deletedAt: null,
@@ -149,10 +167,12 @@ export class ProductsService {
       );
     }
 
+    const slug = await this.generateUniqueSlug(dto.name);
+
     return this.prisma.product.create({
       data: {
         name: dto.name,
-        slug: toSlug(dto.name),
+        slug,
         shortDescription: dto.shortDescription,
         description: dto.description,
         currentPrice: new Prisma.Decimal(dto.currentPrice),
@@ -209,12 +229,13 @@ export class ProductsService {
           : dto.previousPrice !== undefined
             ? new Prisma.Decimal(dto.previousPrice)
             : undefined;
+      const newSlug = dto.name ? await this.generateUniqueSlug(dto.name, id) : undefined;
 
       return tx.product.update({
         where: { id },
         data: {
           name: dto.name,
-          slug: dto.name ? toSlug(dto.name) : undefined,
+          slug: newSlug,
           shortDescription: dto.shortDescription,
           description: dto.description,
           currentPrice:
