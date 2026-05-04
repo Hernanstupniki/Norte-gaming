@@ -5,10 +5,8 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useStore } from "@/context/store-context";
 import {
-  getMyCart,
   getMyOrders,
   getMyProfile,
-  MyCartResponse,
   MyOrderItem,
   updateMyProfile,
   UserProfile,
@@ -23,7 +21,7 @@ const formatARS = (value: number) =>
 
 export function AccountPanel() {
   const router = useRouter();
-  const { auth, logout } = useStore();
+  const { auth, logout, cartProducts, subtotal } = useStore();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -31,7 +29,6 @@ export function AccountPanel() {
   const [notice, setNotice] = useState<string | null>(null);
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [cart, setCart] = useState<MyCartResponse | null>(null);
   const [orders, setOrders] = useState<MyOrderItem[]>([]);
 
   const [firstName, setFirstName] = useState("");
@@ -51,9 +48,8 @@ export function AccountPanel() {
       setError(null);
 
       try {
-        const [profileData, cartData, ordersData] = await Promise.all([
+        const [profileData, ordersData] = await Promise.all([
           getMyProfile(auth.accessToken),
-          getMyCart(auth.accessToken),
           getMyOrders(auth.accessToken),
         ]);
 
@@ -63,15 +59,22 @@ export function AccountPanel() {
         setFirstName(profileData.firstName || "");
         setLastName(profileData.lastName || "");
         setPhone(profileData.phone || "");
-        setCart(cartData);
         setOrders(ordersData || []);
       } catch (loadError) {
         if (cancelled) return;
-        setError(
+        const errorMsg =
           loadError instanceof Error
             ? loadError.message
-            : "No se pudo cargar tu panel personal",
-        );
+            : "No se pudo cargar tu panel personal";
+        
+        // If it's an unauthorized error, redirect to login
+        if (errorMsg.includes("401") || errorMsg.toLowerCase().includes("unauthorized")) {
+          logout();
+          void router.push("/login");
+          return;
+        }
+        
+        setError(errorMsg);
       } finally {
         if (!cancelled) {
           setLoading(false);
@@ -218,24 +221,18 @@ export function AccountPanel() {
         <aside className="space-y-6">
           <article className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm md:p-6">
             <h2 className="text-xl font-black text-zinc-950">Mi carrito</h2>
-            {loading ? (
-              <p className="mt-3 text-sm text-zinc-500">Cargando carrito...</p>
-            ) : (
-              <>
-                <p className="mt-3 text-sm text-zinc-600">
-                  Productos: <strong>{cart?.totalItems || 0}</strong>
-                </p>
-                <p className="mt-1 text-sm text-zinc-600">
-                  Total: <strong>{formatARS(Number(cart?.subtotal || 0))}</strong>
-                </p>
-                <Link
-                  href="/carrito"
-                  className="mt-4 inline-flex rounded-md border-2 border-black px-4 py-2 text-xs font-bold uppercase tracking-widest text-zinc-900"
-                >
-                  Ver carrito completo
-                </Link>
-              </>
-            )}
+            <p className="mt-3 text-sm text-zinc-600">
+              Productos: <strong>{cartProducts.reduce((acc, item) => acc + item.quantity, 0)}</strong>
+            </p>
+            <p className="mt-1 text-sm text-zinc-600">
+              Total: <strong>{formatARS(subtotal)}</strong>
+            </p>
+            <Link
+              href="/carrito"
+              className="mt-4 inline-flex rounded-md border-2 border-black px-4 py-2 text-xs font-bold uppercase tracking-widest text-zinc-900"
+            >
+              Ver carrito completo
+            </Link>
           </article>
 
           <article className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm md:p-6">
@@ -266,9 +263,6 @@ export function AccountPanel() {
             </p>
             <p className="mt-1 text-sm text-zinc-600">
               Email: <strong>{profile?.email || auth.email || "-"}</strong>
-            </p>
-            <p className="mt-1 text-sm text-zinc-600">
-              Rol: <strong>{profile?.role || auth.role || "CLIENT"}</strong>
             </p>
           </article>
         </aside>
