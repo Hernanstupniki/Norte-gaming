@@ -22,7 +22,7 @@ export function Navbar() {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
   const mobileButtonRef = useRef<HTMLButtonElement | null>(null);
-  const { auth, cartCount, openCart, logout } = useStore();
+  const { auth, cartCount, openCart } = useStore();
   const navLinks = links;
 
   const submitSearch = () => {
@@ -83,22 +83,16 @@ export function Navbar() {
             </svg>
           </button>
 
-          {auth.isLoggedIn ? (
-            <button
-              type="button"
-              onClick={logout}
-              className="text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-900"
-            >
-              Salir
-            </button>
-          ) : (
-            <Link href="/login" className="text-zinc-900" aria-label="Mi cuenta">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="2" />
-                <path d="M5 20C5.8 16.9 8.4 15 12 15C15.6 15 18.2 16.9 19 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </Link>
-          )}
+          <Link
+            href={auth.isLoggedIn ? "/mi-cuenta" : "/login"}
+            className="text-zinc-900"
+            aria-label={auth.isLoggedIn ? "Ir a mi cuenta" : "Ingresar"}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="2" />
+              <path d="M5 20C5.8 16.9 8.4 15 12 15C15.6 15 18.2 16.9 19 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </Link>
 
           <button type="button" onClick={openCart} className="relative text-zinc-900" aria-label="Abrir carrito">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -165,22 +159,16 @@ export function Navbar() {
           </div>
 
           <div className="flex h-11 items-center gap-5 text-zinc-200">
-            {auth.isLoggedIn ? (
-              <button
-                type="button"
-                onClick={logout}
-                className="text-[11px] font-bold uppercase tracking-[0.14em] transition hover:text-red-400"
-              >
-                Salir
-              </button>
-            ) : (
-              <Link href="/login" className="transition hover:text-red-400" aria-label="Mi cuenta">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="2" />
-                  <path d="M5 20C5.8 16.9 8.4 15 12 15C15.6 15 18.2 16.9 19 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </Link>
-            )}
+            <Link
+              href={auth.isLoggedIn ? "/mi-cuenta" : "/login"}
+              className="transition hover:text-red-400"
+              aria-label={auth.isLoggedIn ? "Ir a mi cuenta" : "Ingresar"}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="2" />
+                <path d="M5 20C5.8 16.9 8.4 15 12 15C15.6 15 18.2 16.9 19 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </Link>
             <button
               type="button"
               onClick={openCart}

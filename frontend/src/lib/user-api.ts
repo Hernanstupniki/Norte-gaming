@@ -5,6 +5,10 @@ export interface UserProfile {
   firstName: string;
   lastName: string;
   email: string;
+  phone?: string | null;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
   role: "ADMIN" | "CLIENT";
 }
 
@@ -21,6 +25,33 @@ interface WishlistResponse {
     productId?: string;
     product?: { id?: string };
   }>;
+}
+
+export interface MyCartResponse {
+  id?: string;
+  items: Array<{
+    id: string;
+    productId: string;
+    quantity: number;
+    unitPrice: string | number;
+    product?: {
+      id: string;
+      name: string;
+      slug: string;
+      currentPrice: string | number;
+      images?: Array<{ url: string }>;
+    };
+  }>;
+  subtotal: number;
+  totalItems: number;
+  updatedAt?: string;
+}
+
+export interface MyOrderItem {
+  id: string;
+  status: string;
+  totalAmount?: string | number;
+  createdAt: string;
 }
 
 const getErrorMessage = async (response: Response, fallback: string) => {
@@ -143,4 +174,58 @@ export const toggleWishlist = async (accessToken: string, productId: string): Pr
   return (response.wishlist?.items || [])
     .map((item) => item.productId || item.product?.id)
     .filter((id): id is string => Boolean(id));
+};
+
+export const getMyProfile = async (accessToken: string): Promise<UserProfile> => {
+  return request<UserProfile>(
+    "/users/me",
+    {
+      method: "GET",
+      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: "no-store",
+    },
+    "No se pudo obtener tu perfil",
+  );
+};
+
+export const updateMyProfile = async (
+  accessToken: string,
+  payload: { firstName?: string; lastName?: string; phone?: string },
+): Promise<UserProfile> => {
+  return request<UserProfile>(
+    "/users/me",
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(payload),
+    },
+    "No se pudo actualizar tu perfil",
+  );
+};
+
+export const getMyCart = async (accessToken: string): Promise<MyCartResponse> => {
+  return request<MyCartResponse>(
+    "/cart/me",
+    {
+      method: "GET",
+      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: "no-store",
+    },
+    "No se pudo obtener tu carrito",
+  );
+};
+
+export const getMyOrders = async (accessToken: string): Promise<MyOrderItem[]> => {
+  return request<MyOrderItem[]>(
+    "/orders/me",
+    {
+      method: "GET",
+      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: "no-store",
+    },
+    "No se pudo obtener tus pedidos",
+  );
 };
