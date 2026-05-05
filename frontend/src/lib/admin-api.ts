@@ -89,6 +89,19 @@ const readApiError = async (response: Response, fallback: string) => {
   return rawMessage || `${fallback} (${response.status})`;
 };
 
+const readLoginError = async (response: Response) => {
+  const payload = await response.json().catch(() => ({}));
+  const message = Array.isArray(payload?.message)
+    ? payload.message.join(" | ")
+    : payload?.message;
+
+  if (message) {
+    return message;
+  }
+
+  return `No se pudo iniciar sesión (${response.status})`;
+};
+
 export const adminCreateProduct = async (
   productData: CreateProductDto,
 ): Promise<CreateProductResponse> => {
@@ -111,24 +124,34 @@ export const adminLoginUser = async (
   email: string,
   password: string,
 ): Promise<{ accessToken: string }> => {
-  const response = await fetch(`${getApiBaseUrl()}/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  });
+  try {
+    const response = await fetch(`${getApiBaseUrl()}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
 
-  if (!response.ok) {
-    throw new Error("Login failed");
+    if (!response.ok) {
+      throw new Error(await readLoginError(response));
+    }
+
+    const data = await response.json();
+    const accessToken = data?.tokens?.accessToken;
+
+    if (!accessToken) {
+      throw new Error("La respuesta de login no devolvió accessToken");
+    }
+
+    return { accessToken };
+  } catch (error) {
+    if (error instanceof TypeError) {
+      throw new Error(
+        `No se pudo conectar con la API de autenticación en ${getApiBaseUrl()}`,
+      );
+    }
+
+    throw error;
   }
-
-  const data = await response.json();
-  const accessToken = data?.tokens?.accessToken;
-
-  if (!accessToken) {
-    throw new Error("Login response missing access token");
-  }
-
-  return { accessToken };
 };
 
 export const adminGetBrands = async () => {
