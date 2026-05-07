@@ -30,8 +30,10 @@ services:
       PORT: 4000
       TZ: ${GENERIC_TIMEZONE}
       DATABASE_URL: postgresql://postgres:${AUTHENTICATION_API_KEY}@db:5432/norte_gaming?schema=public
+      BACKEND_URL: ${BACKEND_URL}
       CORS_ORIGIN: https://nortegaming.com
       FRONTEND_URL: https://nortegaming.com
+      MERCADO_PAGO_ACCESS_TOKEN: ${MERCADO_PAGO_ACCESS_TOKEN}
       JWT_ACCESS_SECRET: ${AUTHENTICATION_API_KEY}
       JWT_REFRESH_SECRET: ${AUTHENTICATION_API_KEY}
       JWT_ACCESS_EXPIRES_IN: 15m
