@@ -1,0 +1,8 @@
+# Example override to load production env from a secure path outside the repo
+version: '3.8'
+services:
+  api:
+    env_file:
+      # Replace with the absolute path to the env file you create on the server
+      - /home/deploy/norte.env
+    restart: unless-stopped
