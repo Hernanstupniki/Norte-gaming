@@ -36,6 +36,65 @@ export interface CreateContactRequest {
   message: string;
 }
 
+export interface UserAddress {
+  id: string;
+  recipient: string;
+  phone: string;
+  street: string;
+  number: string;
+  floor?: string | null;
+  apartment?: string | null;
+  city: string;
+  province: string;
+  postalCode: string;
+  reference?: string | null;
+  isPrimary?: boolean;
+}
+
+export interface ShippingMethod {
+  id: string;
+  name: string;
+  description?: string | null;
+  cost: number | string;
+  isActive?: boolean;
+}
+
+export interface CreateAddressRequest {
+  recipient: string;
+  phone: string;
+  street: string;
+  number: string;
+  floor?: string;
+  apartment?: string;
+  city: string;
+  province: string;
+  postalCode: string;
+  reference?: string;
+  isPrimary?: boolean;
+}
+
+export interface CreatePaymentRequest {
+  orderId: string;
+  provider: string;
+  method: string;
+  amount: number;
+  currency?: string;
+  externalReference?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface CreatePaymentResponse {
+  id: string;
+  orderId: string;
+  provider: string;
+  method: string;
+  status: string;
+  externalReference?: string | null;
+  preferenceId?: string | null;
+  initPoint?: string | null;
+  message?: string;
+}
+
 const getApiBaseUrl = () => {
   const explicitServerApi = process.env.INTERNAL_API_URL || process.env.NEXT_INTERNAL_API_URL;
 
@@ -131,6 +190,93 @@ export const createOrder = async (
   }
 
   return parseJson<CreateOrderResponse>(response);
+};
+
+export const getMyAddresses = async (token: string): Promise<UserAddress[]> => {
+  const response = await fetch(`${getApiBaseUrl()}/addresses/me`, {
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return parseJson<UserAddress[]>(response);
+};
+
+export const createMyAddress = async (
+  token: string,
+  payload: CreateAddressRequest,
+): Promise<UserAddress> => {
+  const response = await fetch(`${getApiBaseUrl()}/addresses/me`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return parseJson<UserAddress>(response);
+};
+
+export const getShippingMethods = async (): Promise<ShippingMethod[]> => {
+  const response = await fetch(`${getApiBaseUrl()}/shipping/methods`, {
+    cache: "no-store",
+  });
+
+  return parseJson<ShippingMethod[]>(response);
+};
+
+export const clearMyCart = async (token: string) => {
+  const response = await fetch(`${getApiBaseUrl()}/cart/me`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error limpiando carrito: ${response.status}`);
+  }
+
+  return response.json();
+};
+
+export const addMyCartItem = async (token: string, productId: string, quantity: number) => {
+  const response = await fetch(`${getApiBaseUrl()}/cart/me/items`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ productId, quantity }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error agregando producto al carrito: ${response.status}`);
+  }
+
+  return response.json();
+};
+
+export const createPayment = async (
+  token: string,
+  payload: CreatePaymentRequest,
+): Promise<CreatePaymentResponse> => {
+  const response = await fetch(`${getApiBaseUrl()}/payments`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error registrando pago: ${response.status}`);
+  }
+
+  return parseJson<CreatePaymentResponse>(response);
 };
 
 export const createContactInquiry = async (payload: CreateContactRequest) => {

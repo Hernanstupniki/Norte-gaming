@@ -119,12 +119,7 @@ export default function ContactoPage() {
 
         <div className="space-y-4 rounded-xl border border-zinc-200 bg-zinc-50 p-6">
           <h2 className="text-xl font-bold">Canales de atención</h2>
-          <p className="text-sm text-zinc-600">
-            WhatsApp:{" "}
-            <a href="https://wa.me/5493757658938" target="_blank" rel="noreferrer" className="underline-offset-2 hover:underline">
-              +54 9 3757-658938
-            </a>
-          </p>
+          <p className="text-sm text-zinc-600">Canal directo: formulario web y email</p>
           <p className="text-sm text-zinc-600">Email: nortegamingba@gmail.com</p>
           <p className="text-sm text-zinc-600">
             Instagram:{" "}

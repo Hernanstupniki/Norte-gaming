@@ -26,7 +26,7 @@ export const buildCartWhatsAppHref = (
   );
 
   const message = [
-    "Hola Norte Gaming, quiero coordinar la compra de estos productos:",
+    "Hola Norte Gaming, quiero consultar por estos productos:",
     ...lines,
     `Total estimado: ${formatARS(subtotal)}`,
   ].join("\n");

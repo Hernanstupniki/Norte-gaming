@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ProductThumbnail } from "@/components/common/product-thumbnail";
 
-const badges = ["Productos originales", "Envíos a todo el país", "Atención por WhatsApp"];
+const badges = ["Productos originales", "Envíos a todo el país", "Atención directa"];
 
 export function Hero() {
   return (
@@ -16,7 +16,7 @@ export function Hero() {
             Equipá tu setup con productos originales
           </h1>
           <p className="mt-5 max-w-xl text-base text-zinc-600 md:text-lg">
-            Encontrá productos originales para mejorar tu setup, con asesoramiento real y atención rápida por WhatsApp.
+            Encontrá productos originales para mejorar tu setup, con asesoramiento real y atención rápida desde el sitio.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <Link

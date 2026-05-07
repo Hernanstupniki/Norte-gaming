@@ -23,17 +23,7 @@ export function Footer() {
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.2em]">Contacto</p>
           <ul className="mt-3 space-y-2 text-sm text-zinc-600">
-            <li>
-              WhatsApp:{" "}
-              <a
-                href="https://wa.me/5493757658938"
-                target="_blank"
-                rel="noreferrer"
-                className="underline-offset-2 hover:underline"
-              >
-                +54 9 3757-658938
-              </a>
-            </li>
+            <li>Contacto directo: formulario web y email</li>
             <li>
               Instagram:{" "}
               <a

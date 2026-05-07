@@ -2,12 +2,12 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Product } from "@/types";
 import { ProductThumbnail } from "@/components/common/product-thumbnail";
 import { ProductCard } from "@/components/common/product-card";
 import { useStore } from "@/context/store-context";
 import { formatARS } from "@/lib/utils";
-import { buildProductWhatsAppHref } from "@/lib/whatsapp";
 
 interface ProductDetailClientProps {
   product: Product;
@@ -20,12 +20,12 @@ export function ProductDetailClient({
   related,
   reviewComments,
 }: ProductDetailClientProps) {
+  const router = useRouter();
   const safeImages = product.images.length > 0 ? product.images : ["Imagen principal"];
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const selectedImage = safeImages[selectedImageIndex] ?? safeImages[0];
   const hasMultipleImages = safeImages.length > 1;
   const { addToCart } = useStore();
-  const whatsappHref = buildProductWhatsAppHref(product);
   const outOfStock = product.stock <= 0;
   const shortDescription = product.shortDescription?.trim() || product.description;
   const fullDescription = product.description?.trim();
@@ -41,7 +41,7 @@ export function ProductDetailClient({
   const shippingEta = useMemo(
     () =>
       outOfStock
-        ? "Sin stock por el momento. Consultá disponibilidad por WhatsApp."
+        ? "Sin stock por el momento. Consultá disponibilidad con nuestro equipo."
         : "Envíos a todo el país con demora estimada de 1 semana.",
     [outOfStock, product.stock],
   );
@@ -147,14 +147,17 @@ export function ProductDetailClient({
             >
               {outOfStock ? "Sin stock" : "Agregar al carrito"}
             </button>
-            <a
-              href={whatsappHref}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-md border-2 border-[#1FA855] bg-[#25D366] px-4 py-3 text-center text-xs font-bold uppercase tracking-widest text-black"
+            <button
+              type="button"
+              onClick={() => {
+                addToCart(product.id, product);
+                router.push("/checkout");
+              }}
+              disabled={outOfStock}
+              className="rounded-md border-2 border-black bg-black px-4 py-3 text-xs font-bold uppercase tracking-widest text-white disabled:cursor-not-allowed disabled:border-zinc-300 disabled:bg-zinc-300 disabled:text-zinc-600"
             >
-              {outOfStock ? "Consultar stock por WhatsApp" : "Comprar por WhatsApp"}
-            </a>
+              {outOfStock ? "Sin stock" : "Comprar ahora"}
+            </button>
           </div>
 
           <div className="grid gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700">

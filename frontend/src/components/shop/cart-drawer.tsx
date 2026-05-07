@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useStore } from "@/context/store-context";
 import { formatARS } from "@/lib/utils";
-import { buildCartWhatsAppHref } from "@/lib/whatsapp";
 
 export function CartDrawer() {
   const {
@@ -14,7 +13,6 @@ export function CartDrawer() {
     removeFromCart,
     subtotal,
   } = useStore();
-  const whatsappHref = buildCartWhatsAppHref(cartProducts, subtotal);
 
   return (
     <>
@@ -98,19 +96,10 @@ export function CartDrawer() {
             <Link
               href="/checkout"
               onClick={closeCart}
-              className="rounded-lg border-2 border-zinc-400 bg-zinc-100 px-4 py-2 text-center text-xs font-semibold uppercase tracking-widest text-zinc-700"
+              className="rounded-lg border-2 border-red-700 bg-red-600 px-4 py-2 text-center text-xs font-semibold uppercase tracking-widest text-white"
             >
-              Ver resumen
+              Ir a pagar
             </Link>
-            <a
-              href={whatsappHref}
-              target="_blank"
-              rel="noreferrer"
-              onClick={closeCart}
-              className="rounded-lg border-2 border-[#25D366] bg-[#25D366] px-4 py-2 text-center text-xs font-semibold uppercase tracking-widest text-black"
-            >
-              Coordinar por WhatsApp
-            </a>
           </div>
         </div>
       </aside>

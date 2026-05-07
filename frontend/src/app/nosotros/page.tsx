@@ -17,8 +17,8 @@ export default function NosotrosPage() {
         <article className="rounded-xl border border-zinc-200 bg-white p-5">
           <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-red-600">Qué buscamos</h2>
           <p className="mt-3 text-sm text-zinc-600">
-            Buscamos crecer de forma responsable, con atención cercana y respuestas rápidas por WhatsApp. Queremos
-            construir confianza en cada compra.
+            Buscamos crecer de forma responsable, con atención cercana y respuestas rápidas desde nuestros canales.
+            Queremos construir confianza en cada compra.
           </p>
         </article>
         <article className="rounded-xl border border-zinc-200 bg-white p-5">

@@ -21,7 +21,7 @@ export default async function HomePage() {
       <ProductShowcase
         eyebrow="Destacados"
         title="Variedad en periféricos gamer"
-        description="Encontrá productos originales para mejorar tu setup, con asesoramiento real y atención rápida por WhatsApp."
+        description="Encontrá productos originales para mejorar tu setup, con asesoramiento real y atención rápida desde el sitio."
         products={featured}
       />
       <ProductShowcase

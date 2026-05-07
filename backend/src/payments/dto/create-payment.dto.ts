@@ -42,6 +42,18 @@ export class CreatePaymentDto {
   metadata?: Record<string, unknown>;
 }
 
+export interface CreatePaymentResponseDto {
+  id: string;
+  orderId: string;
+  provider: string;
+  method: string;
+  status: PaymentStatus;
+  externalReference?: string | null;
+  preferenceId?: string | null;
+  initPoint?: string | null;
+  message?: string;
+}
+
 export class UpdatePaymentStatusDto {
   @IsEnum(PaymentStatus)
   status: PaymentStatus;

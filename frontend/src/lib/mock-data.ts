@@ -435,7 +435,7 @@ export const reviews: Review[] = [
 
 export const benefitItems = [
   {
-    title: "Atención por WhatsApp",
+    title: "Atención directa",
     description: "Respondemos rápido para ayudarte a elegir según lo que jugás y lo que necesitás.",
   },
   {

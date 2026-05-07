@@ -3,11 +3,9 @@
 import Link from "next/link";
 import { useStore } from "@/context/store-context";
 import { formatARS } from "@/lib/utils";
-import { buildCartWhatsAppHref } from "@/lib/whatsapp";
 
 export default function CarritoPage() {
   const { cartProducts, updateQuantity, removeFromCart, subtotal } = useStore();
-  const whatsappHref = buildCartWhatsAppHref(cartProducts, subtotal);
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-12 md:px-6">
@@ -74,20 +72,17 @@ export default function CarritoPage() {
               <span className="text-zinc-600">Total</span>
               <span className="text-2xl font-black">{formatARS(subtotal)}</span>
             </div>
-            <p className="mt-2 text-xs text-zinc-600">Productos originales | Envíos a todo el país | Atención rápida por WhatsApp.</p>
             <a
-              href={whatsappHref}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-5 block rounded-md border-2 border-[#25D366] bg-[#25D366] px-4 py-3 text-center text-xs font-bold uppercase tracking-widest text-black"
+              href="/checkout"
+              className="mt-5 block rounded-md border-2 border-black bg-black px-4 py-3 text-center text-xs font-bold uppercase tracking-widest text-white"
             >
-              Coordinar compra por WhatsApp
+              Ir a pagar
             </a>
             <Link
               href="/checkout"
               className="mt-2 block rounded-md border-2 border-zinc-300 bg-white px-4 py-3 text-center text-xs font-bold uppercase tracking-widest text-zinc-700"
             >
-              Ver resumen
+              Ver checkout
             </Link>
           </aside>
         </div>

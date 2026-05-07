@@ -34,6 +34,7 @@ interface StoreContextValue {
   addToCart: (productId: string, productData?: Product) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
+  clearCart: () => void;
   toggleFavorite: (productId: string) => void;
   dismissFavoriteNotice: () => void;
   setCatalogProducts: (catalogProducts: Product[]) => void;
@@ -151,6 +152,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const removeFromCart = (productId: string) => {
     setCart((previous) => previous.filter((item) => item.productId !== productId));
+  };
+
+  const clearCart = () => {
+    setCart([]);
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
@@ -279,6 +284,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     addToCart,
     removeFromCart,
     updateQuantity,
+    clearCart,
     toggleFavorite,
     dismissFavoriteNotice: () => setFavoriteNotice(null),
     setCatalogProducts,

@@ -1,8 +1,17 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
+import { Public } from '../common/public.decorator';
 import {
   CreatePaymentDto,
   UpdatePaymentStatusDto,
@@ -18,6 +27,17 @@ export class PaymentsController {
   @Post()
   create(@Body() dto: CreatePaymentDto) {
     return this.paymentsService.create(dto);
+  }
+
+  @Public()
+  @Post('mercadopago/webhook')
+  mercadopagoWebhook(@Body() payload: Record<string, unknown>, @Query() query: Record<string, string>) {
+    return this.paymentsService.handleMercadoPagoWebhook({
+      ...(payload as Record<string, unknown>),
+      id: query.id ?? (payload.id as string | number | undefined),
+      type: query.type ?? (payload.type as string | undefined),
+      action: query.action ?? (payload.action as string | undefined),
+    });
   }
 
   @Get('me')

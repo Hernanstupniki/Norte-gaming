@@ -1,10 +1,6 @@
 import Link from "next/link";
 
 export function PromoBanner() {
-  const phone = (process.env.NEXT_PUBLIC_WHATSAPP_PHONE ?? "5493757658938").replace(/\D/g, "");
-  const message = encodeURIComponent("¡Hola! Quiero que me avisen cuando esté disponible la opción 'Armá tu setup'.");
-  const whatsappHref = `https://wa.me/${phone}?text=${message}`;
-
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-8 md:px-6">
       <div className="relative overflow-hidden rounded-2xl border-2 border-black bg-zinc-900 p-8 text-white shadow-[10px_10px_0_#11111140]">
@@ -27,9 +23,7 @@ export function PromoBanner() {
               Ver productos
             </Link>
             <Link
-              href={whatsappHref}
-              target="_blank"
-              rel="noreferrer"
+              href="/contacto"
               className="rounded-md border-2 border-white bg-transparent px-5 py-3 text-xs font-bold uppercase tracking-widest text-white"
             >
               Quiero aviso
