@@ -45,6 +45,32 @@ export class PaymentsService {
     return new MercadoPagoConfig({ accessToken: this.getMercadoPagoAccessToken() });
   }
 
+  private async verifyMercadoPagoToken() {
+    const token = this.getMercadoPagoAccessToken();
+    try {
+      const res = await fetch('https://api.mercadopago.com/v1/users/me', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+        },
+      });
+
+      if (res.status === 401) {
+        throw new Error('MERCADO_PAGO 401 Unauthorized - token inválido en configuración');
+      }
+
+      if (!res.ok) {
+        const body = await res.text().catch(() => 'no body');
+        throw new Error(`MERCADO_PAGO ${res.status} - ${body}`);
+      }
+
+      return true;
+    } catch (err) {
+      console.error('Mercado Pago token verification failed:', err);
+      throw err;
+    }
+  }
+
   private isMercadoPagoProvider(provider: string) {
     return provider.trim().toLowerCase() === 'mercado pago';
   }
@@ -129,6 +155,8 @@ export class PaymentsService {
     }
 
     try {
+      // verify token early to fail fast with clearer error messages
+      await this.verifyMercadoPagoToken();
       const mpPreference = await new Preference(this.getMercadoPagoConfig()).create({
         body: {
           external_reference: order.orderNumber,
