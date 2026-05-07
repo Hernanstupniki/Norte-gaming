@@ -189,7 +189,22 @@ export class PaymentsService {
         initPoint: mpPreference.init_point ?? null,
         message: 'Redirigiendo a Mercado Pago',
       };
-    } catch {
+    } catch (error) {
+      console.error('Error creating Mercado Pago preference:', error);
+      const errAny = error as any;
+      const statusCode =
+        (errAny && (errAny.status || (errAny.response && errAny.response.status))) ?? null;
+      let errorMessage =
+        errAny && typeof errAny === 'object' && 'message' in errAny
+          ? errAny.message
+          : 'error desconocido';
+
+      if (statusCode === 401) {
+        errorMessage = 'MERCADO_PAGO 401 Unauthorized - verifica MERCADO_PAGO_ACCESS_TOKEN en producción';
+      } else if (statusCode) {
+        errorMessage = `MERCADO_PAGO ${statusCode} - ${errorMessage}`;
+      }
+
       return {
         id: payment.id,
         orderId: payment.orderId,
@@ -197,7 +212,7 @@ export class PaymentsService {
         method: payment.method,
         status: payment.status,
         externalReference: payment.externalReference,
-        message: 'La orden quedó creada, pero no se pudo generar el enlace de Mercado Pago',
+        message: `La orden quedó creada, pero no se pudo generar el enlace de Mercado Pago: ${errorMessage}`,
       };
     }
   }
