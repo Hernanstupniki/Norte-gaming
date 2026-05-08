@@ -47,24 +47,34 @@ type FieldErrors = Record<string, string>;
 
 const PAYMENT_METHODS = [
   {
-    id: "transferencia-mp",
-    label: "Transferencia por Mercado Pago",
-    provider: "Transferencia",
-    method: "Transferencia Mercado Pago",
-    shortDesc: "Envianos el comprobante por WhatsApp al confirmar.",
+    id: "mercado-pago",
+    label: "Mercado Pago",
+    provider: "Mercado Pago",
+    method: "Mercado Pago",
+    shortDesc: "Tarjeta de crédito, débito o transferencia. Pago 100% protegido.",
     badge: "Recomendado",
     contextMsg:
-      "Al confirmar te enviamos por WhatsApp nuestro alias de Mercado Pago. Coordinamos el envío o retiro una vez acreditado el pago.",
+      "Al confirmar te redirigiremos a Mercado Pago para completar el pago de forma segura. Aceptan tarjetas de crédito, débito y transferencias bancarias.",
+  },
+  {
+    id: "transferencia",
+    label: "Transferencia bancaria",
+    provider: "Transferencia",
+    method: "Transferencia bancaria",
+    shortDesc: "Te enviamos los datos CBU por WhatsApp al confirmar el pedido.",
+    badge: null,
+    contextMsg:
+      "Al confirmar el pedido te enviamos por WhatsApp el CBU y los datos para hacer la transferencia. Confirmamos cuando acreditemos el pago.",
   },
   {
     id: "efectivo",
-    label: "Efectivo",
+    label: "Efectivo / retiro",
     provider: "Efectivo",
-    method: "Efectivo",
-    shortDesc: "Pagás en efectivo al momento del retiro o la entrega.",
+    method: "Efectivo o retiro",
+    shortDesc: "Coordinamos la entrega o el retiro personal por WhatsApp.",
     badge: null,
     contextMsg:
-      "Al confirmar coordinamos por WhatsApp el lugar y horario. El pago es en efectivo al momento del retiro o la entrega.",
+      "Al confirmar coordinamos por WhatsApp el lugar y horario de entrega o retiro. No se necesita pago anticipado.",
   },
 ];
 
@@ -400,6 +410,12 @@ export default function CheckoutPage() {
           shippingMethodId: selectedShippingId,
         },
       });
+
+      if (selectedPayment.id === "mercado-pago" && payment.initPoint) {
+        clearCart();
+        window.location.assign(payment.initPoint);
+        return;
+      }
 
       clearCart();
       setSuccessMessage(
@@ -960,6 +976,8 @@ export default function CheckoutPage() {
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                     Confirmando...
                   </>
+                ) : selectedPaymentId === "mercado-pago" ? (
+                  "Confirmar y pagar con MP"
                 ) : (
                   "Confirmar pedido"
                 )}
