@@ -18,7 +18,13 @@ import {
 
 // ─── Shipping config ──────────────────────────────────────────────────────────
 
-const FREE_SHIPPING_THRESHOLD = 150000;
+const FREE_SHIPPING_THRESHOLD = 160000;
+
+const SHIPPING_TIERS = [
+  { label: "Hasta 1 kg", customerPrice: 23500, realPrice: 47000 },
+  { label: "Hasta 5 kg", customerPrice: 28500, realPrice: 57000 },
+  { label: "Hasta 10 kg", customerPrice: 40200, realPrice: 80400 },
+];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -712,7 +718,7 @@ export default function CheckoutPage() {
                       </svg>
                       <div>
                         <p className="text-sm font-black text-green-700">¡Envío GRATIS en tu pedido!</p>
-                        <p className="text-xs text-green-600">Tu pedido supera los {formatARS(FREE_SHIPPING_THRESHOLD)} — el envío es sin costo.</p>
+                        <p className="text-xs text-green-600">Tu pedido supera los {formatARS(FREE_SHIPPING_THRESHOLD)} — el envío no tiene costo.</p>
                       </div>
                     </div>
                   ) : (
@@ -744,18 +750,29 @@ export default function CheckoutPage() {
                     </>
                   )}
 
-                  {/* Badge 50% a cargo de Norte Gaming */}
+                  {/* Badge 50% + desglose por peso */}
                   {subtotal < FREE_SHIPPING_THRESHOLD && (
-                    <div className="flex items-start gap-2.5 rounded-xl border border-green-200 bg-green-50 px-4 py-3">
-                      <svg className="mt-0.5 h-4 w-4 shrink-0 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M9.664 1.319a.75.75 0 01.672 0 41.059 41.059 0 018.198 5.424.75.75 0 01-.254 1.285 31.372 31.372 0 00-7.86 3.83.75.75 0 01-.84 0 31.508 31.508 0 00-2.08-1.287V9.394c0-.244.065-.473.18-.668a29.7 29.7 0 00-3.008-1.61.75.75 0 01-.254-1.285 41.059 41.059 0 018.198-5.424zM4.5 11.25a.75.75 0 00-.75.75v4.5c0 .414.336.75.75.75h11a.75.75 0 00.75-.75v-4.5a.75.75 0 00-.75-.75h-11z" clipRule="evenodd" />
-                      </svg>
-                      <div>
+                    <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3.5">
+                      <div className="flex items-start gap-2.5">
+                        <svg className="mt-0.5 h-4 w-4 shrink-0 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M9.664 1.319a.75.75 0 01.672 0 41.059 41.059 0 018.198 5.424.75.75 0 01-.254 1.285 31.372 31.372 0 00-7.86 3.83.75.75 0 01-.84 0 31.508 31.508 0 00-2.08-1.287V9.394c0-.244.065-.473.18-.668a29.7 29.7 0 00-3.008-1.61.75.75 0 01-.254-1.285 41.059 41.059 0 018.198-5.424zM4.5 11.25a.75.75 0 00-.75.75v4.5c0 .414.336.75.75.75h11a.75.75 0 00.75-.75v-4.5a.75.75 0 00-.75-.75h-11z" clipRule="evenodd" />
+                        </svg>
                         <p className="text-xs font-black text-green-700">Norte Gaming cubre el 50% del costo de envío</p>
-                        <p className="mt-0.5 text-xs text-green-600">
-                          Norte Gaming se hace cargo del 50% del costo de envío en todos los pedidos.
-                        </p>
                       </div>
+                      <div className="mt-3 space-y-1.5">
+                        {SHIPPING_TIERS.map((tier) => (
+                          <div key={tier.label} className="flex items-center justify-between text-xs">
+                            <span className="text-green-700">{tier.label}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-green-500 line-through">{formatARS(tier.realPrice)}</span>
+                              <span className="font-black text-green-800">{formatARS(tier.customerPrice)}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="mt-2.5 text-[11px] text-green-600">
+                        El peso final se confirma con el embalaje. Te avisamos por WhatsApp si hay diferencia.
+                      </p>
                     </div>
                   )}
 
@@ -767,7 +784,7 @@ export default function CheckoutPage() {
                         <p className="mt-0.5 text-xs text-zinc-300">3 a 5 días hábiles · Coordinamos por WhatsApp</p>
                       </div>
                       <p className="ml-4 shrink-0 text-sm font-black text-white">
-                        {subtotal >= FREE_SHIPPING_THRESHOLD ? "GRATIS" : formatARS(23500)}
+                        {subtotal >= FREE_SHIPPING_THRESHOLD ? "GRATIS" : "desde " + formatARS(SHIPPING_TIERS[0].customerPrice)}
                       </p>
                     </div>
                   </div>
