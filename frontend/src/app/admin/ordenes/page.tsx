@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useStore } from "@/context/store-context";
 import { formatARS } from "@/lib/utils";
+
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 
 interface OrderItem {
   id: string;
@@ -54,6 +57,7 @@ const STATUS_OPTIONS = [
 const statusInfo = (s: string) => STATUS_OPTIONS.find((o) => o.value === s) ?? { label: s, color: "bg-zinc-100 text-zinc-700" };
 
 export default function AdminOrdenesPage() {
+  const { auth } = useStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -92,24 +96,31 @@ export default function AdminOrdenesPage() {
   const handleSave = async (id: string) => {
     setSaving(id);
     try {
-      const res = await fetch(`/api/admin/proxy/orders/admin/${id}/status`, {
+      const res = await fetch(`${API}/orders/admin/${id}/status`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(auth.accessToken ? { Authorization: `Bearer ${auth.accessToken}` } : {}),
+        },
         body: JSON.stringify({
           status: editStatus[id],
           trackingCode: editTracking[id] || undefined,
           logisticStatus: editCarrier[id] || undefined,
         }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `Error ${res.status}`);
+      }
       setOrders((prev) => prev.map((o) => o.id === id
         ? { ...o, status: editStatus[id], trackingCode: editTracking[id] || null, logisticStatus: editCarrier[id] || null }
         : o
       ));
       setSaveMsg((prev) => ({ ...prev, [id]: "✓ Guardado" }));
       setTimeout(() => setSaveMsg((prev) => ({ ...prev, [id]: "" })), 2500);
-    } catch {
-      setSaveMsg((prev) => ({ ...prev, [id]: "Error al guardar" }));
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Error al guardar";
+      setSaveMsg((prev) => ({ ...prev, [id]: msg }));
     } finally {
       setSaving(null);
     }
