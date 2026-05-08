@@ -134,7 +134,7 @@ export function ProductDetailClient({
             <p className="text-4xl font-black text-zinc-950">{formatARS(product.price)}</p>
             {product.installments ? <p className="text-sm text-zinc-600">{product.installments}</p> : null}
             <p className={outOfStock ? "text-sm font-semibold text-red-600" : "text-sm text-zinc-600"}>
-              {outOfStock ? "Sin stock" : `Stock disponible: ${product.stock}`}
+              {outOfStock ? "Sin stock" : "Stock disponible"}
             </p>
           </div>
 
