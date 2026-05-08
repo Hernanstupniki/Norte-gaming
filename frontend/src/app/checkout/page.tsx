@@ -759,20 +759,6 @@ export default function CheckoutPage() {
                         </svg>
                         <p className="text-xs font-black text-green-700">Norte Gaming cubre el 50% del costo de envío</p>
                       </div>
-                      <div className="mt-3 space-y-1.5">
-                        {SHIPPING_TIERS.map((tier) => (
-                          <div key={tier.label} className="flex items-center justify-between text-xs">
-                            <span className="text-green-700">{tier.label}</span>
-                            <div className="flex items-center gap-2">
-                              <span className="text-green-500 line-through">{formatARS(tier.realPrice)}</span>
-                              <span className="font-black text-green-800">{formatARS(tier.customerPrice)}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <p className="mt-2.5 text-[11px] text-green-600">
-                        El peso final se confirma con el embalaje. Te avisamos por WhatsApp si hay diferencia.
-                      </p>
                     </div>
                   )}
 
