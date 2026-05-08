@@ -210,10 +210,13 @@ export function AccountPanel() {
           <article className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm md:p-6">
             <h2 className="text-xl font-black text-zinc-950">Seguimiento de envíos</h2>
             <p className="mt-1 text-sm text-zinc-600">
-              Esta sección se integrará más adelante para que puedas seguir cada envío en tiempo real.
+              Una vez confirmado y despachado tu pedido, el código de seguimiento y la empresa de envío a cargo aparecerán acá.
             </p>
-            <div className="mt-4 rounded-xl border border-dashed border-zinc-300 bg-zinc-50 p-4 text-sm text-zinc-600">
-              Próximamente: estado del paquete, historial por orden y link de tracking del correo.
+            <div className="mt-4 flex items-start gap-3 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
+              <svg className="mt-0.5 h-4 w-4 shrink-0 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+              </svg>
+              <p className="text-sm text-zinc-500">No tenés envíos activos por el momento.</p>
             </div>
           </article>
         </section>
