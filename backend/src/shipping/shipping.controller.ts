@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
@@ -22,8 +23,8 @@ export class ShippingController {
 
   @Public()
   @Get('methods')
-  listActive() {
-    return this.shippingService.listActive();
+  listActive(@Query('province') province?: string) {
+    return this.shippingService.listActive(province);
   }
 
   @ApiBearerAuth()

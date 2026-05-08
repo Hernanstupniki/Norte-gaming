@@ -56,6 +56,7 @@ export interface ShippingMethod {
   name: string;
   description?: string | null;
   cost: number | string;
+  provinces: string[];
   isActive?: boolean;
 }
 
@@ -219,8 +220,9 @@ export const createMyAddress = async (
   return parseJson<UserAddress>(response);
 };
 
-export const getShippingMethods = async (): Promise<ShippingMethod[]> => {
-  const response = await fetch(`${getApiBaseUrl()}/shipping/methods`, {
+export const getShippingMethods = async (province?: string): Promise<ShippingMethod[]> => {
+  const params = province ? `?province=${encodeURIComponent(province)}` : "";
+  const response = await fetch(`${getApiBaseUrl()}/shipping/methods${params}`, {
     cache: "no-store",
   });
 

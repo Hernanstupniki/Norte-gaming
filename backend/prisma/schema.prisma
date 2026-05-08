@@ -237,6 +237,7 @@ model ShippingMethod {
   name        String   @unique
   description String?
   cost        Decimal  @db.Decimal(12, 2)
+  provinces   String[] @default([])
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

@@ -477,3 +477,60 @@ export const adminGetProductBySku = async (sku: string) => {
   }
   return response.json() as Promise<AdminProductItem>;
 };
+
+// ─── Shipping zones ───────────────────────────────────────────────────────────
+
+export interface AdminShippingMethod {
+  id: string;
+  name: string;
+  description?: string | null;
+  cost: string | number;
+  provinces: string[];
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export const adminListShippingMethods = async (): Promise<AdminShippingMethod[]> => {
+  const response = await fetch(getAdminProxyUrl("shipping/methods/admin/all"), {
+    cache: "no-store",
+  });
+  if (!response.ok) throw new Error(await readApiError(response, "Error cargando zonas de envío"));
+  return response.json();
+};
+
+export const adminCreateShippingMethod = async (payload: {
+  name: string;
+  description?: string;
+  cost: number;
+  provinces?: string[];
+  isActive?: boolean;
+}): Promise<AdminShippingMethod> => {
+  const response = await fetch(getAdminProxyUrl("shipping/methods"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) throw new Error(await readApiError(response, "Error creando zona de envío"));
+  return response.json();
+};
+
+export const adminUpdateShippingMethod = async (
+  id: string,
+  payload: Partial<{ name: string; description: string; cost: number; provinces: string[]; isActive: boolean }>,
+): Promise<AdminShippingMethod> => {
+  const response = await fetch(getAdminProxyUrl(`shipping/methods/${id}`), {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) throw new Error(await readApiError(response, "Error actualizando zona de envío"));
+  return response.json();
+};
+
+export const adminDeleteShippingMethod = async (id: string): Promise<void> => {
+  const response = await fetch(getAdminProxyUrl(`shipping/methods/${id}`), {
+    method: "DELETE",
+  });
+  if (!response.ok) throw new Error(await readApiError(response, "Error eliminando zona de envío"));
+};

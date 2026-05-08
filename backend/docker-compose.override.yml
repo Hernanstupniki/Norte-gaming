@@ -6,6 +6,8 @@ services:
   api:
     ports:
       - "4000:4000"
+    environment:
+      CORS_ORIGIN: "http://localhost:3000,http://localhost:3001"
 
   web:
     build:

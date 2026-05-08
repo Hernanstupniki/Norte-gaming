@@ -72,17 +72,11 @@ export default function CarritoPage() {
               <span className="text-zinc-600">Total</span>
               <span className="text-2xl font-black">{formatARS(subtotal)}</span>
             </div>
-            <a
+            <Link
               href="/checkout"
               className="mt-5 block rounded-md border-2 border-black bg-black px-4 py-3 text-center text-xs font-bold uppercase tracking-widest text-white"
             >
               Ir a pagar
-            </a>
-            <Link
-              href="/checkout"
-              className="mt-2 block rounded-md border-2 border-zinc-300 bg-white px-4 py-3 text-center text-xs font-bold uppercase tracking-widest text-zinc-700"
-            >
-              Ver checkout
             </Link>
           </aside>
         </div>

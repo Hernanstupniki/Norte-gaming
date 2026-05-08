@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   Param,
   Patch,
   Post,
@@ -33,13 +34,22 @@ export class PaymentsController {
 
   @Public()
   @Post('mercadopago/webhook')
-  mercadopagoWebhook(@Body() payload: Record<string, unknown>, @Query() query: Record<string, string>) {
-    return this.paymentsService.handleMercadoPagoWebhook({
-      ...(payload as Record<string, unknown>),
-      id: query.id ?? (payload.id as string | number | undefined),
-      type: query.type ?? (payload.type as string | undefined),
-      action: query.action ?? (payload.action as string | undefined),
-    });
+  mercadopagoWebhook(
+    @Body() payload: Record<string, unknown>,
+    @Query() query: Record<string, string>,
+    @Headers('x-signature') xSignature: string | undefined,
+    @Headers('x-request-id') xRequestId: string | undefined,
+  ) {
+    return this.paymentsService.handleMercadoPagoWebhook(
+      {
+        ...(payload as Record<string, unknown>),
+        id: query.id ?? (payload.id as string | number | undefined),
+        type: query.type ?? (payload.type as string | undefined),
+        action: query.action ?? (payload.action as string | undefined),
+      },
+      xSignature,
+      xRequestId,
+    );
   }
 
   @Get('me')

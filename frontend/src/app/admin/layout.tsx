@@ -14,6 +14,7 @@ const navItems = [
   { href: "/admin/categorias", label: "Categorías" },
   { href: "/admin/marcas", label: "Marcas" },
   { href: "/admin/ordenes", label: "Órdenes" },
+  { href: "/admin/envios", label: "Zonas de envío" },
 ];
 
 export default function AdminLayout({

@@ -1,3 +1,4 @@
+import * as crypto from 'crypto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { OrderStatus, PaymentStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
@@ -48,7 +49,7 @@ export class PaymentsService {
   private async verifyMercadoPagoToken() {
     const token = this.getMercadoPagoAccessToken();
     try {
-      const res = await fetch('https://api.mercadopago.com/v1/users/me', {
+      const res = await fetch('https://api.mercadopago.com/users/me', {
         headers: {
           Authorization: `Bearer ${token}`,
           Accept: 'application/json',
@@ -104,6 +105,48 @@ export class PaymentsService {
     }
 
     return null;
+  }
+
+  validateWebhookSignature(
+    xSignature: string | undefined,
+    xRequestId: string | undefined,
+    dataId: string | null,
+  ): boolean {
+    const secret = process.env.MERCADO_PAGO_WEBHOOK_SECRET?.trim();
+    if (!secret) return true; // Sin secreto configurado, se omite la validación
+
+    if (!xSignature || !xRequestId || !dataId) return false;
+
+    let ts: string | undefined;
+    let v1: string | undefined;
+    for (const part of xSignature.split(',')) {
+      const [key, value] = part.split('=');
+      if (key?.trim() === 'ts') ts = value?.trim();
+      if (key?.trim() === 'v1') v1 = value?.trim();
+    }
+    if (!ts || !v1) return false;
+
+    const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
+    const digest = crypto.createHmac('sha256', secret).update(manifest).digest('hex');
+
+    try {
+      return crypto.timingSafeEqual(Buffer.from(digest), Buffer.from(v1));
+    } catch {
+      return false;
+    }
+  }
+
+  private async restoreStockForOrder(orderId: string) {
+    const items = await this.prisma.orderItem.findMany({ where: { orderId } });
+    for (const item of items) {
+      await this.prisma.product.update({
+        where: { id: item.productId },
+        data: {
+          stock: { increment: item.quantity },
+          soldCount: { decrement: item.quantity },
+        },
+      });
+    }
   }
 
   async create(dto: CreatePaymentDto): Promise<CreatePaymentResponseDto> {
@@ -245,8 +288,17 @@ export class PaymentsService {
     }
   }
 
-  async handleMercadoPagoWebhook(payload: MercadoPagoWebhookPayload) {
+  async handleMercadoPagoWebhook(
+    payload: MercadoPagoWebhookPayload,
+    xSignature?: string,
+    xRequestId?: string,
+  ) {
     const mpPaymentId = this.extractWebhookPaymentId(payload);
+
+    if (!this.validateWebhookSignature(xSignature, xRequestId, mpPaymentId)) {
+      return { ok: false, error: 'invalid_signature' };
+    }
+
     if (!mpPaymentId) {
       return { ok: true };
     }
@@ -301,6 +353,7 @@ export class PaymentsService {
         where: { id: localPayment.orderId },
         data: { status: OrderStatus.CANCELED, canceledAt: new Date() },
       });
+      await this.restoreStockForOrder(localPayment.orderId);
     }
 
     return updatedPayment;
@@ -380,6 +433,7 @@ export class PaymentsService {
         where: { id: payment.orderId },
         data: { status: OrderStatus.CANCELED, canceledAt: new Date() },
       });
+      await this.restoreStockForOrder(payment.orderId);
     }
 
     return updated;

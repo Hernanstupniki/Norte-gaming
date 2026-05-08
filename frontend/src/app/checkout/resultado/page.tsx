@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 type CheckoutResultPageProps = {
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
 const getParam = (value: string | string[] | undefined) => {
@@ -12,10 +12,11 @@ const getParam = (value: string | string[] | undefined) => {
   return value ?? "";
 };
 
-export default function CheckoutResultPage({ searchParams }: CheckoutResultPageProps) {
-  const status = getParam(searchParams?.status) || "pending";
-  const order = getParam(searchParams?.order);
-  const paymentId = getParam(searchParams?.payment_id);
+export default async function CheckoutResultPage({ searchParams }: CheckoutResultPageProps) {
+  const params = searchParams ? await searchParams : {};
+  const status = getParam(params.status) || "pending";
+  const order = getParam(params.order);
+  const paymentId = getParam(params.payment_id);
 
   const isSuccess = status === "success";
   const isFailure = status === "failure";

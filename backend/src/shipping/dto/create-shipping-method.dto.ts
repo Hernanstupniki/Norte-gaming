@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsBoolean,
   IsNumber,
   IsOptional,
@@ -22,6 +23,11 @@ export class CreateShippingMethodDto {
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   cost: number;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  provinces?: string[];
 
   @IsOptional()
   @Type(() => Boolean)
