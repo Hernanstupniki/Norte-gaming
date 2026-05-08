@@ -370,12 +370,13 @@ export class OrdersService {
   async updateStatus(orderId: string, dto: UpdateOrderStatusDto) {
     const found = await this.prisma.order.findUnique({
       where: { id: orderId },
+      include: {
+        user: { select: { firstName: true, lastName: true, email: true } },
+      },
     });
-    if (!found) {
-      throw new NotFoundException('Orden no encontrada');
-    }
+    if (!found) throw new NotFoundException('Orden no encontrada');
 
-    return this.prisma.order.update({
+    const updated = await this.prisma.order.update({
       where: { id: orderId },
       data: {
         status: dto.status,
@@ -384,5 +385,69 @@ export class OrdersService {
         canceledAt: dto.status === OrderStatus.CANCELED ? new Date() : null,
       },
     });
+
+    if (found.user && dto.status !== found.status) {
+      void this.sendStatusUpdateEmail(updated, found.user, dto.trackingCode, dto.logisticStatus);
+    }
+
+    return updated;
+  }
+
+  private async sendStatusUpdateEmail(
+    order: any,
+    user: { firstName: string; lastName: string; email: string },
+    trackingCode?: string,
+    carrier?: string,
+  ) {
+    const smtpUser = this.config.get<string>('SMTP_USER');
+    if (!smtpUser || !user.email) return;
+
+    const STATUS_LABELS: Record<string, string> = {
+      PENDING: 'Pendiente',
+      PAID: 'Pagado ✅',
+      PROCESSING: 'En preparación 📦',
+      SHIPPED: 'Enviado 🚚',
+      DELIVERED: 'Entregado ✅',
+      CANCELED: 'Cancelado ❌',
+    };
+
+    const statusLabel = STATUS_LABELS[order.status] ?? order.status;
+
+    const trackingHtml = trackingCode
+      ? `<div style="margin:16px 0;padding:12px 16px;background:#eef2ff;border-radius:8px;border:1px solid #c7d2fe">
+           <p style="margin:0;font-size:14px;color:#4338ca;font-weight:bold">
+             ${carrier ? carrier + ' · ' : ''}Código de seguimiento: ${trackingCode}
+           </p>
+           <p style="margin:4px 0 0;font-size:12px;color:#6366f1">Usá este código para rastrear tu paquete en el sitio del correo.</p>
+         </div>`
+      : '';
+
+    const html = `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#111">
+        <div style="background:#111;padding:24px 32px;border-radius:12px 12px 0 0">
+          <h1 style="color:#fff;margin:0;font-size:20px">Actualización de tu pedido</h1>
+          <p style="color:#aaa;margin:6px 0 0;font-size:14px">Orden <strong style="color:#fff">${order.orderNumber}</strong></p>
+        </div>
+        <div style="background:#fafafa;padding:24px 32px;border:1px solid #eee;border-top:none">
+          <p style="font-size:15px;color:#333">Hola <strong>${user.firstName}</strong>, el estado de tu pedido fue actualizado:</p>
+          <p style="font-size:22px;font-weight:bold;margin:16px 0;color:#111">${statusLabel}</p>
+          ${trackingHtml}
+          <p style="font-size:13px;color:#555;margin-top:16px">Ante cualquier consulta respondé este email o escribinos por WhatsApp.</p>
+        </div>
+        <div style="background:#f5f5f5;padding:14px 32px;border:1px solid #eee;border-top:none;border-radius:0 0 12px 12px;font-size:12px;color:#888;text-align:center">
+          Norte Gaming · nortegaming.com
+        </div>
+      </div>`;
+
+    try {
+      await this.buildTransporter().sendMail({
+        from: `"Norte Gaming" <${smtpUser}>`,
+        to: user.email,
+        subject: `📦 Pedido ${order.orderNumber} — ${statusLabel}`,
+        html,
+      });
+    } catch (err) {
+      this.logger.error('Error enviando email de actualización de estado:', err);
+    }
   }
 }
