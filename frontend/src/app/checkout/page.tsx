@@ -47,34 +47,24 @@ type FieldErrors = Record<string, string>;
 
 const PAYMENT_METHODS = [
   {
-    id: "mercado-pago",
-    label: "Mercado Pago",
-    provider: "Mercado Pago",
-    method: "Mercado Pago",
-    shortDesc: "Tarjeta de crédito, débito o transferencia. Pago 100% protegido.",
+    id: "transferencia-mp",
+    label: "Transferencia por Mercado Pago",
+    provider: "Transferencia",
+    method: "Transferencia Mercado Pago",
+    shortDesc: "Envianos el comprobante por WhatsApp al confirmar.",
     badge: "Recomendado",
     contextMsg:
-      "Al confirmar te redirigiremos a Mercado Pago para completar el pago de forma segura. Aceptan tarjetas de crédito, débito y transferencias bancarias.",
-  },
-  {
-    id: "transferencia",
-    label: "Transferencia bancaria",
-    provider: "Transferencia",
-    method: "Transferencia bancaria",
-    shortDesc: "Te enviamos los datos CBU por WhatsApp al confirmar el pedido.",
-    badge: null,
-    contextMsg:
-      "Al confirmar el pedido te enviamos por WhatsApp el CBU y los datos para hacer la transferencia. Confirmamos cuando acreditemos el pago.",
+      "Al confirmar te enviamos por WhatsApp nuestro alias de Mercado Pago. Coordinamos el envío o retiro una vez acreditado el pago.",
   },
   {
     id: "efectivo",
-    label: "Efectivo / retiro",
+    label: "Efectivo",
     provider: "Efectivo",
-    method: "Efectivo o retiro",
-    shortDesc: "Coordinamos la entrega o el retiro personal por WhatsApp.",
+    method: "Efectivo",
+    shortDesc: "Pagás en efectivo al momento del retiro o la entrega.",
     badge: null,
     contextMsg:
-      "Al confirmar coordinamos por WhatsApp el lugar y horario de entrega o retiro. No se necesita pago anticipado.",
+      "Al confirmar coordinamos por WhatsApp el lugar y horario. El pago es en efectivo al momento del retiro o la entrega.",
   },
 ];
 
@@ -314,12 +304,15 @@ export default function CheckoutPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeProvince]);
 
-  // Auto-select free or paid method based on subtotal threshold
+  // Auto-select shipping: standard by default, free when threshold met.
+  // Never overrides a manual "retiro" selection.
   useEffect(() => {
     if (shippingMethods.length === 0) return;
+    const current = shippingMethods.find((m) => m.id === selectedShippingId);
+    if (current?.name.toLowerCase().includes("retiro")) return;
     const qualifies = subtotal >= FREE_SHIPPING_THRESHOLD;
     const target = qualifies
-      ? shippingMethods.find((m) => Number(m.cost) === 0)
+      ? shippingMethods.find((m) => Number(m.cost) === 0 && !m.name.toLowerCase().includes("retiro"))
       : shippingMethods.find((m) => Number(m.cost) > 0);
     if (target) setSelectedShippingId(target.id);
   }, [shippingMethods, subtotal]);
@@ -407,12 +400,6 @@ export default function CheckoutPage() {
           shippingMethodId: selectedShippingId,
         },
       });
-
-      if (selectedPayment.id === "mercado-pago" && payment.initPoint) {
-        clearCart();
-        window.location.assign(payment.initPoint);
-        return;
-      }
 
       clearCart();
       setSuccessMessage(
@@ -750,30 +737,52 @@ export default function CheckoutPage() {
                     </>
                   )}
 
-                  {/* Badge 50% + desglose por peso */}
-                  {subtotal < FREE_SHIPPING_THRESHOLD && (
-                    <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3.5">
-                      <div className="flex items-start gap-2.5">
+                  {/* Opciones de envío */}
+                  <div className="space-y-2">
+                    {shippingMethods.map((method) => {
+                      const sel = selectedShippingId === method.id;
+                      const isRetiro = method.name.toLowerCase().includes("retiro");
+                      const isFree = Number(method.cost) === 0;
+                      const showFree = isFree || subtotal >= FREE_SHIPPING_THRESHOLD;
+                      return (
+                        <button
+                          key={method.id}
+                          type="button"
+                          onClick={() => setSelectedShippingId(method.id)}
+                          className={`flex w-full items-center justify-between rounded-xl border-2 px-4 py-3.5 text-left transition-all hover:shadow-sm ${
+                            sel ? "border-zinc-900 bg-zinc-900" : "border-zinc-200 bg-white hover:border-zinc-400"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`h-4 w-4 shrink-0 rounded-full border-2 transition-colors ${sel ? "border-white bg-white" : "border-zinc-300"}`} />
+                            <div>
+                              <p className={`text-sm font-black ${sel ? "text-white" : "text-zinc-900"}`}>{method.name}</p>
+                              {method.description && (
+                                <p className={`mt-0.5 text-xs ${sel ? "text-zinc-300" : "text-zinc-500"}`}>{method.description}</p>
+                              )}
+                            </div>
+                          </div>
+                          <p className={`ml-4 shrink-0 text-sm font-black ${sel ? "text-white" : "text-zinc-900"}`}>
+                            {isRetiro ? "GRATIS" : showFree ? "GRATIS" : "desde " + formatARS(SHIPPING_TIERS[0].customerPrice)}
+                          </p>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Badge 50% — solo para envío a domicilio */}
+                  {(() => {
+                    const current = shippingMethods.find((m) => m.id === selectedShippingId);
+                    const isRetiro = current?.name.toLowerCase().includes("retiro");
+                    return !isRetiro && subtotal < FREE_SHIPPING_THRESHOLD ? (
+                      <div className="flex items-start gap-2.5 rounded-xl border border-green-200 bg-green-50 px-4 py-3">
                         <svg className="mt-0.5 h-4 w-4 shrink-0 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M9.664 1.319a.75.75 0 01.672 0 41.059 41.059 0 018.198 5.424.75.75 0 01-.254 1.285 31.372 31.372 0 00-7.86 3.83.75.75 0 01-.84 0 31.508 31.508 0 00-2.08-1.287V9.394c0-.244.065-.473.18-.668a29.7 29.7 0 00-3.008-1.61.75.75 0 01-.254-1.285 41.059 41.059 0 018.198-5.424zM4.5 11.25a.75.75 0 00-.75.75v4.5c0 .414.336.75.75.75h11a.75.75 0 00.75-.75v-4.5a.75.75 0 00-.75-.75h-11z" clipRule="evenodd" />
                         </svg>
                         <p className="text-xs font-black text-green-700">Norte Gaming cubre el 50% del costo de envío</p>
                       </div>
-                    </div>
-                  )}
-
-                  {/* Método seleccionado */}
-                  <div className="rounded-xl border-2 border-zinc-900 bg-zinc-900 px-4 py-3.5">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-black text-white">Envío Estándar · Todo el país</p>
-                        <p className="mt-0.5 text-xs text-zinc-300">3 a 5 días hábiles · Coordinamos por WhatsApp</p>
-                      </div>
-                      <p className="ml-4 shrink-0 text-sm font-black text-white">
-                        {subtotal >= FREE_SHIPPING_THRESHOLD ? "GRATIS" : "desde " + formatARS(SHIPPING_TIERS[0].customerPrice)}
-                      </p>
-                    </div>
-                  </div>
+                    ) : null;
+                  })()}
 
                   {fieldErrors.shipping && (
                     <p className="flex items-center gap-1.5 text-xs text-red-600">
@@ -951,8 +960,6 @@ export default function CheckoutPage() {
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                     Confirmando...
                   </>
-                ) : selectedPaymentId === "mercado-pago" ? (
-                  "Confirmar y pagar con MP"
                 ) : (
                   "Confirmar pedido"
                 )}
