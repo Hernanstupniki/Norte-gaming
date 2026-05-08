@@ -296,6 +296,15 @@ export class OrdersService {
     });
   }
 
+  async deleteOrder(orderId: string) {
+    const found = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!found) throw new NotFoundException('Orden no encontrada');
+    await this.prisma.payment.deleteMany({ where: { orderId } });
+    await this.prisma.orderItem.deleteMany({ where: { orderId } });
+    await this.prisma.order.delete({ where: { id: orderId } });
+    return { ok: true };
+  }
+
   async updateStatus(orderId: string, dto: UpdateOrderStatusDto) {
     const found = await this.prisma.order.findUnique({
       where: { id: orderId },

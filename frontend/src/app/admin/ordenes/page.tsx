@@ -55,6 +55,21 @@ export default function AdminOrdenesPage() {
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [deleting, setDeleting] = useState<string | null>(null);
+
+  const handleDelete = async (id: string, orderNumber: string) => {
+    if (!confirm(`¿Eliminar la orden ${orderNumber}? Esta acción no se puede deshacer.`)) return;
+    setDeleting(id);
+    try {
+      await fetch(`/api/admin/proxy/orders/admin/${id}`, { method: "DELETE" });
+      setOrders((prev) => prev.filter((o) => o.id !== id));
+      if (expanded === id) setExpanded(null);
+    } catch {
+      alert("No se pudo eliminar la orden.");
+    } finally {
+      setDeleting(null);
+    }
+  };
 
   useEffect(() => {
     fetch("/api/admin/proxy/orders/admin/all", { cache: "no-store" })
@@ -131,11 +146,19 @@ export default function AdminOrdenesPage() {
                     {new Date(order.createdAt).toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                   </span>
                 </div>
-                <div className="flex shrink-0 items-center gap-4">
+                <div className="flex shrink-0 items-center gap-3">
                   <div className="hidden text-right sm:block">
                     <p className="text-sm font-bold text-zinc-900">{formatARS(Number(order.total))}</p>
                     <p className="text-xs text-zinc-400">{order.user.firstName} {order.user.lastName}</p>
                   </div>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); handleDelete(order.id, order.orderNumber); }}
+                    disabled={deleting === order.id}
+                    className="rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-bold text-red-600 hover:bg-red-100 disabled:opacity-40"
+                  >
+                    {deleting === order.id ? "..." : "Eliminar"}
+                  </button>
                   <svg className={`h-4 w-4 text-zinc-400 transition-transform ${isOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
