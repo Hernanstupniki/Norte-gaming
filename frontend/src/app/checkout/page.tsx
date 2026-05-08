@@ -757,7 +757,7 @@ export default function CheckoutPage() {
                   <div className="space-y-2">
                     {shippingMethods.map((method) => {
                       const sel = selectedShippingId === method.id;
-                      const isRetiro = method.name.toLowerCase().includes("retiro");
+                      const isRetiro = Number(method.cost) === 0 && method.name.toLowerCase() !== "envío gratis";
                       const isFree = Number(method.cost) === 0;
                       const showFree = isFree || subtotal >= FREE_SHIPPING_THRESHOLD;
                       return (
@@ -789,7 +789,7 @@ export default function CheckoutPage() {
                   {/* Badge 50% — solo para envío a domicilio */}
                   {(() => {
                     const current = shippingMethods.find((m) => m.id === selectedShippingId);
-                    const isRetiro = current?.name.toLowerCase().includes("retiro");
+                    const isRetiro = current ? Number(current.cost) === 0 && current.name.toLowerCase() !== "envío gratis" : false;
                     return !isRetiro && subtotal < FREE_SHIPPING_THRESHOLD ? (
                       <div className="flex items-start gap-2.5 rounded-xl border border-green-200 bg-green-50 px-4 py-3">
                         <svg className="mt-0.5 h-4 w-4 shrink-0 text-green-600" fill="currentColor" viewBox="0 0 20 20">
