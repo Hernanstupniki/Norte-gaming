@@ -64,9 +64,14 @@ export interface MyCartResponse {
 
 export interface MyOrderItem {
   id: string;
+  orderNumber: string;
   status: string;
-  totalAmount?: string | number;
+  total?: string | number;
+  trackingCode?: string | null;
+  logisticStatus?: string | null;
   createdAt: string;
+  shippingMethod?: { name: string } | null;
+  items?: Array<{ productName: string; quantity: number }>;
 }
 
 const getErrorMessage = async (response: Response, fallback: string) => {

@@ -16,6 +16,8 @@ interface Order {
   id: string;
   orderNumber: string;
   status: string;
+  trackingCode?: string | null;
+  logisticStatus?: string | null;
   subtotal: string | number;
   shippingCost: string | number;
   discountTotal: string | number;
@@ -40,14 +42,16 @@ interface Order {
   coupon?: { code: string } | null;
 }
 
-const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  PENDING:    { label: "Pendiente",   color: "bg-yellow-100 text-yellow-800" },
-  PAID:       { label: "Pagado",      color: "bg-green-100 text-green-800" },
-  PROCESSING: { label: "Procesando",  color: "bg-blue-100 text-blue-800" },
-  SHIPPED:    { label: "Enviado",     color: "bg-indigo-100 text-indigo-800" },
-  DELIVERED:  { label: "Entregado",   color: "bg-emerald-100 text-emerald-800" },
-  CANCELED:   { label: "Cancelado",   color: "bg-red-100 text-red-800" },
-};
+const STATUS_OPTIONS = [
+  { value: "PENDING",    label: "Pendiente",   color: "bg-yellow-100 text-yellow-800" },
+  { value: "PAID",       label: "Pagado",       color: "bg-green-100 text-green-800" },
+  { value: "PROCESSING", label: "Procesando",   color: "bg-blue-100 text-blue-800" },
+  { value: "SHIPPED",    label: "Enviado",      color: "bg-indigo-100 text-indigo-800" },
+  { value: "DELIVERED",  label: "Entregado",    color: "bg-emerald-100 text-emerald-800" },
+  { value: "CANCELED",   label: "Cancelado",    color: "bg-red-100 text-red-800" },
+];
+
+const statusInfo = (s: string) => STATUS_OPTIONS.find((o) => o.value === s) ?? { label: s, color: "bg-zinc-100 text-zinc-700" };
 
 export default function AdminOrdenesPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -56,6 +60,60 @@ export default function AdminOrdenesPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [deleting, setDeleting] = useState<string | null>(null);
+
+  // Per-order edit state
+  const [editStatus, setEditStatus] = useState<Record<string, string>>({});
+  const [editTracking, setEditTracking] = useState<Record<string, string>>({});
+  const [editCarrier, setEditCarrier] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState<string | null>(null);
+  const [saveMsg, setSaveMsg] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch("/api/admin/proxy/orders/admin/all", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data: Order[]) => {
+        setOrders(Array.isArray(data) ? data : []);
+        const st: Record<string, string> = {};
+        const tr: Record<string, string> = {};
+        const ca: Record<string, string> = {};
+        (Array.isArray(data) ? data : []).forEach((o) => {
+          st[o.id] = o.status;
+          tr[o.id] = o.trackingCode ?? "";
+          ca[o.id] = o.logisticStatus ?? "";
+        });
+        setEditStatus(st);
+        setEditTracking(tr);
+        setEditCarrier(ca);
+      })
+      .catch(() => setError("No se pudieron cargar las órdenes."))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleSave = async (id: string) => {
+    setSaving(id);
+    try {
+      const res = await fetch(`/api/admin/proxy/orders/admin/${id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: editStatus[id],
+          trackingCode: editTracking[id] || undefined,
+          logisticStatus: editCarrier[id] || undefined,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      setOrders((prev) => prev.map((o) => o.id === id
+        ? { ...o, status: editStatus[id], trackingCode: editTracking[id] || null, logisticStatus: editCarrier[id] || null }
+        : o
+      ));
+      setSaveMsg((prev) => ({ ...prev, [id]: "✓ Guardado" }));
+      setTimeout(() => setSaveMsg((prev) => ({ ...prev, [id]: "" })), 2500);
+    } catch {
+      setSaveMsg((prev) => ({ ...prev, [id]: "Error al guardar" }));
+    } finally {
+      setSaving(null);
+    }
+  };
 
   const handleDelete = async (id: string, orderNumber: string) => {
     if (!confirm(`¿Eliminar la orden ${orderNumber}? Esta acción no se puede deshacer.`)) return;
@@ -70,14 +128,6 @@ export default function AdminOrdenesPage() {
       setDeleting(null);
     }
   };
-
-  useEffect(() => {
-    fetch("/api/admin/proxy/orders/admin/all", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((data) => setOrders(Array.isArray(data) ? data : []))
-      .catch(() => setError("No se pudieron cargar las órdenes."))
-      .finally(() => setLoading(false));
-  }, []);
 
   const filtered = orders.filter((o) => {
     const q = search.toLowerCase();
@@ -96,7 +146,6 @@ export default function AdminOrdenesPage() {
         <p className="mt-1 text-sm text-zinc-500">{orders.length} orden{orders.length !== 1 ? "es" : ""} en total</p>
       </div>
 
-      {/* Search */}
       <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
         <input
           type="text"
@@ -113,11 +162,7 @@ export default function AdminOrdenesPage() {
           Cargando órdenes...
         </div>
       )}
-
-      {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
-      )}
-
+      {error && <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
       {!loading && !error && filtered.length === 0 && (
         <div className="rounded-2xl border border-zinc-200 bg-white p-8 text-center text-sm text-zinc-400">
           No hay órdenes{search ? " que coincidan con la búsqueda" : ""}.
@@ -126,14 +171,14 @@ export default function AdminOrdenesPage() {
 
       <div className="space-y-3">
         {filtered.map((order) => {
-          const st = STATUS_LABELS[order.status] ?? { label: order.status, color: "bg-zinc-100 text-zinc-700" };
+          const st = statusInfo(order.status);
           const isOpen = expanded === order.id;
           const addr = order.address;
           const addressStr = `${addr.street} ${addr.number}${addr.floor ? `, piso ${addr.floor}` : ""}${addr.apartment ? ` dpto ${addr.apartment}` : ""}, ${addr.city}, ${addr.province} (CP ${addr.postalCode})`;
 
           return (
             <div key={order.id} className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-              {/* Header row */}
+              {/* Header */}
               <button
                 type="button"
                 onClick={() => setExpanded(isOpen ? null : order.id)}
@@ -142,6 +187,11 @@ export default function AdminOrdenesPage() {
                 <div className="flex flex-wrap items-center gap-3">
                   <span className="font-black text-zinc-900">{order.orderNumber}</span>
                   <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${st.color}`}>{st.label}</span>
+                  {order.trackingCode && (
+                    <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-bold text-indigo-700">
+                      📦 {order.trackingCode}
+                    </span>
+                  )}
                   <span className="text-xs text-zinc-400">
                     {new Date(order.createdAt).toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                   </span>
@@ -165,9 +215,64 @@ export default function AdminOrdenesPage() {
                 </div>
               </button>
 
-              {/* Detail panel */}
+              {/* Detail */}
               {isOpen && (
                 <div className="border-t border-zinc-100 px-5 py-4 space-y-5">
+
+                  {/* Estado + tracking */}
+                  <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 space-y-4">
+                    <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">Gestión del pedido</p>
+                    <div className="grid gap-3 sm:grid-cols-3">
+                      <div>
+                        <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-500">Estado</label>
+                        <select
+                          value={editStatus[order.id] ?? order.status}
+                          onChange={(e) => setEditStatus((prev) => ({ ...prev, [order.id]: e.target.value }))}
+                          className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-900 focus:outline-none"
+                        >
+                          {STATUS_OPTIONS.map((s) => (
+                            <option key={s.value} value={s.value}>{s.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-500">Código de tracking</label>
+                        <input
+                          type="text"
+                          placeholder="Ej: OCA123456789"
+                          value={editTracking[order.id] ?? ""}
+                          onChange={(e) => setEditTracking((prev) => ({ ...prev, [order.id]: e.target.value }))}
+                          className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-900 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-500">Empresa de envío</label>
+                        <input
+                          type="text"
+                          placeholder="Ej: OCA, Andreani, Correo"
+                          value={editCarrier[order.id] ?? ""}
+                          onChange={(e) => setEditCarrier((prev) => ({ ...prev, [order.id]: e.target.value }))}
+                          className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-900 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => handleSave(order.id)}
+                        disabled={saving === order.id}
+                        className="rounded-lg bg-zinc-900 px-4 py-2 text-xs font-black uppercase tracking-widest text-white hover:bg-zinc-700 disabled:opacity-50"
+                      >
+                        {saving === order.id ? "Guardando..." : "Guardar cambios"}
+                      </button>
+                      {saveMsg[order.id] && (
+                        <span className={`text-xs font-bold ${saveMsg[order.id].startsWith("✓") ? "text-green-600" : "text-red-600"}`}>
+                          {saveMsg[order.id]}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
                   {/* Cliente + dirección */}
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
@@ -177,7 +282,7 @@ export default function AdminOrdenesPage() {
                       <p className="text-xs text-zinc-500">{addr.phone}</p>
                     </div>
                     <div>
-                      <p className="mb-2 text-xs font-bold uppercase tracking-wider text-zinc-400">Dirección de entrega</p>
+                      <p className="mb-2 text-xs font-bold uppercase tracking-wider text-zinc-400">Dirección</p>
                       <p className="text-sm text-zinc-700">{addr.recipient}</p>
                       <p className="text-xs text-zinc-500">{addressStr}</p>
                     </div>

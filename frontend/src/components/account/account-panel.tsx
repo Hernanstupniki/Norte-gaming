@@ -210,13 +210,54 @@ export function AccountPanel() {
           <article className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm md:p-6">
             <h2 className="text-xl font-black text-zinc-950">Seguimiento de envíos</h2>
             <p className="mt-1 text-sm text-zinc-600">
-              Una vez confirmado y despachado tu pedido, el código de seguimiento y la empresa de envío a cargo aparecerán acá.
+              Estado de tus pedidos activos. El código de seguimiento aparece cuando el pedido es despachado.
             </p>
-            <div className="mt-4 flex items-start gap-3 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-              <svg className="mt-0.5 h-4 w-4 shrink-0 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
-              </svg>
-              <p className="text-sm text-zinc-500">No tenés envíos activos por el momento.</p>
+            <div className="mt-4 space-y-3">
+              {orders.filter((o) => !["DELIVERED", "CANCELED"].includes(o.status)).length === 0 ? (
+                <div className="flex items-start gap-3 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
+                  <p className="text-sm text-zinc-500">No tenés envíos activos por el momento.</p>
+                </div>
+              ) : (
+                orders
+                  .filter((o) => !["DELIVERED", "CANCELED"].includes(o.status))
+                  .map((order) => {
+                    const STATUS: Record<string, { label: string; color: string }> = {
+                      PENDING:    { label: "Pendiente",  color: "bg-yellow-100 text-yellow-800" },
+                      PAID:       { label: "Pagado",     color: "bg-green-100 text-green-800" },
+                      PROCESSING: { label: "Procesando", color: "bg-blue-100 text-blue-800" },
+                      SHIPPED:    { label: "Enviado",    color: "bg-indigo-100 text-indigo-800" },
+                    };
+                    const st = STATUS[order.status] ?? { label: order.status, color: "bg-zinc-100 text-zinc-700" };
+                    return (
+                      <div key={order.id} className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 space-y-2">
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <span className="font-bold text-sm text-zinc-900">{order.orderNumber}</span>
+                          <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${st.color}`}>{st.label}</span>
+                        </div>
+                        {order.items && order.items.length > 0 && (
+                          <p className="text-xs text-zinc-500 truncate">
+                            {order.items.map((i) => `${i.productName} x${i.quantity}`).join(", ")}
+                          </p>
+                        )}
+                        {order.trackingCode ? (
+                          <div className="flex items-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2">
+                            <svg className="h-4 w-4 shrink-0 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                            </svg>
+                            <div>
+                              <p className="text-xs font-black text-indigo-700">
+                                {order.logisticStatus ? `${order.logisticStatus} · ` : ""}Código: {order.trackingCode}
+                              </p>
+                              <p className="text-xs text-indigo-500">Usá este código para rastrear tu paquete en el sitio del correo.</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-zinc-400">El código de seguimiento aparecerá cuando el pedido sea despachado.</p>
+                        )}
+                      </div>
+                    );
+                  })
+              )}
             </div>
           </article>
         </section>
