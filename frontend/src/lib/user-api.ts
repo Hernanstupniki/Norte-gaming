@@ -1,5 +1,20 @@
 const getApiBaseUrl = () => process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 
+export const refreshAccessToken = async (refreshToken: string): Promise<{ accessToken: string; refreshToken: string } | null> => {
+  try {
+    const res = await fetch(`${getApiBaseUrl()}/auth/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data?.tokens ?? null;
+  } catch {
+    return null;
+  }
+};
+
 export interface UserProfile {
   id: string;
   firstName: string;

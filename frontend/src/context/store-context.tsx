@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 import { products } from "@/lib/mock-data";
-import { getWishlistProductIds, logoutUser, toggleWishlist, UserSession } from "@/lib/user-api";
+import { getWishlistProductIds, logoutUser, refreshAccessToken, toggleWishlist, UserSession } from "@/lib/user-api";
 import { CartItem, Product } from "@/types";
 
 interface AuthState {
@@ -120,6 +120,34 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const payload = JSON.stringify({ cart, favorites, auth });
     window.localStorage.setItem(STORAGE_KEY, payload);
   }, [auth, cart, favorites, hasHydrated]);
+
+  // Auto-refresh access token before it expires
+  useEffect(() => {
+    if (!hasHydrated || !auth.refreshToken || !auth.accessToken) return;
+
+    const scheduleRefresh = () => {
+      // Decode exp from JWT without a library
+      try {
+        const payload = JSON.parse(atob(auth.accessToken.split(".")[1]));
+        const expiresInMs = payload.exp * 1000 - Date.now();
+        const refreshInMs = Math.max(expiresInMs - 60_000, 0); // 1 min before expiry
+        return setTimeout(async () => {
+          const tokens = await refreshAccessToken(auth.refreshToken);
+          if (tokens) {
+            setAuth((prev) => ({ ...prev, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken }));
+          } else {
+            // Refresh token also expired — log out silently
+            setAuth((prev) => ({ ...prev, userId: "", role: "", accessToken: "", refreshToken: "", email: "", name: "", isLoggedIn: false }));
+          }
+        }, refreshInMs);
+      } catch {
+        return undefined;
+      }
+    };
+
+    const timer = scheduleRefresh();
+    return () => { if (timer) clearTimeout(timer); };
+  }, [auth.accessToken, auth.refreshToken, hasHydrated]);
 
   const setCatalogProducts = useCallback((catalogProducts: Product[]) => {
     setProductCatalog((previous) => ({
