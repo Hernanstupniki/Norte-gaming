@@ -286,16 +286,39 @@ export function AccountPanel() {
             ) : displayedOrders.length === 0 ? (
               <p className="mt-3 text-sm text-zinc-600">Aún no tenés pedidos registrados.</p>
             ) : (
-              <ul className="mt-3 space-y-2 text-sm text-zinc-700">
-                {displayedOrders.map((order) => (
-                  <li key={order.id} className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
-                    <p className="font-semibold">Pedido #{order.id.slice(0, 8).toUpperCase()}</p>
-                    <p className="text-zinc-600">Estado: {order.status}</p>
-                    <p className="text-zinc-600">
-                      Fecha: {new Date(order.createdAt).toLocaleDateString("es-AR")}
-                    </p>
-                  </li>
-                ))}
+              <ul className="mt-3 space-y-2">
+                {displayedOrders.map((order) => {
+                  const STATUS_MAP: Record<string, { label: string; color: string }> = {
+                    PENDING:    { label: "Pendiente",  color: "bg-yellow-100 text-yellow-800" },
+                    PAID:       { label: "Pagado",     color: "bg-green-100 text-green-800" },
+                    PROCESSING: { label: "Procesando", color: "bg-blue-100 text-blue-800" },
+                    SHIPPED:    { label: "Enviado",    color: "bg-indigo-100 text-indigo-800" },
+                    DELIVERED:  { label: "Entregado",  color: "bg-emerald-100 text-emerald-800" },
+                    CANCELED:   { label: "Cancelado",  color: "bg-red-100 text-red-800" },
+                  };
+                  const st = STATUS_MAP[order.status] ?? { label: order.status, color: "bg-zinc-100 text-zinc-700" };
+                  return (
+                    <li key={order.id} className="rounded-xl border border-zinc-200 bg-zinc-50 p-3.5 space-y-1.5">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <p className="text-sm font-black text-zinc-900">{order.orderNumber ?? `#${order.id.slice(0, 8).toUpperCase()}`}</p>
+                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${st.color}`}>{st.label}</span>
+                      </div>
+                      {order.items && order.items.length > 0 && (
+                        <p className="text-xs text-zinc-500 truncate">
+                          {order.items.map((i) => `${i.productName} x${i.quantity}`).join(", ")}
+                        </p>
+                      )}
+                      <div className="flex items-center justify-between text-xs text-zinc-400">
+                        <span>{new Date(order.createdAt).toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" })}</span>
+                        {order.total && (
+                          <span className="font-bold text-zinc-700">
+                            {Number(order.total).toLocaleString("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 })}
+                          </span>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </article>

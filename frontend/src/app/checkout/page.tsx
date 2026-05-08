@@ -242,6 +242,12 @@ export default function CheckoutPage() {
   const [selectedShippingId, setSelectedShippingId] = useState<string>("");
   const [selectedPaymentId, setSelectedPaymentId] = useState<string>(PAYMENT_METHODS[0].id);
   const [notes, setNotes] = useState<string>("");
+  const [couponCode, setCouponCode] = useState<string>("");
+  const [couponInput, setCouponInput] = useState<string>("");
+  const [couponDiscount, setCouponDiscount] = useState<number>(0);
+  const [couponLabel, setCouponLabel] = useState<string>("");
+  const [couponError, setCouponError] = useState<string>("");
+  const [couponLoading, setCouponLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -257,7 +263,42 @@ export default function CheckoutPage() {
   const selectedShipping = shippingMethods.find((m) => m.id === selectedShippingId);
   const isNew = selectedAddressId === "new";
   const shippingCost = selectedShipping ? Number(selectedShipping.cost) : 0;
-  const total = subtotal + shippingCost;
+  const total = subtotal + shippingCost - couponDiscount;
+
+  const applyCoupon = async () => {
+    if (!couponInput.trim()) return;
+    setCouponError("");
+    setCouponLoading(true);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api"}/coupons/preview?code=${encodeURIComponent(couponInput.trim())}&amount=${subtotal}`
+      );
+      const data = await res.json();
+      if (!res.ok) {
+        setCouponError(data.message || "Cupón inválido");
+        setCouponDiscount(0);
+        setCouponCode("");
+        setCouponLabel("");
+      } else {
+        setCouponDiscount(data.discount);
+        setCouponCode(couponInput.trim().toUpperCase());
+        setCouponLabel(`${data.name} · -${formatARS(data.discount)}`);
+        setCouponError("");
+      }
+    } catch {
+      setCouponError("No se pudo verificar el cupón");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setCouponCode("");
+    setCouponInput("");
+    setCouponDiscount(0);
+    setCouponLabel("");
+    setCouponError("");
+  };
 
   // Province derived from the selected or new address
   const activeProvince = isNew
@@ -397,6 +438,7 @@ export default function CheckoutPage() {
         addressId,
         shippingMethodId: selectedShippingId,
         notes: notes.trim() || undefined,
+        couponCode: couponCode || undefined,
       });
 
       const payment = await createPayment(auth.accessToken, {
@@ -933,6 +975,39 @@ export default function CheckoutPage() {
               </div>
             </div>
 
+            {/* Coupon */}
+            <div className="border-b border-zinc-200 px-5 py-4">
+              {couponCode ? (
+                <div className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 px-3 py-2">
+                  <div>
+                    <p className="text-xs font-black text-green-700">{couponCode}</p>
+                    <p className="text-xs text-green-600">{couponLabel}</p>
+                  </div>
+                  <button type="button" onClick={removeCoupon} className="text-xs font-bold text-red-500 hover:text-red-700">Quitar</button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Código de descuento"
+                    value={couponInput}
+                    onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                    onKeyDown={(e) => e.key === "Enter" && applyCoupon()}
+                    className="flex-1 rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-900 focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={applyCoupon}
+                    disabled={couponLoading || !couponInput.trim()}
+                    className="rounded-lg border-2 border-zinc-900 px-3 py-2 text-xs font-black uppercase tracking-wider hover:bg-zinc-100 disabled:opacity-40"
+                  >
+                    {couponLoading ? "..." : "Aplicar"}
+                  </button>
+                </div>
+              )}
+              {couponError && <p className="mt-1.5 text-xs text-red-600">{couponError}</p>}
+            </div>
+
             {/* Totals */}
             <div className="space-y-2 border-b border-zinc-200 px-5 py-4 text-sm">
               <div className="flex justify-between text-zinc-600">
@@ -949,6 +1024,12 @@ export default function CheckoutPage() {
                     : "—"}
                 </span>
               </div>
+              {couponDiscount > 0 && (
+                <div className="flex justify-between text-green-600">
+                  <span>Descuento ({couponCode})</span>
+                  <span className="font-semibold">-{formatARS(couponDiscount)}</span>
+                </div>
+              )}
               <div className="flex justify-between border-t border-zinc-200 pt-2 text-zinc-900">
                 <span className="text-base font-black">Total</span>
                 <span className="text-xl font-black">{formatARS(total)}</span>

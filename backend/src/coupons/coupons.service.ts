@@ -100,6 +100,28 @@ export class CouponsService {
     return this.prisma.coupon.delete({ where: { id } });
   }
 
+  async previewCoupon(code: string, subtotal: number) {
+    if (!code?.trim()) throw new BadRequestException('Ingresá un código de cupón');
+    const coupon = await this.prisma.coupon.findFirst({
+      where: { code: code.trim().toUpperCase(), isActive: true },
+    });
+    if (!coupon) throw new BadRequestException('Cupón inválido o inexistente');
+    if (coupon.expiresAt && coupon.expiresAt <= new Date()) throw new BadRequestException('El cupón expiró');
+    if (coupon.maxUses !== null && coupon.currentUses >= coupon.maxUses) throw new BadRequestException('El cupón no tiene usos disponibles');
+    if (coupon.minOrderAmount !== null && subtotal < Number(coupon.minOrderAmount)) {
+      throw new BadRequestException(`El monto mínimo para este cupón es ${Number(coupon.minOrderAmount).toLocaleString('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 })}`);
+    }
+    const discount = this.calculateDiscount(coupon, subtotal);
+    return {
+      code: coupon.code,
+      name: coupon.name,
+      description: coupon.description,
+      discountType: coupon.discountType,
+      discountValue: Number(coupon.discountValue),
+      discount,
+    };
+  }
+
   async validateCouponForOrder(code: string, userId: string, subtotal: number) {
     const coupon = await this.prisma.coupon.findFirst({
       where: {

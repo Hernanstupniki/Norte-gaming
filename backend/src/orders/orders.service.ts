@@ -114,6 +114,67 @@ export class OrdersService {
     }
   }
 
+  private async sendOrderConfirmationToCustomer(order: any, user: { firstName: string; lastName: string; email: string }) {
+    const smtpUser = this.config.get<string>('SMTP_USER');
+    if (!smtpUser || !user.email) return;
+
+    const itemsHtml = order.items
+      .map(
+        (item: any) => `
+        <tr>
+          <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0">${item.productName}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;text-align:center">${item.quantity}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;text-align:right;font-weight:bold">${formatARS(Number(item.totalPrice))}</td>
+        </tr>`,
+      )
+      .join('');
+
+    const html = `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#111">
+        <div style="background:#111;padding:24px 32px;border-radius:12px 12px 0 0">
+          <h1 style="color:#fff;margin:0;font-size:22px">¡Gracias por tu compra!</h1>
+          <p style="color:#aaa;margin:6px 0 0;font-size:14px">Orden <strong style="color:#fff">${order.orderNumber}</strong></p>
+        </div>
+        <div style="background:#fafafa;padding:24px 32px;border:1px solid #eee;border-top:none">
+          <p style="font-size:15px;color:#333">Hola <strong>${user.firstName}</strong>, recibimos tu pedido y lo estamos procesando.</p>
+
+          <h2 style="font-size:15px;margin:20px 0 12px;color:#333">📦 Tu pedido</h2>
+          <table style="width:100%;font-size:14px;border-collapse:collapse;margin-bottom:24px">
+            <thead>
+              <tr style="background:#f0f0f0">
+                <th style="padding:8px 12px;text-align:left">Producto</th>
+                <th style="padding:8px 12px;text-align:center">Cant.</th>
+                <th style="padding:8px 12px;text-align:right">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>${itemsHtml}</tbody>
+          </table>
+
+          <table style="width:100%;font-size:14px;margin-bottom:24px">
+            <tr><td style="color:#888;padding:3px 0;width:130px">Envío</td><td style="text-align:right">${Number(order.shippingCost) === 0 ? 'GRATIS' : formatARS(Number(order.shippingCost))}</td></tr>
+            ${Number(order.discountTotal) > 0 ? `<tr><td style="color:#888;padding:3px 0">Descuento</td><td style="text-align:right;color:green">-${formatARS(Number(order.discountTotal))}</td></tr>` : ''}
+            <tr style="font-size:16px;font-weight:bold"><td style="padding:8px 0 3px">TOTAL</td><td style="text-align:right;padding:8px 0 3px">${formatARS(Number(order.total))}</td></tr>
+          </table>
+
+          <p style="font-size:13px;color:#555;margin:0">Te contactaremos por WhatsApp para coordinar los próximos pasos. Ante cualquier consulta respondé este email.</p>
+        </div>
+        <div style="background:#f5f5f5;padding:14px 32px;border:1px solid #eee;border-top:none;border-radius:0 0 12px 12px;font-size:12px;color:#888;text-align:center">
+          Norte Gaming · nortegaming.com
+        </div>
+      </div>`;
+
+    try {
+      await this.buildTransporter().sendMail({
+        from: `"Norte Gaming" <${smtpUser}>`,
+        to: user.email,
+        subject: `✅ Pedido recibido ${order.orderNumber} — Norte Gaming`,
+        html,
+      });
+    } catch (err) {
+      this.logger.error('Error enviando email de confirmación al cliente:', err);
+    }
+  }
+
   async createFromCart(userId: string, dto: CreateOrderDto) {
     const cart = await this.prisma.cart.findUnique({
       where: { userId },
@@ -242,6 +303,7 @@ export class OrdersService {
     });
     if (user) {
       void this.sendOrderNotification(order, user);
+      void this.sendOrderConfirmationToCustomer(order, user);
     }
 
     return order;

@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
@@ -24,6 +25,12 @@ export class CouponsController {
   @Get()
   listPublic() {
     return this.couponsService.listPublic();
+  }
+
+  @Public()
+  @Get('preview')
+  previewCoupon(@Query('code') code: string, @Query('amount') amount: string) {
+    return this.couponsService.previewCoupon(code, Number(amount) || 0);
   }
 
   @ApiBearerAuth()
