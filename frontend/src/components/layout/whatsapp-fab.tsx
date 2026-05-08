@@ -1,4 +1,11 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+
 export function WhatsAppFab() {
+  const pathname = usePathname();
+  if (pathname.startsWith("/checkout") || pathname.startsWith("/carrito")) return null;
+
   return (
     <a
       href="https://wa.me/5493757658938"
