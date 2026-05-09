@@ -96,6 +96,49 @@ export default function AdminOrdenesPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const printLabel = (order: Order) => {
+    const addr = order.address;
+    const addressStr = `${addr.street} ${addr.number}${addr.floor ? `, piso ${addr.floor}` : ""}${addr.apartment ? ` dpto ${addr.apartment}` : ""}`;
+    const items = order.items.map(i => `<tr><td style="padding:4px 8px;border:1px solid #ddd">${i.productName}</td><td style="padding:4px 8px;border:1px solid #ddd;text-align:center">${i.quantity}</td></tr>`).join("");
+    const tracking = order.trackingCode ? `<p style="margin:6px 0;font-size:13px"><strong>Tracking:</strong> ${order.trackingCode}${order.logisticStatus ? ` (${order.logisticStatus})` : ""}</p>` : "";
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Etiqueta ${order.orderNumber}</title>
+    <style>body{font-family:Arial,sans-serif;margin:0;padding:20px;color:#111}
+    .label{border:3px solid #111;border-radius:8px;padding:20px;max-width:420px;margin:0 auto}
+    .header{border-bottom:2px solid #111;padding-bottom:12px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+    .logo{font-size:18px;font-weight:900;letter-spacing:-0.5px}
+    .order{font-size:12px;color:#555}
+    h3{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:0.05em;color:#555}
+    .recipient{font-size:20px;font-weight:900;margin:0 0 4px}
+    .addr{font-size:14px;margin:2px 0}
+    table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
+    th{background:#111;color:#fff;padding:4px 8px;text-align:left}
+    @media print{body{padding:0}.no-print{display:none}}</style></head>
+    <body>
+    <div class="label">
+      <div class="header">
+        <div><div class="logo">NORTE GAMING</div><div class="order">nortegaming.com</div></div>
+        <div style="text-align:right"><div style="font-size:13px;font-weight:700">${order.orderNumber}</div><div style="font-size:11px;color:#888">${new Date(order.createdAt).toLocaleDateString("es-AR")}</div></div>
+      </div>
+      <h3>Destinatario</h3>
+      <p class="recipient">${addr.recipient}</p>
+      <p class="addr">${addressStr}</p>
+      <p class="addr">${addr.city}, ${addr.province} · CP ${addr.postalCode}</p>
+      <p class="addr">📱 ${addr.phone}</p>
+      ${tracking}
+      <h3 style="margin-top:14px">Contenido</h3>
+      <table><thead><tr><th>Producto</th><th style="width:50px;text-align:center">Cant.</th></tr></thead><tbody>${items}</tbody></table>
+      <div style="margin-top:14px;padding-top:12px;border-top:2px dashed #111;display:flex;justify-content:space-between;font-size:13px">
+        <span>Total del pedido</span><strong>${formatARS(Number(order.total))}</strong>
+      </div>
+    </div>
+    <div class="no-print" style="text-align:center;margin-top:16px">
+      <button onclick="window.print()" style="background:#111;color:#fff;border:none;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">🖨️ Imprimir</button>
+    </div>
+    </body></html>`;
+    const win = window.open("", "_blank");
+    if (win) { win.document.write(html); win.document.close(); }
+  };
+
   const handleSave = async (id: string) => {
     setSaving(id);
     try {
@@ -215,6 +258,13 @@ export default function AdminOrdenesPage() {
                     <p className="text-sm font-bold text-zinc-900">{formatARS(Number(order.total))}</p>
                     <p className="text-xs text-zinc-400">{order.user.firstName} {order.user.lastName}</p>
                   </div>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); printLabel(order); }}
+                    className="rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs font-bold text-zinc-700 hover:bg-zinc-50"
+                  >
+                    🖨️ Etiqueta
+                  </button>
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); handleDelete(order.id, order.orderNumber); }}
