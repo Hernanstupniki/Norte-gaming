@@ -1015,12 +1015,22 @@ export default function CheckoutPage() {
                 <span className="font-semibold">{formatARS(subtotal)}</span>
               </div>
               <div className="flex justify-between text-zinc-600">
-                <span>Envío</span>
+                <span className="flex items-center gap-1.5">
+                  Envío
+                  {selectedShipping && Number(selectedShipping.cost) > 0 && subtotal < FREE_SHIPPING_THRESHOLD && (
+                    <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-black text-red-600">50% bonificado</span>
+                  )}
+                </span>
                 <span className="font-semibold">
                   {selectedShipping
                     ? Number(selectedShipping.cost) === 0
                       ? "Gratis"
-                      : formatARS(Number(selectedShipping.cost))
+                      : (
+                        <span className="flex items-center gap-1.5">
+                          <span className="text-xs text-zinc-400 line-through">{formatARS(Number(selectedShipping.cost) * 2)}</span>
+                          {formatARS(Number(selectedShipping.cost))}
+                        </span>
+                      )
                     : "—"}
                 </span>
               </div>
