@@ -558,6 +558,9 @@ export default function CheckoutPage() {
           </div>
           <h1 className="mt-4 text-2xl font-black tracking-tight text-zinc-900">¡Pedido registrado!</h1>
           <p className="mt-2 text-sm leading-relaxed text-zinc-600">{successMessage}</p>
+          <div className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-600">
+            Una vez que confirmemos el pago te vamos a avisar por <strong>WhatsApp y email</strong> con el estado de tu pedido. ¡Gracias por tu compra! 🎮
+          </div>
 
           {isTransfer && (
             <div className="mt-6 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 space-y-3">
