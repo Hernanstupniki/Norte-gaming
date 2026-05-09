@@ -274,7 +274,7 @@ async function main() {
 
   await prisma.coupon.upsert({
     where: { code: 'NORTE10' },
-    update: {},
+    update: { isActive: false },
     create: {
       code: 'NORTE10',
       name: 'Descuento Bienvenida',
@@ -284,7 +284,7 @@ async function main() {
       minOrderAmount: 50000,
       maxDiscount: 30000,
       maxUsesPerUser: 1,
-      isActive: true,
+      isActive: false,
     },
   });
 
