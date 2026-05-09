@@ -47,23 +47,23 @@ type FieldErrors = Record<string, string>;
 
 const PAYMENT_METHODS = [
   {
-    id: "mercado-pago",
-    label: "Mercado Pago",
-    provider: "Mercado Pago",
-    method: "Mercado Pago",
-    shortDesc: "Tarjeta de crédito, débito o transferencia. Pago 100% protegido.",
-    badge: "Recomendado",
-    contextMsg:
-      "Al confirmar te redirigiremos a Mercado Pago para completar el pago de forma segura. Aceptan tarjetas de crédito, débito y transferencias bancarias.",
-  },
-  {
     id: "transferencia",
     label: "Transferencia bancaria",
     provider: "Transferencia",
     method: "Transferencia bancaria",
-    shortDesc: "Al confirmar te mostramos el alias y CVU para transferir.",
+    shortDesc: "Sin comisiones · Acreditamos el mismo día.",
+    badge: "Recomendado",
+    contextMsg: "Al confirmar el pedido te mostramos el alias y CVU para transferir. Acreditamos en el día.",
+  },
+  {
+    id: "mercado-pago",
+    label: "Mercado Pago",
+    provider: "Mercado Pago",
+    method: "Mercado Pago",
+    shortDesc: "Tarjeta de crédito, débito o transferencia MP.",
     badge: null,
-    contextMsg: "Al confirmar el pedido te mostramos los datos para realizar la transferencia. Envianos el comprobante por WhatsApp y acreditamos en el día.",
+    contextMsg:
+      "Al confirmar te redirigiremos a Mercado Pago para completar el pago de forma segura. Aceptan tarjetas de crédito, débito y transferencias.",
   },
   {
     id: "efectivo",
@@ -953,7 +953,7 @@ export default function CheckoutPage() {
                           {pm.badge && (
                             <span
                               className={`rounded px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide ${
-                                sel ? "bg-white/20 text-white" : "bg-zinc-100 text-zinc-600"
+                                sel ? "bg-red-600 text-white" : "bg-red-100 text-red-700"
                               }`}
                             >
                               {pm.badge}
