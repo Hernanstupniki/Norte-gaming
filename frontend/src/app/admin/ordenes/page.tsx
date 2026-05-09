@@ -1,10 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useStore } from "@/context/store-context";
 import { formatARS } from "@/lib/utils";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+
+const getAdminToken = () => {
+  if (typeof window === "undefined") return "";
+  return sessionStorage.getItem("norte_admin_token") ?? "";
+};
 
 interface OrderItem {
   id: string;
@@ -57,7 +61,6 @@ const STATUS_OPTIONS = [
 const statusInfo = (s: string) => STATUS_OPTIONS.find((o) => o.value === s) ?? { label: s, color: "bg-zinc-100 text-zinc-700" };
 
 export default function AdminOrdenesPage() {
-  const { auth } = useStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -100,7 +103,7 @@ export default function AdminOrdenesPage() {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...(auth.accessToken ? { Authorization: `Bearer ${auth.accessToken}` } : {}),
+          Authorization: `Bearer ${getAdminToken()}`,
         },
         body: JSON.stringify({
           status: editStatus[id],

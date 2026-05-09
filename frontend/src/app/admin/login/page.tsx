@@ -37,6 +37,7 @@ export default function AdminLoginPage() {
         throw new Error(payload.message || "No se pudo iniciar la sesión de admin");
       }
 
+      sessionStorage.setItem("norte_admin_token", accessToken);
       router.replace("/admin/productos");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "Error desconocido");
