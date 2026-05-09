@@ -268,7 +268,14 @@ export default function CheckoutPage() {
     PAYMENT_METHODS.find((m) => m.id === selectedPaymentId) ?? PAYMENT_METHODS[0];
   const selectedShipping = shippingMethods.find((m) => m.id === selectedShippingId);
   const isNew = selectedAddressId === "new";
-  const shippingCost = selectedShipping ? Number(selectedShipping.cost) : 0;
+  const isRetiroMethod = selectedShipping
+    ? Number(selectedShipping.cost) === 0 && selectedShipping.name.toLowerCase() !== "envío gratis"
+    : false;
+  const isPaidShipping = selectedShipping ? Number(selectedShipping.cost) > 0 : false;
+  // Customer pays 50% of shipping cost; real cost stays in DB for reference
+  const shippingCost = isPaidShipping && subtotal < FREE_SHIPPING_THRESHOLD
+    ? SHIPPING_TIERS[0].customerPrice
+    : selectedShipping ? Number(selectedShipping.cost) : 0;
   const total = subtotal + shippingCost - couponDiscount;
 
   const applyCoupon = async () => {
@@ -856,18 +863,14 @@ export default function CheckoutPage() {
                   </div>
 
                   {/* Badge 50% — solo para envío a domicilio */}
-                  {(() => {
-                    const current = shippingMethods.find((m) => m.id === selectedShippingId);
-                    const isRetiro = current ? Number(current.cost) === 0 && current.name.toLowerCase() !== "envío gratis" : false;
-                    return !isRetiro && subtotal < FREE_SHIPPING_THRESHOLD ? (
-                      <div className="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-                        <svg className="mt-0.5 h-4 w-4 shrink-0 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M9.664 1.319a.75.75 0 01.672 0 41.059 41.059 0 018.198 5.424.75.75 0 01-.254 1.285 31.372 31.372 0 00-7.86 3.83.75.75 0 01-.84 0 31.508 31.508 0 00-2.08-1.287V9.394c0-.244.065-.473.18-.668a29.7 29.7 0 00-3.008-1.61.75.75 0 01-.254-1.285 41.059 41.059 0 018.198-5.424zM4.5 11.25a.75.75 0 00-.75.75v4.5c0 .414.336.75.75.75h11a.75.75 0 00.75-.75v-4.5a.75.75 0 00-.75-.75h-11z" clipRule="evenodd" />
-                        </svg>
-                        <p className="text-xs font-black text-red-700">Norte Gaming cubre el 50% del costo de envío</p>
-                      </div>
-                    ) : null;
-                  })()}
+                  {isPaidShipping && subtotal < FREE_SHIPPING_THRESHOLD && !isRetiroMethod && (
+                    <p className="flex items-center gap-1.5 text-xs font-bold text-red-600">
+                      <svg className="h-3.5 w-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M9.664 1.319a.75.75 0 01.672 0 41.059 41.059 0 018.198 5.424.75.75 0 01-.254 1.285 31.372 31.372 0 00-7.86 3.83.75.75 0 01-.84 0 31.508 31.508 0 00-2.08-1.287V9.394c0-.244.065-.473.18-.668a29.7 29.7 0 00-3.008-1.61.75.75 0 01-.254-1.285 41.059 41.059 0 018.198-5.424zM4.5 11.25a.75.75 0 00-.75.75v4.5c0 .414.336.75.75.75h11a.75.75 0 00.75-.75v-4.5a.75.75 0 00-.75-.75h-11z" clipRule="evenodd" />
+                      </svg>
+                      Norte Gaming cubre el 50% del costo de envío
+                    </p>
+                  )}
 
                   {fieldErrors.shipping && (
                     <p className="flex items-center gap-1.5 text-xs text-red-600">
@@ -1080,23 +1083,19 @@ export default function CheckoutPage() {
                 <span className="font-semibold">{formatARS(subtotal)}</span>
               </div>
               <div className="flex justify-between text-zinc-600">
-                <span className="flex items-center gap-1.5">
-                  Envío
-                  {selectedShipping && Number(selectedShipping.cost) > 0 && subtotal < FREE_SHIPPING_THRESHOLD && (
-                    <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-black text-red-600">50% bonificado</span>
-                  )}
-                </span>
+                <span>Envío</span>
                 <span className="font-semibold">
-                  {selectedShipping
-                    ? Number(selectedShipping.cost) === 0
+                  {!selectedShipping
+                    ? "—"
+                    : shippingCost === 0
                       ? "Gratis"
                       : (
                         <span className="flex items-center gap-1.5">
-                          <span className="text-xs text-zinc-400 line-through">{formatARS(Number(selectedShipping.cost) * 2)}</span>
-                          {formatARS(Number(selectedShipping.cost))}
+                          <span className="text-xs text-zinc-400 line-through">{formatARS(SHIPPING_TIERS[0].realPrice)}</span>
+                          <span className="text-red-600 font-black">{formatARS(shippingCost)}</span>
                         </span>
                       )
-                    : "—"}
+                  }
                 </span>
               </div>
               {couponDiscount > 0 && (
