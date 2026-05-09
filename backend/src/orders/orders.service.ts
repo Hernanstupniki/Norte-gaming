@@ -156,29 +156,33 @@ export class OrdersService {
             <tr style="font-size:16px;font-weight:bold"><td style="padding:8px 0 3px">TOTAL</td><td style="text-align:right;padding:8px 0 3px">${formatARS(Number(order.total))}</td></tr>
           </table>
 
-          <div style="margin:20px 0;padding:16px;background:#fff8f0;border-radius:8px;border:1px solid #fcd9a0">
-            <p style="margin:0 0 12px;font-size:14px;font-weight:bold;color:#b45309">💳 Datos para transferir</p>
-            <table style="width:100%;font-size:14px;border-collapse:collapse">
-              <tr>
-                <td style="color:#888;padding:5px 0;width:80px;vertical-align:top">Alias</td>
-                <td style="padding:5px 0">
-                  <span style="font-weight:900;font-size:18px;color:#111;letter-spacing:0.5px">nortegaming.pagos</span>
-                </td>
-              </tr>
-              <tr>
-                <td style="color:#888;padding:5px 0;vertical-align:top">CVU</td>
-                <td style="font-family:monospace;font-size:13px;font-weight:bold;color:#111;padding:5px 0;word-break:break-all">0000177500091496182530</td>
-              </tr>
-              <tr>
-                <td style="color:#888;padding:5px 0;vertical-align:top">Titular</td>
-                <td style="color:#111;padding:5px 0">Emiliano Thomas Andrusyszyn</td>
-              </tr>
-              <tr>
-                <td style="color:#888;padding:5px 0;vertical-align:top">Monto</td>
-                <td style="font-weight:bold;font-size:16px;color:#111;padding:5px 0">${formatARS(Number(order.total))}</td>
-              </tr>
-            </table>
-            <p style="margin:12px 0 0;font-size:12px;color:#92400e">⚠️ Si elegiste otro método de pago podés ignorar esta sección. Si transferiste, envianos el comprobante por WhatsApp para confirmar tu pedido.</p>
+          <div style="margin:20px 0;border-radius:12px;overflow:hidden;border:1px solid #e4e4e7">
+            <div style="background:#18181b;padding:14px 20px">
+              <p style="margin:0;font-size:13px;font-weight:700;color:#a1a1aa;letter-spacing:0.08em;text-transform:uppercase">Datos para transferir</p>
+            </div>
+            <div style="background:#fafafa;padding:4px 0">
+              <table style="width:100%;font-size:14px;border-collapse:collapse">
+                <tr style="border-bottom:1px solid #f0f0f0">
+                  <td style="color:#888;padding:12px 20px;width:90px;font-size:13px">Monto</td>
+                  <td style="padding:12px 20px;font-weight:900;font-size:22px;color:#18181b">${formatARS(Number(order.total))}</td>
+                </tr>
+                <tr style="border-bottom:1px solid #f0f0f0">
+                  <td style="color:#888;padding:12px 20px;font-size:13px">Alias</td>
+                  <td style="padding:12px 20px;font-weight:900;font-size:17px;color:#18181b;letter-spacing:0.3px">nortegaming.pagos</td>
+                </tr>
+                <tr style="border-bottom:1px solid #f0f0f0">
+                  <td style="color:#888;padding:12px 20px;font-size:13px">CVU</td>
+                  <td style="padding:12px 20px;font-family:monospace;font-size:13px;font-weight:600;color:#18181b;word-break:break-all">0000177500091496182530</td>
+                </tr>
+                <tr>
+                  <td style="color:#888;padding:12px 20px;font-size:13px">Titular</td>
+                  <td style="padding:12px 20px;color:#18181b;font-size:14px">Emiliano Thomas Andrusyszyn</td>
+                </tr>
+              </table>
+            </div>
+            <div style="background:#f4f4f5;padding:10px 20px;border-top:1px solid #e4e4e7">
+              <p style="margin:0;font-size:12px;color:#71717a">Si elegiste otro método de pago podés ignorar esta sección.</p>
+            </div>
           </div>
           <p style="font-size:13px;color:#555;margin:0">Ante cualquier consulta respondé este email o escribinos por WhatsApp.</p>
         </div>
