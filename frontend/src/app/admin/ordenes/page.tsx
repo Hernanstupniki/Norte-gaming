@@ -236,7 +236,7 @@ export default function AdminOrdenesPage() {
                   {/* Estado + tracking */}
                   <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 space-y-4">
                     <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">Gestión del pedido</p>
-                    <div className="grid gap-3 sm:grid-cols-3">
+                    <div className={`grid gap-3 ${(editStatus[order.id] ?? order.status) === "SHIPPED" ? "sm:grid-cols-3" : "sm:grid-cols-1 max-w-xs"}`}>
                       <div>
                         <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-500">Estado</label>
                         <select
@@ -249,26 +249,30 @@ export default function AdminOrdenesPage() {
                           ))}
                         </select>
                       </div>
-                      <div>
-                        <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-500">Código de tracking</label>
-                        <input
-                          type="text"
-                          placeholder="Ej: OCA123456789"
-                          value={editTracking[order.id] ?? ""}
-                          onChange={(e) => setEditTracking((prev) => ({ ...prev, [order.id]: e.target.value }))}
-                          className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-900 focus:outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-500">Empresa de envío</label>
-                        <input
-                          type="text"
-                          placeholder="Ej: OCA, Andreani, Correo"
-                          value={editCarrier[order.id] ?? ""}
-                          onChange={(e) => setEditCarrier((prev) => ({ ...prev, [order.id]: e.target.value }))}
-                          className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-900 focus:outline-none"
-                        />
-                      </div>
+                      {(editStatus[order.id] ?? order.status) === "SHIPPED" && (
+                        <>
+                          <div>
+                            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-500">Empresa de envío</label>
+                            <input
+                              type="text"
+                              placeholder="Ej: OCA, Andreani, Correo"
+                              value={editCarrier[order.id] ?? ""}
+                              onChange={(e) => setEditCarrier((prev) => ({ ...prev, [order.id]: e.target.value }))}
+                              className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-900 focus:outline-none"
+                            />
+                          </div>
+                          <div>
+                            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-500">Código de tracking</label>
+                            <input
+                              type="text"
+                              placeholder="Ej: OCA123456789"
+                              value={editTracking[order.id] ?? ""}
+                              onChange={(e) => setEditTracking((prev) => ({ ...prev, [order.id]: e.target.value }))}
+                              className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-900 focus:outline-none"
+                            />
+                          </div>
+                        </>
+                      )}
                     </div>
                     <div className="flex flex-wrap items-center gap-3">
                       <button
