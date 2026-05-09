@@ -1109,9 +1109,9 @@ export default function CheckoutPage() {
                   }`}
                 >
                   {selectedShipping
-                    ? subtotal >= FREE_SHIPPING_THRESHOLD
-                      ? "Envío Estándar (GRATIS)"
-                      : "Envío Estándar"
+                    ? shippingCost === 0
+                      ? `${selectedShipping.name} (GRATIS)`
+                      : selectedShipping.name
                     : "No seleccionado"}
                 </span>
               </div>
