@@ -922,11 +922,11 @@ export default function CheckoutPage() {
                   <div className="grid gap-1.5 text-xs">
                     <div className="flex justify-between">
                       <span className="text-zinc-500">Alias</span>
-                      <span className="font-black text-zinc-900 select-all">emiandru</span>
+                      <span className="font-black text-zinc-900 select-all">nortegaming.pagos</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-zinc-500">CVU</span>
-                      <span className="font-mono font-bold text-zinc-900 select-all">0000003100011126533844</span>
+                      <span className="font-mono font-bold text-zinc-900 select-all">0000177500091496182530</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-zinc-500">Titular</span>

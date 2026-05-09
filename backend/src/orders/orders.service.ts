@@ -160,8 +160,8 @@ export class OrdersService {
           <div style="margin:20px 0;padding:16px;background:#fff8f0;border-radius:8px;border:1px solid #fcd9a0">
             <p style="margin:0 0 10px;font-size:14px;font-weight:bold;color:#b45309">💳 Datos para la transferencia</p>
             <table style="width:100%;font-size:13px">
-              <tr><td style="color:#888;padding:3px 0;width:80px">Alias</td><td style="font-weight:bold;font-size:15px;color:#111">emiandru</td></tr>
-              <tr><td style="color:#888;padding:3px 0">CVU</td><td style="font-family:monospace;font-weight:bold;color:#111">0000003100011126533844</td></tr>
+              <tr><td style="color:#888;padding:3px 0;width:80px">Alias</td><td style="font-weight:bold;font-size:15px;color:#111">nortegaming.pagos</td></tr>
+              <tr><td style="color:#888;padding:3px 0">CVU</td><td style="font-family:monospace;font-weight:bold;color:#111">0000177500091496182530</td></tr>
               <tr><td style="color:#888;padding:3px 0">Titular</td><td style="color:#111">Emiliano Thomas Andrusyszyn</td></tr>
               <tr><td style="color:#888;padding:3px 0">Monto</td><td style="font-weight:bold;color:#111">${formatARS(Number(order.total))}</td></tr>
             </table>
