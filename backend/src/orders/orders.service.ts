@@ -132,11 +132,11 @@ export class OrdersService {
     const html = `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#111">
         <div style="background:#111;padding:24px 32px;border-radius:12px 12px 0 0">
-          <h1 style="color:#fff;margin:0;font-size:22px">¡Gracias por tu compra!</h1>
+          <h1 style="color:#fff;margin:0;font-size:22px">Pedido recibido</h1>
           <p style="color:#aaa;margin:6px 0 0;font-size:14px">Orden <strong style="color:#fff">${order.orderNumber}</strong></p>
         </div>
         <div style="background:#fafafa;padding:24px 32px;border:1px solid #eee;border-top:none">
-          <p style="font-size:15px;color:#333">Hola <strong>${user.firstName}</strong>, recibimos tu pedido y lo estamos procesando.</p>
+          <p style="font-size:15px;color:#333">Hola <strong>${user.firstName}</strong>, recibimos tu pedido. Una vez que confirmemos el pago te avisamos por email y WhatsApp para coordinar el envío.</p>
 
           <h2 style="font-size:15px;margin:20px 0 12px;color:#333">📦 Tu pedido</h2>
           <table style="width:100%;font-size:14px;border-collapse:collapse;margin-bottom:24px">
@@ -429,37 +429,53 @@ export class OrdersService {
     const smtpUser = this.config.get<string>('SMTP_USER');
     if (!smtpUser || !user.email) return;
 
+    const isPaid = order.status === 'PAID';
+    const isShipped = order.status === 'SHIPPED';
+    const isCanceled = order.status === 'CANCELED';
+
     const STATUS_LABELS: Record<string, string> = {
-      PENDING: 'Pendiente',
-      PAID: 'Pagado ✅',
-      PROCESSING: 'En preparación 📦',
-      SHIPPED: 'Enviado 🚚',
+      PENDING:   'Pendiente de pago',
+      PAID:      '¡Pago confirmado!',
+      PREPARING: 'En preparación 📦',
+      SHIPPED:   'Enviado 🚚',
       DELIVERED: 'Entregado ✅',
-      CANCELED: 'Cancelado ❌',
+      CANCELED:  'Cancelado',
     };
 
     const statusLabel = STATUS_LABELS[order.status] ?? order.status;
+    const headerBg = isPaid ? '#16a34a' : isCanceled ? '#dc2626' : '#111';
 
     const trackingHtml = trackingCode
-      ? `<div style="margin:16px 0;padding:12px 16px;background:#eef2ff;border-radius:8px;border:1px solid #c7d2fe">
-           <p style="margin:0;font-size:14px;color:#4338ca;font-weight:bold">
-             ${carrier ? carrier + ' · ' : ''}Código de seguimiento: ${trackingCode}
-           </p>
-           <p style="margin:4px 0 0;font-size:12px;color:#6366f1">Usá este código para rastrear tu paquete en el sitio del correo.</p>
+      ? `<div style="margin:16px 0;padding:14px 18px;background:#eef2ff;border-radius:8px;border:1px solid #c7d2fe">
+           <p style="margin:0 0 4px;font-size:13px;font-weight:bold;color:#4338ca">${carrier ? carrier + ' · ' : ''}Código de seguimiento</p>
+           <p style="margin:0;font-size:18px;font-weight:900;color:#1e1b4b;font-family:monospace">${trackingCode}</p>
+           <p style="margin:6px 0 0;font-size:12px;color:#6366f1">Usá este código para rastrear tu paquete en el sitio del correo.</p>
+         </div>`
+      : '';
+
+    const paidMessage = isPaid
+      ? `<div style="margin:16px 0;padding:14px 18px;background:#f0fdf4;border-radius:8px;border:1px solid #86efac">
+           <p style="margin:0;font-size:14px;color:#15803d">Recibimos tu pago correctamente. Estamos preparando tu pedido y te avisamos cuando sea despachado.</p>
+         </div>`
+      : '';
+
+    const canceledMessage = isCanceled
+      ? `<div style="margin:16px 0;padding:14px 18px;background:#fef2f2;border-radius:8px;border:1px solid #fca5a5">
+           <p style="margin:0;font-size:14px;color:#dc2626">Tu pedido fue cancelado. Si tenés alguna duda escribinos por WhatsApp o respondé este email.</p>
          </div>`
       : '';
 
     const html = `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#111">
-        <div style="background:#111;padding:24px 32px;border-radius:12px 12px 0 0">
-          <h1 style="color:#fff;margin:0;font-size:20px">Actualización de tu pedido</h1>
-          <p style="color:#aaa;margin:6px 0 0;font-size:14px">Orden <strong style="color:#fff">${order.orderNumber}</strong></p>
+        <div style="background:${headerBg};padding:24px 32px;border-radius:12px 12px 0 0">
+          <h1 style="color:#fff;margin:0;font-size:20px">${statusLabel}</h1>
+          <p style="color:rgba(255,255,255,0.6);margin:6px 0 0;font-size:14px">Orden <strong style="color:#fff">${order.orderNumber}</strong></p>
         </div>
         <div style="background:#fafafa;padding:24px 32px;border:1px solid #eee;border-top:none">
-          <p style="font-size:15px;color:#333">Hola <strong>${user.firstName}</strong>, el estado de tu pedido fue actualizado:</p>
-          <p style="font-size:22px;font-weight:bold;margin:16px 0;color:#111">${statusLabel}</p>
-          ${trackingHtml}
-          <p style="font-size:13px;color:#555;margin-top:16px">Ante cualquier consulta respondé este email o escribinos por WhatsApp.</p>
+          <p style="font-size:15px;color:#333">Hola <strong>${user.firstName}</strong>,</p>
+          ${paidMessage}${canceledMessage}${trackingHtml}
+          ${!isPaid && !isCanceled ? `<p style="font-size:14px;color:#555;margin:12px 0">El estado de tu pedido fue actualizado a <strong>${statusLabel}</strong>.</p>` : ''}
+          <p style="font-size:13px;color:#888;margin-top:16px">Ante cualquier consulta respondé este email o escribinos por WhatsApp.</p>
         </div>
         <div style="background:#f5f5f5;padding:14px 32px;border:1px solid #eee;border-top:none;border-radius:0 0 12px 12px;font-size:12px;color:#888;text-align:center">
           Norte Gaming · nortegaming.com
@@ -470,7 +486,11 @@ export class OrdersService {
       await this.buildTransporter().sendMail({
         from: `"Norte Gaming" <${smtpUser}>`,
         to: user.email,
-        subject: `📦 Pedido ${order.orderNumber} — ${statusLabel}`,
+        subject: isPaid
+          ? `✅ Pago confirmado — Pedido ${order.orderNumber}`
+          : isCanceled
+            ? `❌ Pedido ${order.orderNumber} cancelado`
+            : `📦 Pedido ${order.orderNumber} — ${statusLabel}`,
         html,
       });
     } catch (err) {
