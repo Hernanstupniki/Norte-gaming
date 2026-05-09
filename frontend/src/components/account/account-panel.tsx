@@ -224,7 +224,7 @@ export function AccountPanel() {
                     const STATUS: Record<string, { label: string; color: string }> = {
                       PENDING:    { label: "Pendiente",  color: "bg-yellow-100 text-yellow-800" },
                       PAID:       { label: "Pagado",     color: "bg-green-100 text-green-800" },
-                      PROCESSING: { label: "Procesando", color: "bg-blue-100 text-blue-800" },
+                      PREPARING: { label: "Procesando", color: "bg-blue-100 text-blue-800" },
                       SHIPPED:    { label: "Enviado",    color: "bg-indigo-100 text-indigo-800" },
                     };
                     const st = STATUS[order.status] ?? { label: order.status, color: "bg-zinc-100 text-zinc-700" };
@@ -291,7 +291,7 @@ export function AccountPanel() {
                   const STATUS_MAP: Record<string, { label: string; color: string }> = {
                     PENDING:    { label: "Pendiente",  color: "bg-yellow-100 text-yellow-800" },
                     PAID:       { label: "Pagado",     color: "bg-green-100 text-green-800" },
-                    PROCESSING: { label: "Procesando", color: "bg-blue-100 text-blue-800" },
+                    PREPARING: { label: "Procesando", color: "bg-blue-100 text-blue-800" },
                     SHIPPED:    { label: "Enviado",    color: "bg-indigo-100 text-indigo-800" },
                     DELIVERED:  { label: "Entregado",  color: "bg-emerald-100 text-emerald-800" },
                     CANCELED:   { label: "Cancelado",  color: "bg-red-100 text-red-800" },

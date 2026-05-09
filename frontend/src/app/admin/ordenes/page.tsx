@@ -52,7 +52,7 @@ interface Order {
 const STATUS_OPTIONS = [
   { value: "PENDING",    label: "Pendiente",   color: "bg-yellow-100 text-yellow-800" },
   { value: "PAID",       label: "Pagado",       color: "bg-green-100 text-green-800" },
-  { value: "PROCESSING", label: "Procesando",   color: "bg-blue-100 text-blue-800" },
+  { value: "PREPARING",  label: "Procesando",   color: "bg-blue-100 text-blue-800" },
   { value: "SHIPPED",    label: "Enviado",      color: "bg-indigo-100 text-indigo-800" },
   { value: "DELIVERED",  label: "Entregado",    color: "bg-emerald-100 text-emerald-800" },
   { value: "CANCELED",   label: "Cancelado",    color: "bg-red-100 text-red-800" },
