@@ -890,7 +890,7 @@ export default function CheckoutPage() {
                             ) : (
                               <>
                                 <p className={`text-xs line-through ${sel ? "text-zinc-400" : "text-zinc-400"}`}>{formatARS(SHIPPING_TIERS[0].realPrice)}</p>
-                                <p className={`text-sm font-black ${sel ? "text-white" : "text-zinc-900"}`}>desde {formatARS(SHIPPING_TIERS[0].customerPrice)}</p>
+                                <p className={`text-sm font-black ${sel ? "text-white" : "text-zinc-900"}`}>{formatARS(SHIPPING_TIERS[0].customerPrice)}</p>
                               </>
                             )}
                           </div>
