@@ -61,9 +61,9 @@ const PAYMENT_METHODS = [
     label: "Transferencia bancaria",
     provider: "Transferencia",
     method: "Transferencia bancaria",
-    shortDesc: "Transferí a nuestro alias de MP y envianos el comprobante.",
+    shortDesc: "Al confirmar te mostramos el alias y CVU para transferir.",
     badge: null,
-    contextMsg: "__transferencia__",
+    contextMsg: "Al confirmar el pedido te mostramos los datos para realizar la transferencia. Envianos el comprobante por WhatsApp y acreditamos en el día.",
   },
   {
     id: "efectivo",
@@ -259,6 +259,8 @@ export default function CheckoutPage() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [topError, setTopError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [successOrderTotal, setSuccessOrderTotal] = useState<number>(0);
+  const [successPaymentId, setSuccessPaymentId] = useState<string>("");
 
   const buyerRef = useRef<HTMLElement>(null);
   const addressRef = useRef<HTMLElement>(null);
@@ -475,6 +477,8 @@ export default function CheckoutPage() {
       }
 
       clearCart();
+      setSuccessPaymentId(selectedPayment.id);
+      setSuccessOrderTotal(total);
       setSuccessMessage(
         payment.message ||
           `Tu pedido quedó registrado. Número de orden: ${order.orderNumber}. Te contactaremos para coordinar los próximos pasos.`,
@@ -543,27 +547,60 @@ export default function CheckoutPage() {
 
   // ── Success ─────────────────────────────────────────────────────────────────
   if (successMessage) {
+    const isTransfer = successPaymentId === "transferencia";
     return (
-      <main className="mx-auto flex min-h-[60vh] w-full max-w-5xl items-center justify-center px-4 py-12 md:px-6">
-        <div className="w-full max-w-md rounded-2xl border-2 border-zinc-900 bg-white p-8 shadow-[6px_6px_0_#11111115]">
+      <main className="mx-auto w-full max-w-lg px-4 py-12 md:px-6">
+        <div className="rounded-2xl border-2 border-zinc-900 bg-white p-8 shadow-[6px_6px_0_#11111115]">
           <div className="flex h-14 w-14 items-center justify-center rounded-xl border-2 border-green-200 bg-green-50">
             <svg className="h-7 w-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4.5 12.75l6 6 9-13.5" />
             </svg>
           </div>
-          <h1 className="mt-4 text-2xl font-black tracking-tight text-zinc-900">Pedido registrado</h1>
-          <p className="mt-3 text-sm leading-relaxed text-zinc-600">{successMessage}</p>
+          <h1 className="mt-4 text-2xl font-black tracking-tight text-zinc-900">¡Pedido registrado!</h1>
+          <p className="mt-2 text-sm leading-relaxed text-zinc-600">{successMessage}</p>
+
+          {isTransfer && (
+            <div className="mt-6 rounded-2xl border-2 border-zinc-900 bg-zinc-950 p-4 space-y-3">
+              <p className="text-xs font-bold uppercase tracking-widest text-zinc-400">Datos para transferir</p>
+              <div className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3">
+                <p className="text-xs text-zinc-500 mb-1">Importe</p>
+                <p className="text-2xl font-black text-white">{formatARS(successOrderTotal)}</p>
+              </div>
+              <div className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3">
+                <p className="text-xs text-zinc-500 mb-1.5">Alias</p>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-lg font-black text-white">nortegaming.pagos</span>
+                  <button type="button" onClick={() => copyToClipboard("nortegaming.pagos", "alias-ok")}
+                    className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-black uppercase tracking-wider ${copiedField === "alias-ok" ? "bg-green-500 text-white" : "bg-red-600 text-white hover:bg-red-500"}`}>
+                    {copiedField === "alias-ok" ? "¡Copiado!" : "Copiar"}
+                  </button>
+                </div>
+              </div>
+              <div className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3">
+                <p className="text-xs text-zinc-500 mb-1.5">CVU</p>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-mono text-sm font-bold text-white break-all">0000177500091496182530</span>
+                  <button type="button" onClick={() => copyToClipboard("0000177500091496182530", "cvu-ok")}
+                    className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-black uppercase tracking-wider ${copiedField === "cvu-ok" ? "bg-green-500 text-white" : "bg-red-600 text-white hover:bg-red-500"}`}>
+                    {copiedField === "cvu-ok" ? "¡Copiado!" : "Copiar"}
+                  </button>
+                </div>
+              </div>
+              <div className="flex justify-between text-xs px-1">
+                <span className="text-zinc-500">Titular</span>
+                <span className="font-semibold text-zinc-300">Emiliano Thomas Andrusyszyn</span>
+              </div>
+              <p className="text-xs text-zinc-500 pt-1 border-t border-zinc-800">
+                Envianos el comprobante por WhatsApp para confirmar. Acreditamos en el día.
+              </p>
+            </div>
+          )}
+
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link
-              href="/mi-cuenta"
-              className="rounded-xl border-2 border-zinc-900 bg-zinc-900 px-4 py-2.5 text-xs font-black uppercase tracking-widest text-white hover:bg-zinc-800"
-            >
+            <Link href="/mi-cuenta" className="rounded-xl border-2 border-zinc-900 bg-zinc-900 px-4 py-2.5 text-xs font-black uppercase tracking-widest text-white hover:bg-zinc-800">
               Ver mi cuenta
             </Link>
-            <Link
-              href="/tienda"
-              className="rounded-xl border-2 border-zinc-200 px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-zinc-700 hover:border-zinc-400"
-            >
+            <Link href="/tienda" className="rounded-xl border-2 border-zinc-200 px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-zinc-700 hover:border-zinc-400">
               Seguir comprando
             </Link>
           </div>
@@ -933,61 +970,9 @@ export default function CheckoutPage() {
               </div>
 
               {/* Context message */}
-              {selectedPayment.contextMsg === "__transferencia__" ? (
-                <div className="mt-4 rounded-xl border-2 border-zinc-900 bg-zinc-950 px-4 py-4 space-y-3">
-                  <p className="text-xs font-bold uppercase tracking-widest text-zinc-400">Datos para transferir</p>
-
-                  {/* Monto */}
-                  <div className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3">
-                    <p className="text-xs text-zinc-500 mb-1">Importe a transferir</p>
-                    <p className="text-2xl font-black text-white">{formatARS(total)}</p>
-                  </div>
-
-                  {/* Alias */}
-                  <div className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3">
-                    <p className="text-xs text-zinc-500 mb-1.5">Alias</p>
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-lg font-black text-white tracking-wide">nortegaming.pagos</span>
-                      <button
-                        type="button"
-                        onClick={() => copyToClipboard("nortegaming.pagos", "alias")}
-                        className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-colors ${copiedField === "alias" ? "bg-green-500 text-white" : "bg-red-600 text-white hover:bg-red-500"}`}
-                      >
-                        {copiedField === "alias" ? "¡Copiado!" : "Copiar"}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* CVU */}
-                  <div className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3">
-                    <p className="text-xs text-zinc-500 mb-1.5">CVU</p>
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="font-mono text-sm font-bold text-white break-all">0000177500091496182530</span>
-                      <button
-                        type="button"
-                        onClick={() => copyToClipboard("0000177500091496182530", "cvu")}
-                        className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-colors ${copiedField === "cvu" ? "bg-green-500 text-white" : "bg-red-600 text-white hover:bg-red-500"}`}
-                      >
-                        {copiedField === "cvu" ? "¡Copiado!" : "Copiar"}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Titular */}
-                  <div className="flex justify-between text-xs px-1">
-                    <span className="text-zinc-500">Titular</span>
-                    <span className="font-semibold text-zinc-300">Emiliano Thomas Andrusyszyn</span>
-                  </div>
-
-                  <p className="text-xs text-zinc-500 pt-1 border-t border-zinc-800">
-                    Una vez que confirmes el pedido y realices la transferencia, envianos el comprobante por WhatsApp. Acreditamos en el día.
-                  </p>
-                </div>
-              ) : (
-                <div className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-xs text-zinc-600">
-                  {selectedPayment.contextMsg}
-                </div>
-              )}
+              <div className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-xs text-zinc-600">
+                {selectedPayment.contextMsg}
+              </div>
             </div>
           </section>
 
