@@ -241,6 +241,13 @@ export default function CheckoutPage() {
   const [selectedShippingId, setSelectedShippingId] = useState<string>("");
   const [selectedPaymentId, setSelectedPaymentId] = useState<string>(PAYMENT_METHODS[0].id);
   const [notes, setNotes] = useState<string>("");
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+  const copyToClipboard = (text: string, field: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedField(field);
+      setTimeout(() => setCopiedField(null), 2000);
+    }).catch(() => {});
+  };
   const [couponCode, setCouponCode] = useState<string>("");
   const [couponInput, setCouponInput] = useState<string>("");
   const [couponDiscount, setCouponDiscount] = useState<number>(0);
@@ -917,23 +924,54 @@ export default function CheckoutPage() {
 
               {/* Context message */}
               {selectedPayment.contextMsg === "__transferencia__" ? (
-                <div className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3.5 space-y-2.5">
-                  <p className="text-xs font-bold text-zinc-700">Datos para la transferencia</p>
-                  <div className="grid gap-1.5 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-zinc-500">Alias</span>
-                      <span className="font-black text-zinc-900 select-all">nortegaming.pagos</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-zinc-500">CVU</span>
-                      <span className="font-mono font-bold text-zinc-900 select-all">0000177500091496182530</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-zinc-500">Titular</span>
-                      <span className="font-semibold text-zinc-900">Emiliano Thomas Andrusyszyn</span>
+                <div className="mt-4 rounded-xl border-2 border-zinc-900 bg-zinc-950 px-4 py-4 space-y-3">
+                  <p className="text-xs font-bold uppercase tracking-widest text-zinc-400">Datos para transferir</p>
+
+                  {/* Monto */}
+                  <div className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3">
+                    <p className="text-xs text-zinc-500 mb-1">Importe a transferir</p>
+                    <p className="text-2xl font-black text-white">{formatARS(total)}</p>
+                  </div>
+
+                  {/* Alias */}
+                  <div className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3">
+                    <p className="text-xs text-zinc-500 mb-1.5">Alias</p>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-lg font-black text-white tracking-wide">nortegaming.pagos</span>
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard("nortegaming.pagos", "alias")}
+                        className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-colors ${copiedField === "alias" ? "bg-green-500 text-white" : "bg-red-600 text-white hover:bg-red-500"}`}
+                      >
+                        {copiedField === "alias" ? "¡Copiado!" : "Copiar"}
+                      </button>
                     </div>
                   </div>
-                  <p className="text-xs text-zinc-500">Una vez que confirmes el pedido, envianos el comprobante por WhatsApp. Acreditamos en el día.</p>
+
+                  {/* CVU */}
+                  <div className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3">
+                    <p className="text-xs text-zinc-500 mb-1.5">CVU</p>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-mono text-sm font-bold text-white break-all">0000177500091496182530</span>
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard("0000177500091496182530", "cvu")}
+                        className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-colors ${copiedField === "cvu" ? "bg-green-500 text-white" : "bg-red-600 text-white hover:bg-red-500"}`}
+                      >
+                        {copiedField === "cvu" ? "¡Copiado!" : "Copiar"}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Titular */}
+                  <div className="flex justify-between text-xs px-1">
+                    <span className="text-zinc-500">Titular</span>
+                    <span className="font-semibold text-zinc-300">Emiliano Thomas Andrusyszyn</span>
+                  </div>
+
+                  <p className="text-xs text-zinc-500 pt-1 border-t border-zinc-800">
+                    Una vez que confirmes el pedido y realices la transferencia, envianos el comprobante por WhatsApp. Acreditamos en el día.
+                  </p>
                 </div>
               ) : (
                 <div className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-xs text-zinc-600">
