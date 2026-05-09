@@ -34,6 +34,13 @@ export function AccountPanel() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
+  const [copiedTracking, setCopiedTracking] = useState<string | null>(null);
+  const copyTracking = (code: string) => {
+    navigator.clipboard.writeText(code).then(() => {
+      setCopiedTracking(code);
+      setTimeout(() => setCopiedTracking(null), 2000);
+    }).catch(() => {});
+  };
 
   useEffect(() => {
     if (!auth.isLoggedIn || !auth.accessToken) {
@@ -240,16 +247,22 @@ export function AccountPanel() {
                           </p>
                         )}
                         {order.trackingCode ? (
-                          <div className="flex items-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2">
-                            <svg className="h-4 w-4 shrink-0 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
-                            </svg>
-                            <div>
-                              <p className="text-xs font-black text-indigo-700">
-                                {order.logisticStatus ? `${order.logisticStatus} · ` : ""}Código: {order.trackingCode}
-                              </p>
-                              <p className="text-xs text-indigo-500">Usá este código para rastrear tu paquete en el sitio del correo.</p>
+                          <div className="rounded-xl border-2 border-zinc-900 bg-zinc-950 p-3 space-y-2">
+                            {order.logisticStatus && (
+                              <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">{order.logisticStatus}</p>
+                            )}
+                            <p className="text-xs text-zinc-400">Código de seguimiento</p>
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-mono text-base font-black text-white tracking-wide">{order.trackingCode}</span>
+                              <button
+                                type="button"
+                                onClick={() => copyTracking(order.trackingCode!)}
+                                className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-colors ${copiedTracking === order.trackingCode ? "bg-green-500 text-white" : "bg-red-600 text-white hover:bg-red-500"}`}
+                              >
+                                {copiedTracking === order.trackingCode ? "¡Copiado!" : "Copiar"}
+                              </button>
                             </div>
+                            <p className="text-xs text-zinc-500">Usá este código en el sitio del correo para rastrear tu paquete.</p>
                           </div>
                         ) : (
                           <p className="text-xs text-zinc-400">El código de seguimiento aparecerá cuando el pedido sea despachado.</p>
