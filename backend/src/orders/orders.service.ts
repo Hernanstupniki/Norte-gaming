@@ -326,7 +326,6 @@ export class OrdersService {
       select: { firstName: true, lastName: true, email: true },
     });
     if (user) {
-      void this.sendOrderNotification(order, user);
       void this.sendOrderConfirmationToCustomer(order, user);
     }
 
