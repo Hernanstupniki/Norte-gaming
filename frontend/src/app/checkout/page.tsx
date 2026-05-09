@@ -1025,12 +1025,7 @@ export default function CheckoutPage() {
                   {selectedShipping
                     ? Number(selectedShipping.cost) === 0
                       ? "Gratis"
-                      : (
-                        <span className="flex items-center gap-1.5">
-                          <span className="text-xs text-zinc-400 line-through">{formatARS(Number(selectedShipping.cost) * 2)}</span>
-                          {formatARS(Number(selectedShipping.cost))}
-                        </span>
-                      )
+                      : formatARS(Number(selectedShipping.cost))
                     : "—"}
                 </span>
               </div>
