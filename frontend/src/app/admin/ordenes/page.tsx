@@ -101,6 +101,7 @@ export default function AdminOrdenesPage() {
     const addressStr = `${addr.street} ${addr.number}${addr.floor ? `, piso ${addr.floor}` : ""}${addr.apartment ? ` dpto ${addr.apartment}` : ""}`;
     const items = order.items.map(i => `<tr><td style="padding:4px 8px;border:1px solid #ddd">${i.productName}</td><td style="padding:4px 8px;border:1px solid #ddd;text-align:center">${i.quantity}</td></tr>`).join("");
     const tracking = order.trackingCode ? `<p style="margin:6px 0;font-size:13px"><strong>Tracking:</strong> ${order.trackingCode}${order.logisticStatus ? ` (${order.logisticStatus})` : ""}</p>` : "";
+    const notes = order.notes ? `<div style="margin-top:14px;padding:10px 12px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px"><p style="margin:0;font-size:12px;font-weight:bold;color:#92400e">Nota del cliente:</p><p style="margin:4px 0 0;font-size:13px;color:#111">${order.notes}</p></div>` : "";
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Etiqueta ${order.orderNumber}</title>
     <style>body{font-family:Arial,sans-serif;margin:0;padding:20px;color:#111}
     .label{border:3px solid #111;border-radius:8px;padding:20px;max-width:420px;margin:0 auto}
@@ -127,6 +128,7 @@ export default function AdminOrdenesPage() {
       ${tracking}
       <h3 style="margin-top:14px">Contenido</h3>
       <table><thead><tr><th>Producto</th><th style="width:50px;text-align:center">Cant.</th></tr></thead><tbody>${items}</tbody></table>
+      ${notes}
       <div style="margin-top:14px;padding-top:12px;border-top:2px dashed #111;display:flex;justify-content:space-between;font-size:13px">
         <span>Total del pedido</span><strong>${formatARS(Number(order.total))}</strong>
       </div>
