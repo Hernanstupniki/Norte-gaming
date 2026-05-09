@@ -21,9 +21,9 @@ import {
 const FREE_SHIPPING_THRESHOLD = 160000;
 
 const SHIPPING_TIERS = [
-  { label: "Hasta 1 kg", customerPrice: 23500, realPrice: 47000 },
-  { label: "Hasta 5 kg", customerPrice: 28500, realPrice: 57000 },
-  { label: "Hasta 10 kg", customerPrice: 40200, realPrice: 80400 },
+  { label: "Hasta 1 kg", customerPrice: 11750, realPrice: 23500 },
+  { label: "Hasta 5 kg", customerPrice: 14250, realPrice: 28500 },
+  { label: "Hasta 10 kg", customerPrice: 20100, realPrice: 40200 },
 ];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -840,9 +840,16 @@ export default function CheckoutPage() {
                               )}
                             </div>
                           </div>
-                          <p className={`ml-4 shrink-0 text-sm font-black ${sel ? "text-white" : "text-zinc-900"}`}>
-                            {isRetiro ? "GRATIS" : showFree ? "GRATIS" : "desde " + formatARS(SHIPPING_TIERS[0].customerPrice)}
-                          </p>
+                          <div className="ml-4 shrink-0 text-right">
+                            {isRetiro || showFree ? (
+                              <p className={`text-sm font-black ${sel ? "text-white" : "text-zinc-900"}`}>GRATIS</p>
+                            ) : (
+                              <>
+                                <p className={`text-xs line-through ${sel ? "text-zinc-400" : "text-zinc-400"}`}>{formatARS(SHIPPING_TIERS[0].realPrice)}</p>
+                                <p className={`text-sm font-black ${sel ? "text-white" : "text-zinc-900"}`}>desde {formatARS(SHIPPING_TIERS[0].customerPrice)}</p>
+                              </>
+                            )}
+                          </div>
                         </button>
                       );
                     })}
@@ -1083,7 +1090,12 @@ export default function CheckoutPage() {
                   {selectedShipping
                     ? Number(selectedShipping.cost) === 0
                       ? "Gratis"
-                      : formatARS(Number(selectedShipping.cost))
+                      : (
+                        <span className="flex items-center gap-1.5">
+                          <span className="text-xs text-zinc-400 line-through">{formatARS(Number(selectedShipping.cost) * 2)}</span>
+                          {formatARS(Number(selectedShipping.cost))}
+                        </span>
+                      )
                     : "—"}
                 </span>
               </div>
