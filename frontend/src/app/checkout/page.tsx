@@ -560,37 +560,37 @@ export default function CheckoutPage() {
           <p className="mt-2 text-sm leading-relaxed text-zinc-600">{successMessage}</p>
 
           {isTransfer && (
-            <div className="mt-6 rounded-2xl border-2 border-zinc-900 bg-zinc-950 p-4 space-y-3">
-              <p className="text-xs font-bold uppercase tracking-widest text-zinc-400">Datos para transferir</p>
-              <div className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3">
-                <p className="text-xs text-zinc-500 mb-1">Importe</p>
-                <p className="text-2xl font-black text-white">{formatARS(successOrderTotal)}</p>
+            <div className="mt-6 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 space-y-3">
+              <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">Datos para transferir</p>
+              <div className="rounded-xl border-2 border-zinc-200 bg-white px-4 py-3">
+                <p className="text-xs text-zinc-400 mb-1">Importe</p>
+                <p className="text-2xl font-black text-zinc-900">{formatARS(successOrderTotal)}</p>
               </div>
-              <div className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3">
-                <p className="text-xs text-zinc-500 mb-1.5">Alias</p>
+              <div className="rounded-xl border-2 border-zinc-200 bg-white px-4 py-3">
+                <p className="text-xs text-zinc-400 mb-1.5">Alias</p>
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-lg font-black text-white">nortegaming.pagos</span>
+                  <span className="text-lg font-black text-zinc-900">nortegaming.pagos</span>
                   <button type="button" onClick={() => copyToClipboard("nortegaming.pagos", "alias-ok")}
-                    className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-black uppercase tracking-wider ${copiedField === "alias-ok" ? "bg-green-500 text-white" : "bg-red-600 text-white hover:bg-red-500"}`}>
+                    className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-colors ${copiedField === "alias-ok" ? "bg-green-500 text-white" : "bg-zinc-900 text-white hover:bg-zinc-700"}`}>
                     {copiedField === "alias-ok" ? "¡Copiado!" : "Copiar"}
                   </button>
                 </div>
               </div>
-              <div className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3">
-                <p className="text-xs text-zinc-500 mb-1.5">CVU</p>
+              <div className="rounded-xl border-2 border-zinc-200 bg-white px-4 py-3">
+                <p className="text-xs text-zinc-400 mb-1.5">CVU</p>
                 <div className="flex items-center justify-between gap-3">
-                  <span className="font-mono text-sm font-bold text-white break-all">0000177500091496182530</span>
+                  <span className="font-mono text-sm font-bold text-zinc-900 break-all">0000177500091496182530</span>
                   <button type="button" onClick={() => copyToClipboard("0000177500091496182530", "cvu-ok")}
-                    className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-black uppercase tracking-wider ${copiedField === "cvu-ok" ? "bg-green-500 text-white" : "bg-red-600 text-white hover:bg-red-500"}`}>
+                    className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-colors ${copiedField === "cvu-ok" ? "bg-green-500 text-white" : "bg-zinc-900 text-white hover:bg-zinc-700"}`}>
                     {copiedField === "cvu-ok" ? "¡Copiado!" : "Copiar"}
                   </button>
                 </div>
               </div>
               <div className="flex justify-between text-xs px-1">
                 <span className="text-zinc-500">Titular</span>
-                <span className="font-semibold text-zinc-300">Emiliano Thomas Andrusyszyn</span>
+                <span className="font-semibold text-zinc-700">Emiliano Thomas Andrusyszyn</span>
               </div>
-              <p className="text-xs text-zinc-500 pt-1 border-t border-zinc-800">
+              <p className="text-xs text-zinc-500 pt-2 border-t border-zinc-200">
                 Envianos el comprobante por WhatsApp para confirmar. Acreditamos en el día.
               </p>
             </div>
