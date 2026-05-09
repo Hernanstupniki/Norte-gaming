@@ -796,7 +796,7 @@ export default function CheckoutPage() {
                             </div>
                             <div className="h-2 overflow-hidden rounded-full bg-zinc-100">
                               <div
-                                className="h-full rounded-full bg-green-500 transition-all duration-500"
+                                className="h-full rounded-full bg-red-600 transition-all duration-500"
                                 style={{ width: `${pct}%` }}
                               />
                             </div>
@@ -847,11 +847,11 @@ export default function CheckoutPage() {
                     const current = shippingMethods.find((m) => m.id === selectedShippingId);
                     const isRetiro = current ? Number(current.cost) === 0 && current.name.toLowerCase() !== "envío gratis" : false;
                     return !isRetiro && subtotal < FREE_SHIPPING_THRESHOLD ? (
-                      <div className="flex items-start gap-2.5 rounded-xl border border-green-200 bg-green-50 px-4 py-3">
-                        <svg className="mt-0.5 h-4 w-4 shrink-0 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                      <div className="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+                        <svg className="mt-0.5 h-4 w-4 shrink-0 text-red-600" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M9.664 1.319a.75.75 0 01.672 0 41.059 41.059 0 018.198 5.424.75.75 0 01-.254 1.285 31.372 31.372 0 00-7.86 3.83.75.75 0 01-.84 0 31.508 31.508 0 00-2.08-1.287V9.394c0-.244.065-.473.18-.668a29.7 29.7 0 00-3.008-1.61.75.75 0 01-.254-1.285 41.059 41.059 0 018.198-5.424zM4.5 11.25a.75.75 0 00-.75.75v4.5c0 .414.336.75.75.75h11a.75.75 0 00.75-.75v-4.5a.75.75 0 00-.75-.75h-11z" clipRule="evenodd" />
                         </svg>
-                        <p className="text-xs font-black text-green-700">Norte Gaming cubre el 50% del costo de envío</p>
+                        <p className="text-xs font-black text-red-700">Norte Gaming cubre el 50% del costo de envío</p>
                       </div>
                     ) : null;
                   })()}
