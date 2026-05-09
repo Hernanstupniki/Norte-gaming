@@ -61,10 +61,9 @@ const PAYMENT_METHODS = [
     label: "Transferencia bancaria",
     provider: "Transferencia",
     method: "Transferencia bancaria",
-    shortDesc: "Te enviamos los datos CBU por WhatsApp al confirmar el pedido.",
+    shortDesc: "Transferí a nuestro alias de MP y envianos el comprobante.",
     badge: null,
-    contextMsg:
-      "Al confirmar el pedido te enviamos por WhatsApp el CBU y los datos para hacer la transferencia. Confirmamos cuando acreditemos el pago.",
+    contextMsg: "__transferencia__",
   },
   {
     id: "efectivo",
@@ -917,9 +916,30 @@ export default function CheckoutPage() {
               </div>
 
               {/* Context message */}
-              <div className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-xs text-zinc-600">
-                {selectedPayment.contextMsg}
-              </div>
+              {selectedPayment.contextMsg === "__transferencia__" ? (
+                <div className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3.5 space-y-2.5">
+                  <p className="text-xs font-bold text-zinc-700">Datos para la transferencia</p>
+                  <div className="grid gap-1.5 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500">Alias</span>
+                      <span className="font-black text-zinc-900 select-all">emiandru</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500">CVU</span>
+                      <span className="font-mono font-bold text-zinc-900 select-all">0000003100011126533844</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500">Titular</span>
+                      <span className="font-semibold text-zinc-900">Emiliano Thomas Andrusyszyn</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-zinc-500">Una vez que confirmes el pedido, envianos el comprobante por WhatsApp. Acreditamos en el día.</p>
+                </div>
+              ) : (
+                <div className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-xs text-zinc-600">
+                  {selectedPayment.contextMsg}
+                </div>
+              )}
             </div>
           </section>
 

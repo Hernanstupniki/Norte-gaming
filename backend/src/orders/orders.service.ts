@@ -156,7 +156,18 @@ export class OrdersService {
             <tr style="font-size:16px;font-weight:bold"><td style="padding:8px 0 3px">TOTAL</td><td style="text-align:right;padding:8px 0 3px">${formatARS(Number(order.total))}</td></tr>
           </table>
 
-          <p style="font-size:13px;color:#555;margin:0">Te contactaremos por WhatsApp para coordinar los próximos pasos. Ante cualquier consulta respondé este email.</p>
+          ${order.payments?.[0]?.method?.toLowerCase().includes('transferencia') ? `
+          <div style="margin:20px 0;padding:16px;background:#fff8f0;border-radius:8px;border:1px solid #fcd9a0">
+            <p style="margin:0 0 10px;font-size:14px;font-weight:bold;color:#b45309">💳 Datos para la transferencia</p>
+            <table style="width:100%;font-size:13px">
+              <tr><td style="color:#888;padding:3px 0;width:80px">Alias</td><td style="font-weight:bold;font-size:15px;color:#111">emiandru</td></tr>
+              <tr><td style="color:#888;padding:3px 0">CVU</td><td style="font-family:monospace;font-weight:bold;color:#111">0000003100011126533844</td></tr>
+              <tr><td style="color:#888;padding:3px 0">Titular</td><td style="color:#111">Emiliano Thomas Andrusyszyn</td></tr>
+              <tr><td style="color:#888;padding:3px 0">Monto</td><td style="font-weight:bold;color:#111">${formatARS(Number(order.total))}</td></tr>
+            </table>
+            <p style="margin:10px 0 0;font-size:12px;color:#92400e">Una vez realizada la transferencia, envianos el comprobante por WhatsApp para confirmar tu pedido.</p>
+          </div>` : ''}
+          <p style="font-size:13px;color:#555;margin:0">Ante cualquier consulta respondé este email o escribinos por WhatsApp.</p>
         </div>
         <div style="background:#f5f5f5;padding:14px 32px;border:1px solid #eee;border-top:none;border-radius:0 0 12px 12px;font-size:12px;color:#888;text-align:center">
           Norte Gaming · nortegaming.com
