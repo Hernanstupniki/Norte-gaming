@@ -563,35 +563,39 @@ export default function CheckoutPage() {
           </div>
 
           {isTransfer && (
-            <div className="mt-6 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 space-y-3">
-              <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">Datos para transferir</p>
+            <div className="mt-6 space-y-2">
+              <p className="text-xs font-bold uppercase tracking-widest text-zinc-400 px-1">Datos para transferir</p>
+
               <div className="rounded-xl border-2 border-zinc-200 bg-white px-4 py-3">
-                <p className="text-xs text-zinc-400 mb-1">Importe</p>
+                <p className="text-xs font-semibold text-zinc-400 mb-0.5">Importe a transferir</p>
                 <p className="text-2xl font-black text-zinc-900">{formatARS(successOrderTotal)}</p>
               </div>
+
               <div className="rounded-xl border-2 border-zinc-200 bg-white px-4 py-3">
-                <p className="text-xs text-zinc-400 mb-1.5">Alias</p>
+                <p className="text-xs font-semibold text-zinc-400 mb-1">Alias</p>
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-lg font-black text-zinc-900">nortegaming.pagos</span>
                   <button type="button" onClick={() => copyToClipboard("nortegaming.pagos", "alias-ok")}
-                    className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-colors ${copiedField === "alias-ok" ? "bg-green-500 text-white" : "bg-zinc-900 text-white hover:bg-zinc-700"}`}>
+                    className={`shrink-0 rounded-lg border-2 px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-colors ${copiedField === "alias-ok" ? "border-green-500 bg-green-500 text-white" : "border-zinc-900 bg-white text-zinc-900 hover:bg-zinc-900 hover:text-white"}`}>
                     {copiedField === "alias-ok" ? "¡Copiado!" : "Copiar"}
                   </button>
                 </div>
               </div>
+
               <div className="rounded-xl border-2 border-zinc-200 bg-white px-4 py-3">
-                <p className="text-xs text-zinc-400 mb-1.5">CVU</p>
+                <p className="text-xs font-semibold text-zinc-400 mb-1">CVU</p>
                 <div className="flex items-center justify-between gap-3">
                   <span className="font-mono text-sm font-bold text-zinc-900 break-all">0000177500091496182530</span>
                   <button type="button" onClick={() => copyToClipboard("0000177500091496182530", "cvu-ok")}
-                    className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-colors ${copiedField === "cvu-ok" ? "bg-green-500 text-white" : "bg-zinc-900 text-white hover:bg-zinc-700"}`}>
+                    className={`shrink-0 rounded-lg border-2 px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-colors ${copiedField === "cvu-ok" ? "border-green-500 bg-green-500 text-white" : "border-zinc-900 bg-white text-zinc-900 hover:bg-zinc-900 hover:text-white"}`}>
                     {copiedField === "cvu-ok" ? "¡Copiado!" : "Copiar"}
                   </button>
                 </div>
               </div>
-              <div className="flex justify-between text-xs px-1">
-                <span className="text-zinc-500">Titular</span>
-                <span className="font-semibold text-zinc-700">Emiliano Thomas Andrusyszyn</span>
+
+              <div className="rounded-xl border-2 border-zinc-200 bg-white px-4 py-3 flex justify-between items-center">
+                <span className="text-xs font-semibold text-zinc-400">Titular</span>
+                <span className="text-sm font-bold text-zinc-900">Emiliano Thomas Andrusyszyn</span>
               </div>
             </div>
           )}
