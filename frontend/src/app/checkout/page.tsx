@@ -593,9 +593,6 @@ export default function CheckoutPage() {
                 <span className="text-zinc-500">Titular</span>
                 <span className="font-semibold text-zinc-700">Emiliano Thomas Andrusyszyn</span>
               </div>
-              <p className="text-xs text-zinc-500 pt-2 border-t border-zinc-200">
-                Envianos el comprobante por WhatsApp para confirmar. Acreditamos en el día.
-              </p>
             </div>
           )}
 
