@@ -615,7 +615,7 @@ export default function CheckoutPage() {
 
   // ── Main checkout ───────────────────────────────────────────────────────────
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8 pb-20 md:px-6 md:py-10 md:pb-10">
+    <main className="mx-auto w-full max-w-6xl overflow-x-hidden px-4 py-8 pb-20 md:px-6 md:py-10 md:pb-10">
       {/* Header */}
       <div className="mb-8">
         <p className="text-xs font-bold uppercase tracking-[0.25em] text-zinc-400">Norte Gaming</p>
@@ -651,7 +651,7 @@ export default function CheckoutPage() {
         )
       )}
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_360px] lg:items-start">
+      <div className="grid w-full gap-8 lg:grid-cols-[1fr_360px] lg:items-start">
         {/* ── Left column ─────────────────────────────────────────────────── */}
         <div className="space-y-5">
 
