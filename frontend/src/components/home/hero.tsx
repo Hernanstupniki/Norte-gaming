@@ -9,7 +9,7 @@ const CARDS = [
     status: "LANZAMIENTO",
     subtitle: "Mouse AJAZZ AJ199 Max Nacodexx",
     imageSrc: "/products/mouse_ajazz_aj199_transparente.png",
-    href: "/tienda",
+    href: "/producto/mouse-ajazz-aj199-max-nacodexx-wireless",
   },
   {
     num: "002",
@@ -17,7 +17,7 @@ const CARDS = [
     status: "YA DISPONIBLE!",
     subtitle: "Teclado AJAZZ AK650",
     imageSrc: "/products/ajazz-ak650.png.png",
-    href: "/tienda",
+    href: "/producto/teclado-ajazz-ak650",
   },
   {
     num: "003",
@@ -25,7 +25,7 @@ const CARDS = [
     status: "DESTACADO",
     subtitle: "Mousepad REDRAGON AK1 S",
     imageSrc: "/products/redragon-ak1-s-mousepad.png.png",
-    href: "/tienda",
+    href: "/producto/mousepad-redragon-ak-s",
   },
 ];
 
