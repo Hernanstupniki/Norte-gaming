@@ -148,13 +148,32 @@ function GamingCard({ card }: { card: typeof CARDS[0] }) {
 
 export function Hero() {
   const [active, setActive] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
+    if (isPaused) return;
     const timer = setInterval(() => {
       setActive((prev) => (prev + 1) % CARDS.length);
     }, 3000);
     return () => clearInterval(timer);
-  }, []);
+  }, [isPaused]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.touches[0].clientX);
+    setIsPaused(true);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStart === null) return;
+    const diff = touchStart - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) setActive((prev) => (prev + 1) % CARDS.length);
+      else setActive((prev) => (prev - 1 + CARDS.length) % CARDS.length);
+    }
+    setTouchStart(null);
+    setTimeout(() => setIsPaused(false), 3000);
+  };
 
   return (
     <section className="relative overflow-hidden border-b border-zinc-200 bg-gradient-to-b from-zinc-50 to-white">
@@ -170,7 +189,11 @@ export function Hero() {
 
         {/* Mobile/tablet: carousel */}
         <div className="lg:hidden">
-          <div className="relative overflow-hidden">
+          <div
+            className="relative overflow-hidden"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             <div
               className="flex transition-transform duration-500 ease-in-out"
               style={{ transform: `translateX(-${active * 100}%)` }}
