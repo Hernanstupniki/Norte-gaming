@@ -156,7 +156,7 @@ export function ProductDetailClient({
               disabled={outOfStock}
               className="rounded-md border-2 border-black bg-black px-4 py-3 text-xs font-bold uppercase tracking-widest text-white disabled:cursor-not-allowed disabled:border-zinc-300 disabled:bg-zinc-300 disabled:text-zinc-600"
             >
-              {outOfStock ? "Sin stock" : "Comprar ahora"}
+              {outOfStock ? "Sin stock" : "Comprar"}
             </button>
           </div>
 
