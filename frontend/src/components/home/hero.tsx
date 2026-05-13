@@ -102,7 +102,7 @@ function GamingCard({ card }: { card: typeof CARDS[0] }) {
       </div>
 
       {/* Product image */}
-      <div className="relative mx-auto flex h-52 w-full max-w-[85%] items-center justify-center py-4">
+      <div className="relative mx-auto flex h-72 w-full max-w-[85%] items-center justify-center py-6">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={card.imageSrc}
@@ -148,44 +148,11 @@ function GamingCard({ card }: { card: typeof CARDS[0] }) {
 export function Hero() {
   return (
     <section className="relative overflow-hidden border-b border-zinc-200 bg-gradient-to-b from-zinc-50 to-white">
-      {/* Grid background */}
       <div className="absolute inset-0 opacity-35 [background-image:linear-gradient(to_right,#d4d4d8_1px,transparent_1px),linear-gradient(to_bottom,#d4d4d8_1px,transparent_1px)] [background-size:28px_28px]" />
-
-      <div className="relative mx-auto w-full max-w-7xl px-4 py-12 md:px-6 md:py-16">
-        {/* Section header */}
-        <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="inline-flex border border-zinc-300 bg-white px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-zinc-600">
-              Norte Gaming / Argentina
-            </p>
-            <h1 className="mt-3 text-3xl font-black leading-tight tracking-tight text-zinc-950 md:text-4xl">
-              Equipá tu setup con<br className="hidden sm:block" /> productos originales
-            </h1>
-          </div>
-          <Link
-            href="/tienda"
-            className="self-start rounded-md border-2 border-red-600 bg-red-600 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-[4px_4px_0_#111] transition hover:-translate-y-0.5 sm:self-auto"
-          >
-            Ver todos
-          </Link>
-        </div>
-
-        {/* Cards grid */}
+      <div className="relative mx-auto w-full max-w-7xl px-4 py-10 md:px-6">
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {CARDS.map((card) => (
             <GamingCard key={card.num} card={card} />
-          ))}
-        </div>
-
-        {/* Trust badges */}
-        <div className="mt-6 flex flex-wrap gap-2">
-          {["Productos originales", "Envíos a todo el país", "Atención directa"].map((b) => (
-            <span
-              key={b}
-              className="rounded-full border border-zinc-300 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-600"
-            >
-              {b}
-            </span>
           ))}
         </div>
       </div>
