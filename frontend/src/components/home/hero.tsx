@@ -102,7 +102,7 @@ function GamingCard({ card }: { card: typeof CARDS[0] }) {
       </div>
 
       {/* Product image */}
-      <div className="relative mx-auto flex h-72 w-full max-w-[85%] items-center justify-center py-6">
+      <div className="relative mx-auto flex h-96 w-full max-w-[85%] items-center justify-center py-6">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={card.imageSrc}
