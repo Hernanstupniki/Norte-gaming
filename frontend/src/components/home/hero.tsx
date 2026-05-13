@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 
 const CARDS = [
@@ -126,7 +128,7 @@ function GamingCard({ card }: { card: typeof CARDS[0] }) {
         <p className="mb-4 text-[11px] text-zinc-400">{card.subtitle}</p>
 
         {/* CTA button */}
-        <button className="w-full rounded-sm border-2 border-white bg-red-600 py-3 text-[11px] font-black uppercase tracking-[0.2em] text-white shadow-[3px_3px_0_#000] transition-all group-hover:shadow-[1px_1px_0_#000] group-hover:translate-x-[2px] group-hover:translate-y-[2px]">
+        <button className="w-full rounded-sm border-2 border-white bg-red-600 py-3 text-[11px] font-black uppercase tracking-[0.2em] text-white shadow-[3px_3px_0_#000] transition-all group-hover:shadow-[1px_1px_0_#000]">
           Comprar ahora
         </button>
       </div>
