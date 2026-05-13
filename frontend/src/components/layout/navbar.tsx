@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 
 const links = [
   ...categories.map((cat) => ({ href: `/tienda?categoria=${cat.slug}`, label: cat.name })),
-  { href: "/nosotros", label: "Nosotros" },
   { href: "/faq", label: "Preguntas frecuentes" },
   { href: "/contacto", label: "Contacto" },
   { href: "/tienda", label: "Ver todo" },
