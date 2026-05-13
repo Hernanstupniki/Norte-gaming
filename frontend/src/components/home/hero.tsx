@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const CARDS = [
   {
@@ -146,15 +147,57 @@ function GamingCard({ card }: { card: typeof CARDS[0] }) {
 }
 
 export function Hero() {
+  const [active, setActive] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActive((prev) => (prev + 1) % CARDS.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <section className="relative overflow-hidden border-b border-zinc-200 bg-gradient-to-b from-zinc-50 to-white">
       <div className="absolute inset-0 opacity-35 [background-image:linear-gradient(to_right,#d4d4d8_1px,transparent_1px),linear-gradient(to_bottom,#d4d4d8_1px,transparent_1px)] [background-size:28px_28px]" />
       <div className="relative mx-auto w-full max-w-7xl px-4 py-10 md:px-6">
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+
+        {/* Desktop: grid */}
+        <div className="hidden gap-5 lg:grid lg:grid-cols-3">
           {CARDS.map((card) => (
             <GamingCard key={card.num} card={card} />
           ))}
         </div>
+
+        {/* Mobile/tablet: carousel */}
+        <div className="lg:hidden">
+          <div className="relative overflow-hidden">
+            <div
+              className="flex transition-transform duration-500 ease-in-out"
+              style={{ transform: `translateX(-${active * 100}%)` }}
+            >
+              {CARDS.map((card) => (
+                <div key={card.num} className="w-full shrink-0 px-1">
+                  <GamingCard card={card} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Dots */}
+          <div className="mt-4 flex justify-center gap-2">
+            {CARDS.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setActive(i)}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  i === active ? "w-6 bg-red-600" : "w-2 bg-zinc-400"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
       </div>
     </section>
   );
