@@ -13,9 +13,9 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { AuthService } from './auth.service';
 
 const AUTH_RATE_LIMITS = {
-  register: { limit: 3, ttl: 10 * 60_000 },
-  login: { limit: 5, ttl: 15 * 60_000 },
-  refresh: { limit: 20, ttl: 60_000 },
+  register: { limit: 10, ttl: 10 * 60_000 },
+  login: { limit: 30, ttl: 15 * 60_000 },
+  refresh: { limit: 60, ttl: 60_000 },
   forgotPassword: { limit: 3, ttl: 15 * 60_000 },
   resetPassword: { limit: 5, ttl: 15 * 60_000 },
   changePassword: { limit: 5, ttl: 10 * 60_000 },
