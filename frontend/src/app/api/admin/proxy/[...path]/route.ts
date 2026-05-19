@@ -2,7 +2,10 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { ADMIN_SESSION_COOKIE } from "@/lib/admin-session";
 
-const getApiBaseUrl = () => "http://norte-gaming-api:4000/api";
+const getApiBaseUrl = () =>
+  process.env.INTERNAL_API_URL ||
+  process.env.NEXT_INTERNAL_API_URL ||
+  "http://norte-gaming-api:4000/api";
 
 const proxyRequest = async (
   request: Request,
