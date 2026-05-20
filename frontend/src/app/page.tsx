@@ -6,7 +6,7 @@ import { TrustGrid } from "@/components/home/trust-grid";
 import { fetchCatalogProducts } from "@/lib/backend-api";
 
 export default async function HomePage() {
-  const products = await fetchCatalogProducts();
+  const products = await fetchCatalogProducts().catch(() => []);
 
   const featured = products.filter((item) => item.isFeatured).slice(0, 4);
   const activeOffers = products.filter((item) => Boolean(item.previousPrice)).slice(0, 4);
