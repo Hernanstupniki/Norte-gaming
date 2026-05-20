@@ -31,36 +31,29 @@ services:
       NODE_ENV: production
       PORT: 4000
       TZ: ${GENERIC_TIMEZONE:-America/Argentina/Buenos_Aires}
-
       DATABASE_URL: postgresql://postgres:${AUTHENTICATION_API_KEY}@db:5432/norte_gaming?schema=public
-
       BACKEND_URL: ${BACKEND_URL:-https://nortegaming.com}
       FRONTEND_URL: ${FRONTEND_URL:-https://nortegaming.com}
       CORS_ORIGIN: ${CORS_ORIGIN:-https://nortegaming.com}
-
       MERCADO_PAGO_ACCESS_TOKEN: ${MERCADO_PAGO_ACCESS_TOKEN}
-
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
       JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-7d}
       JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-30d}
-
       SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_SECURE: ${SMTP_SECURE:-false}
       SMTP_USER: ${SMTP_USER}
       SMTP_PASS: ${SMTP_PASS}
       CONTACT_RECEIVER_EMAIL: ${CONTACT_RECEIVER_EMAIL}
-
     volumes:
       - /srv/norte-gaming/uploads:/app/uploads
-
     command: sh -c "npx prisma migrate deploy; node dist/src/main.js"
-
     networks:
-      - norte_internal
-      - proxy
-
+      norte_internal:
+        aliases:
+          - norte-gaming-api
+      proxy:
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
