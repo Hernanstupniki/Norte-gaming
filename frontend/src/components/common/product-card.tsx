@@ -27,7 +27,7 @@ export function ProductCard({ product }: { product: Product }) {
       <div className="mt-3 space-y-2.5">
         <div>
           {product.previousPrice ? (
-            <p className="text-xs text-zinc-500 line-through">{formatARS(product.previousPrice)}</p>
+            <p className="text-xs text-red-500 line-through">{formatARS(product.previousPrice)}</p>
           ) : null}
           <p className="text-2xl font-bold text-zinc-950">{formatARS(product.price)}</p>
           {product.installments ? <p className="text-xs text-zinc-600">{product.installments}</p> : null}
