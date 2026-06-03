@@ -14,11 +14,11 @@ const CARDS = [
   },
   {
     num: "002",
-    title: "AJAZZ\nAK650",
+    title: "AJAZZ\nAK820 MAX",
     status: "YA DISPONIBLE!",
-    subtitle: "Teclado AJAZZ AK650",
-    imageSrc: "/products/ajazz-ak650.png.png",
-    href: "/producto/teclado-ajazz-ak650",
+    subtitle: "Teclado Magnético Ajazz AK820 Max Plus Nacodexx",
+    imageSrc: "/products/ajazz-ak820-max.png.png",
+    href: "/producto/teclado-magnetico-ajazz-ak820-max-plus-nacodexx",
   },
   {
     num: "003",
