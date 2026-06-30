@@ -138,6 +138,14 @@ export function ProductDetailClient({
             <p className={outOfStock ? "text-sm font-semibold text-red-600" : "text-sm text-zinc-600"}>
               {outOfStock ? "Sin stock" : "Stock disponible"}
             </p>
+            {product.freeShipping && (
+              <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700">
+                <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M6.5 3A1.5 1.5 0 005 4.5v.75H3.5A1.5 1.5 0 002 6.75v7A1.5 1.5 0 003.5 15.25h.293a2.25 2.25 0 004.414 0h3.586a2.25 2.25 0 004.414 0h.293A1.5 1.5 0 0018 13.75v-3.19a1.5 1.5 0 00-.44-1.06l-2.56-2.56A1.5 1.5 0 0013.94 6.5H13V4.5A1.5 1.5 0 0011.5 3h-5zM6.5 4.5h5V9H6.5V4.5zM5 10.5v3.5H4.207a2.25 2.25 0 00-.457-.75H5v-2.75zM13 7.75h.94l2.56 2.56v.44H13V7.75z" />
+                </svg>
+                Envío gratis
+              </span>
+            )}
           </div>
 
           <div className="grid gap-2 sm:grid-cols-2">
