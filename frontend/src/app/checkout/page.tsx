@@ -60,10 +60,10 @@ const PAYMENT_METHODS = [
     label: "Mercado Pago",
     provider: "Mercado Pago",
     method: "Mercado Pago",
-    shortDesc: "Tarjeta de crédito, débito o transferencia MP.",
-    badge: null,
+    shortDesc: "Tarjeta de crédito, débito o transferencia MP. Aplica recargo del 5%.",
+    badge: "+5%",
     contextMsg:
-      "Al confirmar te redirigiremos a Mercado Pago para completar el pago de forma segura. Aceptan tarjetas de crédito, débito y transferencias.",
+      "Al confirmar te redirigiremos a Mercado Pago para completar el pago de forma segura. Aceptan tarjetas de crédito, débito y transferencias. Se aplica un recargo del 5% sobre el subtotal.",
   },
   {
     id: "efectivo",
@@ -281,7 +281,9 @@ export default function CheckoutPage() {
     : isPaidShipping && subtotal < FREE_SHIPPING_THRESHOLD
       ? SHIPPING_TIERS[0].customerPrice
       : selectedShipping ? Number(selectedShipping.cost) : 0;
-  const total = subtotal + shippingCost - couponDiscount;
+  const MP_SURCHARGE_RATE = 0.05;
+  const mpSurcharge = selectedPaymentId === "mercado-pago" ? Math.round(subtotal * MP_SURCHARGE_RATE) : 0;
+  const total = subtotal + shippingCost - couponDiscount + mpSurcharge;
 
   const applyCoupon = async () => {
     if (!couponInput.trim()) return;
@@ -1104,6 +1106,12 @@ export default function CheckoutPage() {
                 <div className="flex justify-between text-green-600">
                   <span>Descuento ({couponCode})</span>
                   <span className="font-semibold">-{formatARS(couponDiscount)}</span>
+                </div>
+              )}
+              {mpSurcharge > 0 && (
+                <div className="flex justify-between text-zinc-600">
+                  <span>Recargo Mercado Pago (5%)</span>
+                  <span className="font-semibold">+{formatARS(mpSurcharge)}</span>
                 </div>
               )}
               <div className="flex justify-between border-t border-zinc-200 pt-2 text-zinc-900">
