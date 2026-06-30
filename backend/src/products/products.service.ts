@@ -326,6 +326,41 @@ export class ProductsService {
     return saleRecord;
   }
 
+  async updateSale(saleId: string, quantity: number) {
+    const sale = await this.prisma.salesRecord.findUnique({ where: { id: saleId } });
+    if (!sale) throw new NotFoundException('Registro de venta no encontrado');
+    const totalPrice = quantity * Number(sale.unitPrice);
+    const diff = quantity - sale.quantity;
+    const [updated] = await this.prisma.$transaction([
+      this.prisma.salesRecord.update({
+        where: { id: saleId },
+        data: {
+          quantity,
+          totalPrice: new Prisma.Decimal(totalPrice.toString()),
+        },
+        include: { product: { select: { id: true, name: true, sku: true } } },
+      }),
+      this.prisma.product.update({
+        where: { id: sale.productId },
+        data: { soldCount: { increment: diff } },
+      }),
+    ]);
+    return updated;
+  }
+
+  async deleteSale(saleId: string) {
+    const sale = await this.prisma.salesRecord.findUnique({ where: { id: saleId } });
+    if (!sale) throw new NotFoundException('Registro de venta no encontrado');
+    await this.prisma.$transaction([
+      this.prisma.salesRecord.delete({ where: { id: saleId } }),
+      this.prisma.product.update({
+        where: { id: sale.productId },
+        data: { soldCount: { decrement: sale.quantity } },
+      }),
+    ]);
+    return { deleted: true };
+  }
+
   async getSalesHistory(limit = 100) {
     const sales = await this.prisma.salesRecord.findMany({
       include: {

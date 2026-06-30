@@ -360,6 +360,24 @@ export const adminRegisterSale = async (
   return response.json();
 };
 
+export const adminUpdateSale = async (saleId: string, quantity: number) => {
+  const response = await fetch(getAdminProxyUrl(`products/admin/sales/${saleId}`), {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ quantity }),
+  });
+  if (!response.ok) throw new Error(await readApiError(response, "Failed to update sale"));
+  return response.json();
+};
+
+export const adminDeleteSale = async (saleId: string) => {
+  const response = await fetch(getAdminProxyUrl(`products/admin/sales/${saleId}`), {
+    method: "DELETE",
+  });
+  if (!response.ok) throw new Error(await readApiError(response, "Failed to delete sale"));
+  return response.json();
+};
+
 export const adminGetSalesHistory = async () => {
   const response = await fetch(getAdminProxyUrl("products/admin/sales-history"), {
     cache: "no-store",

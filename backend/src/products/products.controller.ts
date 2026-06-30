@@ -93,6 +93,20 @@ export class ProductsController {
 
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
+  @Patch('admin/sales/:id')
+  updateSale(@Param('id') id: string, @Body() body: { quantity: number }) {
+    return this.productsService.updateSale(id, body.quantity);
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN)
+  @Delete('admin/sales/:id')
+  deleteSale(@Param('id') id: string) {
+    return this.productsService.deleteSale(id);
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.productsService.softDelete(id);
