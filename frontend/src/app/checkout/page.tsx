@@ -834,7 +834,7 @@ export default function CheckoutPage() {
                       </svg>
                       <div>
                         <p className="text-sm font-black text-green-700">¡Envío GRATIS en tu pedido!</p>
-                        <p className="text-xs text-green-600">Todos los productos incluyen envío gratis.</p>
+                        <p className="text-xs text-green-600">Los productos de tu pedido incluyen envío gratis.</p>
                       </div>
                     </div>
                   ) : subtotal >= FREE_SHIPPING_THRESHOLD ? (
@@ -882,7 +882,7 @@ export default function CheckoutPage() {
                       const sel = selectedShippingId === method.id;
                       const isRetiro = Number(method.cost) === 0 && method.name.toLowerCase() !== "envío gratis";
                       const isFree = Number(method.cost) === 0;
-                      const showFree = isFree || subtotal >= FREE_SHIPPING_THRESHOLD;
+                      const showFree = isFree || subtotal >= FREE_SHIPPING_THRESHOLD || allProductsFreeShipping;
                       return (
                         <button
                           key={method.id}
@@ -917,7 +917,7 @@ export default function CheckoutPage() {
                   </div>
 
                   {/* Badge 50% — solo para envío a domicilio */}
-                  {isPaidShipping && subtotal < FREE_SHIPPING_THRESHOLD && !isRetiroMethod && (
+                  {isPaidShipping && subtotal < FREE_SHIPPING_THRESHOLD && !isRetiroMethod && !allProductsFreeShipping && (
                     <p className="flex items-center gap-1.5 text-xs font-bold text-red-600">
                       <svg className="h-3.5 w-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M9.664 1.319a.75.75 0 01.672 0 41.059 41.059 0 018.198 5.424.75.75 0 01-.254 1.285 31.372 31.372 0 00-7.86 3.83.75.75 0 01-.84 0 31.508 31.508 0 00-2.08-1.287V9.394c0-.244.065-.473.18-.668a29.7 29.7 0 00-3.008-1.61.75.75 0 01-.254-1.285 41.059 41.059 0 018.198-5.424zM4.5 11.25a.75.75 0 00-.75.75v4.5c0 .414.336.75.75.75h11a.75.75 0 00.75-.75v-4.5a.75.75 0 00-.75-.75h-11z" clipRule="evenodd" />
