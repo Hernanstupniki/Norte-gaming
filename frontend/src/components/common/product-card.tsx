@@ -24,7 +24,7 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
       </Link>
 
-      <div className="mt-3 space-y-2.5">
+      <div className="mt-3 flex flex-1 flex-col">
         <div>
           {product.previousPrice ? (
             <p className="text-xs text-red-500 line-through">{formatARS(product.previousPrice)}</p>
@@ -37,19 +37,19 @@ export function ProductCard({ product }: { product: Product }) {
           {product.freeShipping && (
             <p className="mt-1 text-xs font-semibold text-green-600">Envío gratis</p>
           )}
-          {product.badges.length > 0 ? (
-            <div className="mt-2 flex flex-wrap gap-2">
-              {product.badges.map((badge) => (
-                <span
-                  key={badge}
-                  className={`rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-wider ${badgeStyles[badge]}`}
-                >
-                  {badge.replace("-", " ")}
-                </span>
-              ))}
-            </div>
-          ) : null}
         </div>
+        {product.badges.length > 0 ? (
+          <div className="mt-auto pt-3 flex flex-wrap gap-2">
+            {product.badges.map((badge) => (
+              <span
+                key={badge}
+                className={`rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-wider ${badgeStyles[badge]}`}
+              >
+                {badge.replace("-", " ")}
+              </span>
+            ))}
+          </div>
+        ) : null}
       </div>
     </article>
   );
