@@ -42,6 +42,7 @@ export interface ApiProduct {
   soldCount: number;
   isFeatured?: boolean;
   isOnOffer?: boolean;
+  freeShipping?: boolean;
   brand: ApiBrand;
   category: ApiCategory;
   specs: ApiProductSpec[];
@@ -125,6 +126,7 @@ export const mapApiProductToProduct = (apiProduct: ApiProduct): Product => {
     reviewCount: apiProduct.reviews?.length ?? 0,
     sold: apiProduct.soldCount,
     isFeatured: Boolean(apiProduct.isFeatured),
+    freeShipping: Boolean(apiProduct.freeShipping),
   };
 };
 

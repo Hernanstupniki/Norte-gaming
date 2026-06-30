@@ -29,6 +29,7 @@ export interface Product {
   reviewCount: number;
   sold: number;
   isFeatured?: boolean;
+  freeShipping?: boolean;
 }
 
 export interface CartItem {

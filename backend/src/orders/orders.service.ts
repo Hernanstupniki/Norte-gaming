@@ -268,7 +268,8 @@ export class OrdersService {
       discountTotal = discount;
     }
 
-    const shippingCost = Number(shippingMethod.cost);
+    const allFreeShipping = cart.items.every((item) => item.product.freeShipping);
+    const shippingCost = allFreeShipping ? 0 : Number(shippingMethod.cost);
     const total = Number((subtotal - discountTotal + shippingCost).toFixed(2));
 
     const order = await this.prisma.$transaction(async (tx) => {

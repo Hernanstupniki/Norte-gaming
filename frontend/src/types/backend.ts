@@ -19,6 +19,7 @@ export interface CreateProductDto {
   soldCount?: number;
   isFeatured?: boolean;
   isOnOffer?: boolean;
+  freeShipping?: boolean;
   isActive?: boolean;
   brandId: string;
   categoryId: string;

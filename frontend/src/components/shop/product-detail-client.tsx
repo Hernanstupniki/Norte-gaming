@@ -42,8 +42,10 @@ export function ProductDetailClient({
     () =>
       outOfStock
         ? "Sin stock por el momento. Consultá disponibilidad con nuestro equipo."
-        : "Envíos a todo el país con demora estimada de 1 semana.",
-    [outOfStock, product.stock],
+        : product.freeShipping
+          ? "Envío gratis a todo el país con demora estimada de 1 semana."
+          : "Envíos a todo el país con demora estimada de 1 semana.",
+    [outOfStock, product.stock, product.freeShipping],
   );
 
   return (

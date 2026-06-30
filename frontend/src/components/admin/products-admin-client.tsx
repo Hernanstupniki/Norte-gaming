@@ -41,6 +41,7 @@ interface ProductFormState {
   stock: string;
   isFeatured: boolean;
   isOnOffer: boolean;
+  freeShipping: boolean;
   isActive: boolean;
   brandId: string;
   categoryId: string;
@@ -61,6 +62,7 @@ const initialForm = (): ProductFormState => ({
   stock: "",
   isFeatured: false,
   isOnOffer: false,
+  freeShipping: false,
   isActive: true,
   brandId: "",
   categoryId: "",
@@ -92,6 +94,7 @@ const toFormFromProduct = (product: AdminProductItem): ProductFormState => ({
   stock: String(product.stock ?? "0"),
   isFeatured: Boolean(product.isFeatured),
   isOnOffer: Boolean(product.isOnOffer) || product.previousPrice !== null,
+  freeShipping: Boolean(product.freeShipping),
   isActive: Boolean(product.isActive),
   brandId: product.brandId || "",
   categoryId: product.categoryId || "",
@@ -401,6 +404,7 @@ export function ProductsAdminClient() {
       stock: parsedStock,
       isFeatured: form.isFeatured,
       isOnOffer: form.isOnOffer,
+      freeShipping: form.freeShipping,
       isActive: form.isActive,
       brandId: form.brandId,
       categoryId: form.categoryId,
@@ -620,6 +624,7 @@ export function ProductsAdminClient() {
               </div>
               <div className="mt-3 flex flex-wrap gap-4 text-sm text-zinc-700">
                 <label className="flex items-center gap-2"><input type="checkbox" checked={form.isFeatured} onChange={(event) => setField("isFeatured", event.target.checked)} /> Destacado</label>
+                <label className="flex items-center gap-2"><input type="checkbox" checked={form.freeShipping} onChange={(event) => setField("freeShipping", event.target.checked)} /> Envío gratis</label>
                 <label className="flex items-center gap-2">
                   <input
                     type="checkbox"

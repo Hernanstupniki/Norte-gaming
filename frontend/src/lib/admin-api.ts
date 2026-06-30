@@ -18,6 +18,7 @@ export interface AdminProductItem {
   stock: number;
   isFeatured: boolean;
   isOnOffer: boolean;
+  freeShipping: boolean;
   isActive: boolean;
   brandId: string;
   categoryId: string;

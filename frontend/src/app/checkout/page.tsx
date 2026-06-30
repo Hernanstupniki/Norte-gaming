@@ -270,14 +270,17 @@ export default function CheckoutPage() {
     PAYMENT_METHODS.find((m) => m.id === selectedPaymentId) ?? PAYMENT_METHODS[0];
   const selectedShipping = shippingMethods.find((m) => m.id === selectedShippingId);
   const isNew = selectedAddressId === "new";
+  const allProductsFreeShipping = cartProducts.length > 0 && cartProducts.every(({ product }) => product.freeShipping);
   const isRetiroMethod = selectedShipping
     ? Number(selectedShipping.cost) === 0 && selectedShipping.name.toLowerCase() !== "envío gratis"
     : false;
   const isPaidShipping = selectedShipping ? Number(selectedShipping.cost) > 0 : false;
   // Customer pays 50% of shipping cost; real cost stays in DB for reference
-  const shippingCost = isPaidShipping && subtotal < FREE_SHIPPING_THRESHOLD
-    ? SHIPPING_TIERS[0].customerPrice
-    : selectedShipping ? Number(selectedShipping.cost) : 0;
+  const shippingCost = allProductsFreeShipping
+    ? 0
+    : isPaidShipping && subtotal < FREE_SHIPPING_THRESHOLD
+      ? SHIPPING_TIERS[0].customerPrice
+      : selectedShipping ? Number(selectedShipping.cost) : 0;
   const total = subtotal + shippingCost - couponDiscount;
 
   const applyCoupon = async () => {
@@ -823,8 +826,18 @@ export default function CheckoutPage() {
                 </div>
               ) : (
                 <>
-                  {/* Envío gratis a partir de $150.000 */}
-                  {subtotal >= FREE_SHIPPING_THRESHOLD ? (
+                  {/* Envío gratis por producto */}
+                  {allProductsFreeShipping ? (
+                    <div className="flex items-center gap-3 rounded-xl border-2 border-green-500 bg-green-50 px-4 py-3.5">
+                      <svg className="h-5 w-5 shrink-0 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+                      </svg>
+                      <div>
+                        <p className="text-sm font-black text-green-700">¡Envío GRATIS en tu pedido!</p>
+                        <p className="text-xs text-green-600">Todos los productos incluyen envío gratis.</p>
+                      </div>
+                    </div>
+                  ) : subtotal >= FREE_SHIPPING_THRESHOLD ? (
                     <div className="flex items-center gap-3 rounded-xl border-2 border-green-500 bg-green-50 px-4 py-3.5">
                       <svg className="h-5 w-5 shrink-0 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
@@ -834,7 +847,7 @@ export default function CheckoutPage() {
                         <p className="text-xs text-green-600">Tu pedido supera los {formatARS(FREE_SHIPPING_THRESHOLD)} — el envío no tiene costo.</p>
                       </div>
                     </div>
-                  ) : (
+                  ) : !allProductsFreeShipping && (
                     <>
                       {/* Progreso hacia envío gratis */}
                       {(() => {

@@ -184,6 +184,7 @@ export class ProductsService {
         stock: dto.stock,
         isFeatured: dto.isFeatured ?? false,
         isOnOffer: dto.isOnOffer ?? false,
+        freeShipping: dto.freeShipping ?? false,
         brandId: dto.brandId,
         categoryId: dto.categoryId,
         images: {
@@ -248,6 +249,7 @@ export class ProductsService {
           stock: dto.stock,
           isFeatured: dto.isFeatured,
           isOnOffer: dto.isOnOffer,
+          freeShipping: dto.freeShipping,
           isActive: dto.isActive,
           brandId: dto.brandId,
           categoryId: dto.categoryId,

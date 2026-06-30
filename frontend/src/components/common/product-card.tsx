@@ -34,6 +34,9 @@ export function ProductCard({ product }: { product: Product }) {
           <p className={`mt-1 text-xs ${outOfStock ? "font-semibold text-red-600" : "text-zinc-500"}`}>
             {outOfStock ? "Sin stock" : "Disponible"}
           </p>
+          {product.freeShipping && (
+            <p className="mt-1 text-xs font-semibold text-green-600">Envío gratis</p>
+          )}
           {product.badges.length > 0 ? (
             <div className="mt-2 flex flex-wrap gap-2">
               {product.badges.map((badge) => (

@@ -70,6 +70,11 @@ export class CreateProductDto {
   @IsOptional()
   @Type(() => Boolean)
   @IsBoolean()
+  freeShipping?: boolean;
+
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
   isActive?: boolean;
 
   @IsString()
