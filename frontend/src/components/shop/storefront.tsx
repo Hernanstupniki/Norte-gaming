@@ -177,6 +177,9 @@ export function Storefront() {
         result = [...result].sort((a, b) => Number(Boolean(b.isFeatured)) - Number(Boolean(a.isFeatured)));
     }
 
+    // Productos sin stock siempre al fondo, respetando el orden aplicado arriba
+    result = [...result].sort((a, b) => Number(a.stock <= 0) - Number(b.stock <= 0));
+
     return result;
   }, [brand, category, maxPrice, onlySaved, favorites, products, search, sort]);
 
