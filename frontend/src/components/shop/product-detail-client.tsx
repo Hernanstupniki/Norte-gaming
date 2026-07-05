@@ -136,7 +136,7 @@ export function ProductDetailClient({
         </div>
 
         <div className="space-y-4">
-          <p className="text-xs uppercase tracking-[0.25em] text-zinc-500">{product.brand}</p>
+          <p className="text-xs uppercase tracking-[0.25em] text-red-600 font-bold">{product.brand}</p>
           <h1 className="text-3xl font-black tracking-tight text-zinc-950">{product.name}</h1>
           <p className="text-sm text-zinc-600">{shortDescription}</p>
 
@@ -146,7 +146,7 @@ export function ProductDetailClient({
             ) : null}
             <p className="text-4xl font-black text-zinc-950">{formatARS(product.price)}</p>
             {product.installments ? <p className="text-sm text-zinc-600">{product.installments}</p> : null}
-            <p className={outOfStock ? "text-sm font-semibold text-red-600" : "text-sm text-zinc-600"}>
+            <p className={outOfStock ? "text-sm font-semibold text-red-600" : "text-sm font-semibold text-green-600"}>
               {outOfStock ? "Sin stock" : "Stock disponible"}
             </p>
             {product.freeShipping && (
@@ -181,10 +181,38 @@ export function ProductDetailClient({
             </button>
           </div>
 
-          <div className="grid gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700">
-            <p>Envíos: {shippingEta}</p>
-            <p>Pagos: distintos medios de pago disponibles (Mercado Pago, tarjetas y transferencia).</p>
-            <p>Retiro: disponible solo en Posadas, Misiones.</p>
+          <div className="grid grid-cols-3 gap-3">
+            {/* Envíos */}
+            <div className="flex flex-col items-start gap-2 rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+              <svg className="h-7 w-7 shrink-0 text-red-600" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+              </svg>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-wide text-zinc-900">Envíos a todo el país</p>
+                <p className="mt-0.5 text-[10px] text-zinc-500">{product.freeShipping ? "Envío gratis con demora estimada de 1 semana." : "Demora estimada de 1 semana."}</p>
+              </div>
+            </div>
+            {/* Medios de pago */}
+            <div className="flex flex-col items-start gap-2 rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+              <svg className="h-7 w-7 shrink-0 text-red-600" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+              </svg>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-wide text-zinc-900">Medios de pago</p>
+                <p className="mt-0.5 text-[10px] text-zinc-500">Mercado Pago, tarjetas y transferencia.</p>
+              </div>
+            </div>
+            {/* Retiro */}
+            <div className="flex flex-col items-start gap-2 rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+              <svg className="h-7 w-7 shrink-0 text-red-600" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+              </svg>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-wide text-zinc-900">Retiro en Posadas</p>
+                <p className="mt-0.5 text-[10px] text-zinc-500">Retiro disponible solo en Posadas, Misiones.</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
