@@ -58,9 +58,9 @@ export function ProductDetailClient({
           </svg>
         </Link>
         <span>›</span>
-        <Link href={`/catalogo?category=${product.category}`} className="capitalize hover:text-zinc-800 transition-colors">{product.category}</Link>
+        <Link href={`/catalogo?categoria=${encodeURIComponent(product.category)}`} className="capitalize hover:text-zinc-800 transition-colors">{product.category}</Link>
         <span>›</span>
-        <Link href={`/catalogo?brand=${product.brand}`} className="hover:text-zinc-800 transition-colors">{product.brand}</Link>
+        <Link href={`/catalogo?marca=${encodeURIComponent(product.brand)}`} className="hover:text-zinc-800 transition-colors">{product.brand}</Link>
         <span>›</span>
         <span className="text-zinc-900 font-medium truncate max-w-[180px] sm:max-w-xs">{product.name}</span>
       </nav>

@@ -51,7 +51,7 @@ export function Storefront() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [search, setSearch] = useState(params.get("q") || "");
   const [category, setCategory] = useState(params.get("categoria") || "all");
-  const [brand, setBrand] = useState("all");
+  const [brand, setBrand] = useState(params.get("marca") || "all");
   const [maxPrice, setMaxPrice] = useState(950000);
   const [priceLimit, setPriceLimit] = useState(950000);
   const [sort, setSort] = useState<SortMode>("destacados");
@@ -66,6 +66,7 @@ export function Storefront() {
 
   useEffect(() => {
     setCategory(params.get("categoria") || "all");
+    setBrand(params.get("marca") || "all");
     setSearch(params.get("q") || "");
   }, [params]);
 
