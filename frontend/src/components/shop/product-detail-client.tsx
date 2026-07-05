@@ -50,6 +50,17 @@ export function ProductDetailClient({
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-6">
+      {/* Breadcrumb */}
+      <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-1.5 text-xs text-zinc-500">
+        <Link href="/" className="hover:text-zinc-800 transition-colors">Inicio</Link>
+        <span>/</span>
+        <Link href={`/catalogo?category=${product.category}`} className="capitalize hover:text-zinc-800 transition-colors">{product.category}</Link>
+        <span>/</span>
+        <Link href={`/catalogo?brand=${product.brand}`} className="hover:text-zinc-800 transition-colors">{product.brand}</Link>
+        <span>/</span>
+        <span className="text-zinc-900 font-medium truncate max-w-[180px] sm:max-w-xs">{product.name}</span>
+      </nav>
+
       <div className="grid gap-8 lg:grid-cols-2">
         <div>
           <div className="relative">
