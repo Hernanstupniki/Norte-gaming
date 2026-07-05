@@ -41,6 +41,9 @@ export default function AdminLayout({
     };
   }, []);
 
+  const [navOpen, setNavOpen] = useState(false);
+  const activeLabel = navItems.find((item) => pathname === item.href)?.label ?? "Menú";
+
   if (pathname === "/admin/login") {
     return <>{children}</>;
   }
@@ -49,17 +52,35 @@ export default function AdminLayout({
     <div className="min-h-screen bg-zinc-100">
       <div className="mx-auto grid w-full max-w-7xl gap-4 px-3 py-4 md:gap-6 md:px-6 md:py-8 lg:grid-cols-[260px_1fr]">
         <aside className="h-fit rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm md:p-4 lg:sticky lg:top-6">
-          <p className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">Panel Admin</p>
-          <h1 className="mt-2 text-2xl font-black tracking-tight text-zinc-950 md:text-3xl">Norte Gaming</h1>
-          <p className="mt-2 text-xs text-zinc-600 md:text-sm">Gestión centralizada del catálogo.</p>
+          {/* Header siempre visible */}
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">Panel Admin</p>
+              <h1 className="mt-1 text-xl font-black tracking-tight text-zinc-950 md:text-3xl md:mt-2">Norte Gaming</h1>
+            </div>
+            {/* Botón hamburguesa solo en mobile */}
+            <button
+              type="button"
+              onClick={() => setNavOpen((o) => !o)}
+              className="flex items-center gap-1.5 rounded-lg border border-zinc-200 px-2.5 py-1.5 text-xs font-semibold text-zinc-700 lg:hidden"
+            >
+              {navOpen ? "✕ Cerrar" : `☰ ${activeLabel}`}
+            </button>
+          </div>
+          <p className="mt-1 hidden text-xs text-zinc-600 md:mt-2 md:block md:text-sm">Gestión centralizada del catálogo.</p>
 
-          <nav className="mt-4 space-y-1 md:mt-5 md:space-y-2" aria-label="Secciones del panel">
+          {/* Nav: siempre visible en lg, colapsable en mobile */}
+          <nav
+            className={`space-y-1 md:space-y-2 lg:mt-5 lg:block ${navOpen ? "mt-3 block" : "hidden lg:block"}`}
+            aria-label="Secciones del panel"
+          >
             {navItems.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={() => setNavOpen(false)}
                   aria-current={isActive ? "page" : undefined}
                   className={`block rounded-lg px-2 py-1.5 text-xs font-semibold transition md:px-3 md:py-2 md:text-sm ${
                     isActive
@@ -71,11 +92,10 @@ export default function AdminLayout({
                 </Link>
               );
             })}
+            <div className="border-t border-zinc-200 pt-3">
+              <AdminLogoutButton />
+            </div>
           </nav>
-
-          <div className="mt-4 border-t border-zinc-200 pt-3 md:mt-6 md:pt-4">
-            <AdminLogoutButton />
-          </div>
         </aside>
 
         <main className="space-y-4 md:space-y-6">{children}</main>
