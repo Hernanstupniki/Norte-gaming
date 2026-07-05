@@ -52,12 +52,16 @@ export function ProductDetailClient({
     <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-6">
       {/* Breadcrumb */}
       <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-1.5 text-xs text-zinc-500">
-        <Link href="/" className="hover:text-zinc-800 transition-colors">Inicio</Link>
-        <span>/</span>
+        <Link href="/" className="hover:text-zinc-800 transition-colors" aria-label="Inicio">
+          <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+          </svg>
+        </Link>
+        <span>›</span>
         <Link href={`/catalogo?category=${product.category}`} className="capitalize hover:text-zinc-800 transition-colors">{product.category}</Link>
-        <span>/</span>
+        <span>›</span>
         <Link href={`/catalogo?brand=${product.brand}`} className="hover:text-zinc-800 transition-colors">{product.brand}</Link>
-        <span>/</span>
+        <span>›</span>
         <span className="text-zinc-900 font-medium truncate max-w-[180px] sm:max-w-xs">{product.name}</span>
       </nav>
 
