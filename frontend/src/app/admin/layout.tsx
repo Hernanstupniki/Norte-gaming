@@ -50,8 +50,8 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-screen bg-zinc-100">
-      <div className="mx-auto grid w-full max-w-7xl gap-4 px-3 py-4 md:gap-6 md:px-6 md:py-8 lg:grid-cols-[260px_1fr]">
-        <aside className="h-fit rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm md:p-4 lg:sticky lg:top-6">
+      <div className="mx-auto w-full max-w-7xl px-3 py-4 md:px-6 md:py-8 lg:grid lg:grid-cols-[260px_1fr] lg:gap-6">
+        <aside className="mb-4 h-fit rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm md:p-4 lg:mb-0 lg:sticky lg:top-6 min-w-0">
           {/* Header siempre visible */}
           <div className="flex items-center justify-between">
             <div>
@@ -98,7 +98,7 @@ export default function AdminLayout({
           </nav>
         </aside>
 
-        <main className="space-y-4 md:space-y-6">{children}</main>
+        <main className="min-w-0 space-y-4 md:space-y-6">{children}</main>
       </div>
     </div>
   );
