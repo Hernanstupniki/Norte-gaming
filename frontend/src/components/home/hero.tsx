@@ -6,19 +6,19 @@ import { useEffect, useState } from "react";
 const CARDS = [
   {
     num: "001",
-    title: "AJAZZ AJ199\nMAX NACODEXX",
+    title: "AJAZZ AJ199\nWIRELESS",
     status: "LANZAMIENTO",
-    subtitle: "Mouse AJAZZ AJ199 Max Nacodexx",
-    imageSrc: "/products/mouse_ajazz_aj199_transparente.png",
-    href: "/producto/mouse-ajazz-aj199-max-nacodexx-wireless",
+    subtitle: "Mouse Gamer AJAZZ AJ199 Wireless",
+    imageSrc: "/AJAZZ AJ199.png",
+    href: "/producto/mouse-gamer-ajazz-aj199-wireless",
   },
   {
     num: "002",
-    title: "AJAZZ\nAK820 MAX",
+    title: "ONIKUMA\nMT706",
     status: "YA DISPONIBLE!",
-    subtitle: "Teclado Magnético Ajazz AK820 Max Plus Nacodexx",
-    imageSrc: "/products/ajazz-ak820-max.png.png",
-    href: "/producto/teclado-magnetico-ajazz-ak820-max-plus-nacodexx",
+    subtitle: "Teclado Gamer Mecánico Onikuma MT706 Wireless",
+    imageSrc: "/Onikuma MT706.png",
+    href: "/producto/teclado-gamer-mecanico-onikuma-mt706-wireless",
   },
   {
     num: "003",
