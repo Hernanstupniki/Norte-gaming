@@ -22,11 +22,11 @@ const CARDS = [
   },
   {
     num: "003",
-    title: "REDRAGON\nAK1 S MOUSEPAD",
+    title: "CORSAIR HS55\nSURROUND V2",
     status: "DESTACADO",
-    subtitle: "Mousepad REDRAGON AK1 S",
-    imageSrc: "/products/redragon-ak1-s-mousepad.png.png",
-    href: "/producto/mousepad-redragon-ak-s",
+    subtitle: "Auriculares Corsair HS55 Surround V2",
+    imageSrc: "/Corsair HS55 Surround V2.png",
+    href: "/producto/auricular-gamer-corsair-hs55-surround-v2",
   },
 ];
 
