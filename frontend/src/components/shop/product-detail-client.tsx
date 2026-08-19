@@ -158,7 +158,7 @@ export function ProductDetailClient({
             {product.installments ? <p className="text-sm text-zinc-600">{product.installments}</p> : null}
             {orderOnly ? (
               <>
-                <p className="text-sm font-semibold text-red-600">Producto disponible a pedido</p>
+                <p className="text-sm font-semibold text-zinc-700">Producto disponible a pedido</p>
                 <p className="mt-1 text-xs text-zinc-500">
                   La disponibilidad y el precio pueden variar. Consultanos para confirmar tiempo estimado de entrega.
                 </p>
