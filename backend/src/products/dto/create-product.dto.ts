@@ -2,6 +2,7 @@ import {
   ArrayMinSize,
   IsArray,
   IsBoolean,
+  IsEnum,
   IsInt,
   IsNumber,
   IsOptional,
@@ -12,6 +13,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ProductAvailability } from '@prisma/client';
 import { ProductImageInputDto } from './product-image-input.dto';
 import { ProductSpecInputDto } from './product-spec-input.dto';
 
@@ -30,10 +32,11 @@ export class CreateProductDto {
   @MinLength(20)
   description: string;
 
+  @IsOptional()
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
-  currentPrice: number;
+  currentPrice?: number | null;
 
   @IsOptional()
   @Type(() => Number)
@@ -76,6 +79,10 @@ export class CreateProductDto {
   @Type(() => Boolean)
   @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional()
+  @IsEnum(ProductAvailability)
+  availability?: ProductAvailability;
 
   @IsString()
   brandId: string;
