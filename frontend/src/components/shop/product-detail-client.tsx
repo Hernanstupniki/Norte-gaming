@@ -8,6 +8,7 @@ import { ProductThumbnail } from "@/components/common/product-thumbnail";
 import { ProductCard } from "@/components/common/product-card";
 import { useStore } from "@/context/store-context";
 import { formatARS } from "@/lib/utils";
+import { buildAvailabilityWhatsAppHref } from "@/lib/whatsapp";
 
 interface ProductDetailClientProps {
   product: Product;
@@ -27,6 +28,7 @@ export function ProductDetailClient({
   const hasMultipleImages = safeImages.length > 1;
   const { addToCart } = useStore();
   const outOfStock = product.stock <= 0;
+  const orderOnly = product.availability === "order-only";
   const shortDescription = product.shortDescription?.trim() || product.description;
   const fullDescription = product.description?.trim();
 
@@ -145,14 +147,27 @@ export function ProductDetailClient({
           <p className="text-sm text-zinc-600">{shortDescription}</p>
 
           <div>
-            {product.previousPrice ? (
+            {product.previousPrice && product.price !== undefined ? (
               <p className="text-sm text-zinc-500 line-through">{formatARS(product.previousPrice)}</p>
             ) : null}
-            <p className="text-4xl font-black text-zinc-950">{formatARS(product.price)}</p>
+            {product.price !== undefined ? (
+              <p className="text-4xl font-black text-zinc-950">{formatARS(product.price)}</p>
+            ) : (
+              <p className="text-4xl font-black text-zinc-950">Consultar precio</p>
+            )}
             {product.installments ? <p className="text-sm text-zinc-600">{product.installments}</p> : null}
-            <p className={outOfStock ? "text-sm font-semibold text-red-600" : "text-sm font-semibold text-green-600"}>
-              {outOfStock ? "Sin stock" : "Stock disponible"}
-            </p>
+            {orderOnly ? (
+              <>
+                <p className="text-sm font-semibold text-red-600">Producto disponible a pedido</p>
+                <p className="mt-1 text-xs text-zinc-500">
+                  La disponibilidad y el precio pueden variar. Consultanos para confirmar tiempo estimado de entrega.
+                </p>
+              </>
+            ) : (
+              <p className={outOfStock ? "text-sm font-semibold text-red-600" : "text-sm font-semibold text-green-600"}>
+                {outOfStock ? "Sin stock" : "Stock disponible"}
+              </p>
+            )}
             {product.freeShipping && (
               <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700">
                 <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
@@ -163,27 +178,38 @@ export function ProductDetailClient({
             )}
           </div>
 
-          <div className="grid gap-2 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={() => addToCart(product.id, product)}
-              disabled={outOfStock}
-              className="rounded-md border-2 border-red-700 bg-red-600 px-4 py-3 text-xs font-bold uppercase tracking-widest text-white disabled:cursor-not-allowed disabled:border-zinc-300 disabled:bg-zinc-300 disabled:text-zinc-600"
+          {orderOnly ? (
+            <a
+              href={buildAvailabilityWhatsAppHref(product)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block rounded-md border-2 border-red-700 bg-red-600 px-4 py-3 text-center text-xs font-bold uppercase tracking-widest text-white transition hover:bg-red-700"
             >
-              {outOfStock ? "Sin stock" : "Agregar al carrito"}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                addToCart(product.id, product);
-                router.push("/checkout");
-              }}
-              disabled={outOfStock}
-              className="rounded-md border-2 border-black bg-black px-4 py-3 text-xs font-bold uppercase tracking-widest text-white disabled:cursor-not-allowed disabled:border-zinc-300 disabled:bg-zinc-300 disabled:text-zinc-600"
-            >
-              {outOfStock ? "Sin stock" : "Comprar"}
-            </button>
-          </div>
+              Consultar disponibilidad
+            </a>
+          ) : (
+            <div className="grid gap-2 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => addToCart(product.id, product)}
+                disabled={outOfStock}
+                className="rounded-md border-2 border-red-700 bg-red-600 px-4 py-3 text-xs font-bold uppercase tracking-widest text-white disabled:cursor-not-allowed disabled:border-zinc-300 disabled:bg-zinc-300 disabled:text-zinc-600"
+              >
+                {outOfStock ? "Sin stock" : "Agregar al carrito"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  addToCart(product.id, product);
+                  router.push("/checkout");
+                }}
+                disabled={outOfStock}
+                className="rounded-md border-2 border-black bg-black px-4 py-3 text-xs font-bold uppercase tracking-widest text-white disabled:cursor-not-allowed disabled:border-zinc-300 disabled:bg-zinc-300 disabled:text-zinc-600"
+              >
+                {outOfStock ? "Sin stock" : "Comprar"}
+              </button>
+            </div>
+          )}
 
           <div className="grid grid-cols-3 gap-3">
             {/* Envíos */}
