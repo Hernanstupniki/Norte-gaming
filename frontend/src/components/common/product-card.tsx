@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { formatARS } from "@/lib/utils";
+import { buildAvailabilityWhatsAppHref } from "@/lib/whatsapp";
 import { Product } from "@/types";
 import { ProductThumbnail } from "./product-thumbnail";
 
@@ -9,6 +10,7 @@ const badgeStyles: Record<string, string> = {
   destacado: "bg-black text-white",
   "mas-vendido": "bg-white text-zinc-900 border border-zinc-300",
   "sin-stock": "bg-red-100 text-red-700 border border-red-300",
+  "a-pedido": "bg-red-600 text-white",
 };
 
 export function ProductCard({ product }: { product: Product }) {
@@ -29,7 +31,11 @@ export function ProductCard({ product }: { product: Product }) {
           {product.previousPrice ? (
             <p className="text-xs text-red-500 line-through">{formatARS(product.previousPrice)}</p>
           ) : null}
-          <p className="text-2xl font-bold text-zinc-950">{formatARS(product.price)}</p>
+          {product.price !== undefined ? (
+            <p className="text-2xl font-bold text-zinc-950">{formatARS(product.price)}</p>
+          ) : (
+            <p className="text-2xl font-bold text-zinc-950">Consultar precio</p>
+          )}
           {product.installments ? <p className="text-xs text-zinc-600">{product.installments}</p> : null}
           <p className={`mt-1 text-xs ${outOfStock ? "font-semibold text-red-600" : "text-zinc-500"}`}>
             {outOfStock ? "Sin stock" : "Disponible"}
@@ -49,6 +55,17 @@ export function ProductCard({ product }: { product: Product }) {
               </span>
             ))}
           </div>
+        ) : null}
+        {product.availability === "order-only" ? (
+          <a
+            href={buildAvailabilityWhatsAppHref(product)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(event) => event.stopPropagation()}
+            className="mt-3 block w-full rounded-md border-2 border-red-700 bg-red-600 px-3 py-2.5 text-center text-xs font-bold uppercase tracking-widest text-white transition hover:bg-red-700"
+          >
+            Consultar disponibilidad
+          </a>
         ) : null}
       </div>
     </article>
