@@ -1019,8 +1019,6 @@ export default function CheckoutPage() {
                 Tu compra
               </p>
               <div className="space-y-3">
-                {/* Cart items always have a defined price — CartService rejects
-                    adding or updating order-only products without one. */}
                 {cartProducts.map(({ product, quantity }) => (
                   <div key={product.id} className="flex items-center gap-3">
                     {product.images[0] ? (
@@ -1038,11 +1036,11 @@ export default function CheckoutPage() {
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-zinc-900">{product.name}</p>
                       <p className="text-xs text-zinc-400">
-                        x{quantity} · {formatARS(product.price!)} c/u
+                        x{quantity} · {product.price !== undefined ? formatARS(product.price) : "Consultar precio"} c/u
                       </p>
                     </div>
                     <p className="shrink-0 text-sm font-bold text-zinc-900">
-                      {formatARS(product.price! * quantity)}
+                      {product.price !== undefined ? formatARS(product.price * quantity) : "Consultar precio"}
                     </p>
                   </div>
                 ))}

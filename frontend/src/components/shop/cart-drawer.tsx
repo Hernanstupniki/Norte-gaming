@@ -44,13 +44,13 @@ export function CartDrawer() {
               Tu carrito está vacío. Explorá el catálogo para sumar periféricos.
             </p>
           ) : (
-            // Cart items always have a defined price — CartService rejects
-            // adding or updating order-only products without one.
             cartProducts.map(({ product, quantity }) => (
               <div key={product.id} className="rounded-xl border border-zinc-200 p-3">
                 <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">{product.brand}</p>
                 <p className="text-sm font-semibold text-zinc-950">{product.name}</p>
-                <p className="text-sm font-bold">{formatARS(product.price!)}</p>
+                <p className="text-sm font-bold">
+                  {product.price !== undefined ? formatARS(product.price) : "Consultar precio"}
+                </p>
                 <div className="mt-3 flex items-center justify-between">
                   <div className="inline-flex items-center overflow-hidden rounded border border-black">
                     <button

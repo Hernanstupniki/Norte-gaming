@@ -27,9 +27,10 @@ export const buildCartWhatsAppHref = (
   subtotal: number,
 ) => {
   const lines = items.map(
-    // Cart items always have a defined price — CartService.addItem/updateItem
-    // reject order-only products without one before they can reach a cart.
-    ({ product, quantity }) => `- ${product.name} x${quantity} (${formatARS(product.price! * quantity)})`,
+    ({ product, quantity }) =>
+      `- ${product.name} x${quantity} (${
+        product.price !== undefined ? formatARS(product.price * quantity) : "Consultar precio"
+      })`,
   );
 
   const message = [
