@@ -15,6 +15,7 @@ const badgeStyles: Record<string, string> = {
 
 export function ProductCard({ product }: { product: Product }) {
   const outOfStock = product.stock <= 0;
+  const orderOnly = product.availability === "order-only" || product.price === undefined;
 
   return (
     <article className="group flex h-full min-w-0 flex-col rounded-2xl border-2 border-black/10 bg-white p-3 sm:p-4 shadow-[6px_6px_0_#17171712] transition hover:-translate-y-0.5 hover:shadow-[8px_8px_0_#17171720]">
@@ -28,7 +29,7 @@ export function ProductCard({ product }: { product: Product }) {
 
       <div className="mt-3 flex flex-1 flex-col">
         <div>
-          {product.previousPrice ? (
+          {product.previousPrice && product.price !== undefined ? (
             <p className="text-xs text-red-500 line-through">{formatARS(product.previousPrice)}</p>
           ) : null}
           {product.price !== undefined ? (
@@ -36,10 +37,14 @@ export function ProductCard({ product }: { product: Product }) {
           ) : (
             <p className="text-2xl font-bold text-zinc-950">Consultar precio</p>
           )}
-          {product.installments ? <p className="text-xs text-zinc-600">{product.installments}</p> : null}
-          <p className={`mt-1 text-xs ${outOfStock ? "font-semibold text-red-600" : "text-zinc-500"}`}>
-            {outOfStock ? "Sin stock" : "Disponible"}
-          </p>
+          {product.installments && product.price !== undefined ? <p className="text-xs text-zinc-600">{product.installments}</p> : null}
+          {orderOnly ? (
+            <p className="mt-1 text-xs font-semibold text-zinc-700">Disponible a pedido</p>
+          ) : (
+            <p className={`mt-1 text-xs ${outOfStock ? "font-semibold text-red-600" : "text-zinc-500"}`}>
+              {outOfStock ? "Sin stock" : "Disponible"}
+            </p>
+          )}
           {product.freeShipping && (
             <p className="mt-1 text-xs font-semibold text-green-600">Envío gratis</p>
           )}
@@ -56,7 +61,7 @@ export function ProductCard({ product }: { product: Product }) {
             ))}
           </div>
         ) : null}
-        {product.availability === "order-only" ? (
+        {orderOnly ? (
           <a
             href={buildAvailabilityWhatsAppHref(product)}
             target="_blank"

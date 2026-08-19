@@ -28,7 +28,7 @@ export function ProductDetailClient({
   const hasMultipleImages = safeImages.length > 1;
   const { addToCart } = useStore();
   const outOfStock = product.stock <= 0;
-  const orderOnly = product.availability === "order-only";
+  const orderOnly = product.availability === "order-only" || product.price === undefined;
   const shortDescription = product.shortDescription?.trim() || product.description;
   const fullDescription = product.description?.trim();
 

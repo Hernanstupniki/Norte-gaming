@@ -80,7 +80,7 @@ const normalizeBrandName = (value: string) => {
 const toBadges = (apiProduct: ApiProduct): ProductBadge[] => {
   const badges: ProductBadge[] = [];
 
-  if (Number(apiProduct.stock) <= 0) {
+  if (Number(apiProduct.stock) <= 0 && toAvailability(apiProduct.availability) !== "order-only") {
     badges.push("sin-stock");
   }
 

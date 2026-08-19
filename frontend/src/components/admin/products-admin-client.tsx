@@ -169,6 +169,7 @@ export function ProductsAdminClient() {
   const normalizeDraft = (draft: ProductFormState): ProductFormState => ({
     ...draft,
     variants: draft.variants || "",
+    availability: draft.availability || "IN_STOCK",
   });
 
   const setField = <K extends keyof ProductFormState>(field: K, value: ProductFormState[K]) => {
