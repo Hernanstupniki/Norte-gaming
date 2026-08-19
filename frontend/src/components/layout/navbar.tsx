@@ -7,8 +7,9 @@ import { useStore } from "@/context/store-context";
 import { categories } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
-const links = [
+const links: Array<{ href: string; label: string; accent?: boolean }> = [
   ...categories.map((cat) => ({ href: `/tienda?categoria=${cat.slug}`, label: cat.name })),
+  { href: "/importados", label: "Importados", accent: true },
   { href: "/faq", label: "Preguntas frecuentes" },
   { href: "/contacto", label: "Contacto" },
   { href: "/tienda", label: "Ver todo" },
@@ -200,6 +201,7 @@ export function Navbar() {
                 pathname === link.href && "text-red-300 after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-red-400",
               )}
             >
+              {link.accent ? <span className="mr-1 text-red-500">•</span> : null}
               {link.label}
             </Link>
           ))}
@@ -256,6 +258,7 @@ export function Navbar() {
                   pathname === link.href && "border-zinc-900 text-zinc-950",
                 )}
               >
+                {link.accent ? <span className="mr-1 text-red-600">•</span> : null}
                 {link.label}
               </Link>
             ))}
