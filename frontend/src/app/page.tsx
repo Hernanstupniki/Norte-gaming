@@ -1,6 +1,7 @@
 import { BrandStrip } from "@/components/home/brand-strip";
 import { CategoryGrid } from "@/components/home/category-grid";
 import { Hero } from "@/components/home/hero";
+import { ImportedPromo } from "@/components/home/imported-promo";
 import { ProductShowcase } from "@/components/home/product-showcase";
 import { TrustGrid } from "@/components/home/trust-grid";
 import { fetchCatalogProducts } from "@/lib/backend-api";
@@ -24,6 +25,7 @@ export default async function HomePage() {
         description="Encontrá productos originales para mejorar tu setup, con asesoramiento real y atención rápida desde el sitio."
         products={featured}
       />
+      <ImportedPromo />
       <ProductShowcase
         eyebrow="Ofertas"
         title="Ofertas activas"
