@@ -99,7 +99,7 @@ const toBadges = (apiProduct: ApiProduct): ProductBadge[] => {
   return badges;
 };
 
-const toInstallments = (_price: number) => "Distintos medios de pago disponibles";
+const toInstallments = (_price: number | undefined) => "Distintos medios de pago disponibles";
 
 export const mapApiProductToProduct = (apiProduct: ApiProduct): Product => {
   const price =
