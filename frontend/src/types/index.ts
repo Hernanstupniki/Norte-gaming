@@ -1,6 +1,8 @@
 export type CategorySlug = string;
 
-export type ProductBadge = "destacado" | "mas-vendido" | "sin-stock";
+export type ProductBadge = "destacado" | "mas-vendido" | "sin-stock" | "a-pedido";
+
+export type ProductAvailability = "in-stock" | "out-of-stock" | "order-only";
 
 export interface Category {
   slug: CategorySlug;
@@ -15,7 +17,7 @@ export interface Product {
   name: string;
   brand: string;
   category: CategorySlug;
-  price: number;
+  price?: number;
   previousPrice?: number;
   stock: number;
   variants?: string[];
@@ -30,6 +32,7 @@ export interface Product {
   sold: number;
   isFeatured?: boolean;
   freeShipping?: boolean;
+  availability: ProductAvailability;
 }
 
 export interface CartItem {

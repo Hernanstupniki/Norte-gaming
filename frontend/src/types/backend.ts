@@ -12,7 +12,7 @@ export interface CreateProductDto {
   name: string;
   shortDescription: string;
   description: string;
-  currentPrice: number;
+  currentPrice?: number | null;
   previousPrice?: number | null;
   sku: string;
   stock: number;
@@ -21,6 +21,7 @@ export interface CreateProductDto {
   isOnOffer?: boolean;
   freeShipping?: boolean;
   isActive?: boolean;
+  availability?: "IN_STOCK" | "OUT_OF_STOCK" | "ORDER_ONLY";
   brandId: string;
   categoryId: string;
   images: ProductImageInputDto[];
