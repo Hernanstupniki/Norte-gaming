@@ -2,7 +2,7 @@ import { fetchCatalogProducts } from "@/lib/backend-api";
 import { ProductCard } from "@/components/common/product-card";
 
 export default async function ImportadosPage() {
-  const products = await fetchCatalogProducts();
+  const products = await fetchCatalogProducts().catch(() => []);
   const importedProducts = products.filter(
     (product) => product.category.toLowerCase() === "importados",
   );
