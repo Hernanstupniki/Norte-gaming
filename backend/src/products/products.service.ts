@@ -160,6 +160,7 @@ export class ProductsService {
   async create(dto: CreateProductDto) {
     if (
       dto.previousPrice !== undefined &&
+      dto.currentPrice != null &&
       dto.previousPrice < dto.currentPrice
     ) {
       throw new BadRequestException(
@@ -175,7 +176,7 @@ export class ProductsService {
         slug,
         shortDescription: dto.shortDescription,
         description: dto.description,
-        currentPrice: new Prisma.Decimal(dto.currentPrice),
+        currentPrice: dto.currentPrice != null ? new Prisma.Decimal(dto.currentPrice) : null,
         previousPrice:
           dto.previousPrice !== undefined
             ? new Prisma.Decimal(dto.previousPrice)
@@ -185,6 +186,7 @@ export class ProductsService {
         isFeatured: dto.isFeatured ?? false,
         isOnOffer: dto.isOnOffer ?? false,
         freeShipping: dto.freeShipping ?? false,
+        availability: dto.availability ?? 'IN_STOCK',
         brandId: dto.brandId,
         categoryId: dto.categoryId,
         images: {
@@ -240,9 +242,11 @@ export class ProductsService {
           shortDescription: dto.shortDescription,
           description: dto.description,
           currentPrice:
-            dto.currentPrice !== undefined
-              ? new Prisma.Decimal(dto.currentPrice)
-              : undefined,
+            dto.currentPrice === undefined
+              ? undefined
+              : dto.currentPrice === null
+                ? null
+                : new Prisma.Decimal(dto.currentPrice),
           previousPrice:
             previousPriceValue,
           sku: dto.sku,
@@ -251,6 +255,7 @@ export class ProductsService {
           isOnOffer: dto.isOnOffer,
           freeShipping: dto.freeShipping,
           isActive: dto.isActive,
+          availability: dto.availability,
           brandId: dto.brandId,
           categoryId: dto.categoryId,
           images: dto.images
