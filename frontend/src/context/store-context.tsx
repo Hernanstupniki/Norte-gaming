@@ -294,8 +294,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const subtotal = useMemo(
     () =>
+      // Cart items always have a defined price — CartService rejects adding
+      // or updating order-only products without one, so this is safe.
       cartProducts.reduce(
-        (sum, entry) => sum + entry.product.price * entry.quantity,
+        (sum, entry) => sum + entry.product.price! * entry.quantity,
         0,
       ),
     [cartProducts],

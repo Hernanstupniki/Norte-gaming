@@ -25,13 +25,15 @@ export default function CarritoPage() {
       ) : (
         <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_320px]">
           <section className="space-y-3">
+            {/* Cart items always have a defined price — CartService rejects
+                adding or updating order-only products without one. */}
             {cartProducts.map(({ product, quantity }) => (
               <article key={product.id} className="rounded-xl border border-zinc-200 bg-white p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">{product.brand}</p>
                     <h2 className="text-lg font-bold text-zinc-950">{product.name}</h2>
-                    <p className="text-sm text-zinc-600">{formatARS(product.price)}</p>
+                    <p className="text-sm text-zinc-600">{formatARS(product.price!)}</p>
                   </div>
                   <div className="inline-flex items-center overflow-hidden rounded border border-black">
                     <button
@@ -53,7 +55,7 @@ export default function CarritoPage() {
                 </div>
                 <div className="mt-3 flex items-center justify-between text-sm">
                   <span className="text-zinc-500">Subtotal</span>
-                  <span className="font-bold text-zinc-950">{formatARS(product.price * quantity)}</span>
+                  <span className="font-bold text-zinc-950">{formatARS(product.price! * quantity)}</span>
                 </div>
                 <button
                   type="button"

@@ -90,6 +90,7 @@ export const products: Product[] = [
     rating: 4.9,
     reviewCount: 82,
     sold: 210,
+    availability: "in-stock",
     isFeatured: true,
   },
   {
@@ -115,6 +116,7 @@ export const products: Product[] = [
     rating: 4.8,
     reviewCount: 124,
     sold: 396,
+    availability: "in-stock",
     isFeatured: true,
   },
   {
@@ -141,6 +143,7 @@ export const products: Product[] = [
     rating: 4.7,
     reviewCount: 67,
     sold: 190,
+    availability: "in-stock",
   },
   {
     id: "p4",
@@ -166,6 +169,7 @@ export const products: Product[] = [
     rating: 4.9,
     reviewCount: 33,
     sold: 74,
+    availability: "in-stock",
     isFeatured: true,
   },
   {
@@ -191,6 +195,7 @@ export const products: Product[] = [
     rating: 4.6,
     reviewCount: 58,
     sold: 280,
+    availability: "in-stock",
   },
   {
     id: "p6",
@@ -216,6 +221,7 @@ export const products: Product[] = [
     rating: 4.5,
     reviewCount: 212,
     sold: 612,
+    availability: "in-stock",
   },
   {
     id: "p7",
@@ -240,6 +246,7 @@ export const products: Product[] = [
     rating: 4.8,
     reviewCount: 101,
     sold: 244,
+    availability: "in-stock",
     isFeatured: true,
   },
   {
@@ -265,6 +272,7 @@ export const products: Product[] = [
     rating: 4.7,
     reviewCount: 41,
     sold: 98,
+    availability: "in-stock",
   },
   {
     id: "p9",
@@ -289,6 +297,7 @@ export const products: Product[] = [
     rating: 4.6,
     reviewCount: 28,
     sold: 66,
+    availability: "in-stock",
   },
   {
     id: "p10",
@@ -313,6 +322,7 @@ export const products: Product[] = [
     rating: 4.9,
     reviewCount: 95,
     sold: 222,
+    availability: "in-stock",
     isFeatured: true,
   },
   {
@@ -338,6 +348,7 @@ export const products: Product[] = [
     rating: 4.7,
     reviewCount: 38,
     sold: 84,
+    availability: "in-stock",
   },
   {
     id: "p12",
@@ -362,6 +373,7 @@ export const products: Product[] = [
     rating: 4.4,
     reviewCount: 21,
     sold: 63,
+    availability: "in-stock",
   },
 ];
 
