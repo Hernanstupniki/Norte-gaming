@@ -41,3 +41,13 @@ export const buildCartWhatsAppHref = (
 
   return buildWhatsAppHref(message);
 };
+
+export const buildAvailabilityWhatsAppHref = (product: Product) => {
+  const variantSuffix = product.variants?.length
+    ? ` ${product.variants.join(" / ")}`
+    : "";
+
+  const message = `Hola Norte Gaming 👋 Quería consultar disponibilidad y precio del ${product.name}${variantSuffix}.`;
+
+  return buildWhatsAppHref(message);
+};
