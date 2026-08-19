@@ -36,8 +36,9 @@ export interface ApiProduct {
   name: string;
   shortDescription: string;
   description: string;
-  currentPrice: string | number;
+  currentPrice: string | number | null;
   previousPrice?: string | number | null;
+  availability?: "IN_STOCK" | "OUT_OF_STOCK" | "ORDER_ONLY";
   stock: number;
   soldCount: number;
   isFeatured?: boolean;
@@ -51,6 +52,15 @@ export interface ApiProduct {
   createdAt?: string;
   reviews?: ApiReview[];
 }
+
+const AVAILABILITY_MAP: Record<string, Product["availability"]> = {
+  IN_STOCK: "in-stock",
+  OUT_OF_STOCK: "out-of-stock",
+  ORDER_ONLY: "order-only",
+};
+
+const toAvailability = (value?: string): Product["availability"] =>
+  AVAILABILITY_MAP[value ?? "IN_STOCK"] ?? "in-stock";
 
 const normalizeBrandName = (value: string) => {
   const trimmed = value.trim();
@@ -82,13 +92,20 @@ const toBadges = (apiProduct: ApiProduct): ProductBadge[] => {
     badges.push("mas-vendido");
   }
 
+  if (toAvailability(apiProduct.availability) === "order-only") {
+    badges.push("a-pedido");
+  }
+
   return badges;
 };
 
 const toInstallments = (_price: number) => "Distintos medios de pago disponibles";
 
 export const mapApiProductToProduct = (apiProduct: ApiProduct): Product => {
-  const price = Number(apiProduct.currentPrice);
+  const price =
+    apiProduct.currentPrice !== null && apiProduct.currentPrice !== undefined
+      ? Number(apiProduct.currentPrice)
+      : undefined;
   const previousPrice = apiProduct.previousPrice ? Number(apiProduct.previousPrice) : undefined;
 
   return {
@@ -127,6 +144,7 @@ export const mapApiProductToProduct = (apiProduct: ApiProduct): Product => {
     sold: apiProduct.soldCount,
     isFeatured: Boolean(apiProduct.isFeatured),
     freeShipping: Boolean(apiProduct.freeShipping),
+    availability: toAvailability(apiProduct.availability),
   };
 };
 
