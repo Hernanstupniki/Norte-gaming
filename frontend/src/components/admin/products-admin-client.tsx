@@ -45,6 +45,7 @@ interface ProductFormState {
   isActive: boolean;
   brandId: string;
   categoryId: string;
+  availability: "IN_STOCK" | "OUT_OF_STOCK" | "ORDER_ONLY";
   images: ProductImageInputDto[];
   specs: ProductSpecInputDto[];
   variants: string;
@@ -66,6 +67,7 @@ const initialForm = (): ProductFormState => ({
   isActive: true,
   brandId: "",
   categoryId: "",
+  availability: "IN_STOCK",
   images: [{ url: "", alt: "" }],
   specs: [{ name: "", value: "" }],
   variants: "",
@@ -98,6 +100,7 @@ const toFormFromProduct = (product: AdminProductItem): ProductFormState => ({
   isActive: Boolean(product.isActive),
   brandId: product.brandId || "",
   categoryId: product.categoryId || "",
+  availability: product.availability || "IN_STOCK",
   images:
     product.images && product.images.length > 0
       ? product.images.map((img) => ({
@@ -335,7 +338,8 @@ export function ProductsAdminClient() {
   };
 
   const validateAndBuildPayload = (): CreateProductDto | null => {
-    const parsedCurrentPrice = Number(form.currentPrice);
+    const hasCurrentPrice = form.currentPrice.trim().length > 0;
+    const parsedCurrentPrice = hasCurrentPrice ? Number(form.currentPrice) : undefined;
     const useOfferPrice = form.isOnOffer;
     const parsedPreviousPrice = useOfferPrice && form.previousPrice.trim() ? Number(form.previousPrice) : undefined;
     const parsedStock = Number(form.stock);
@@ -352,15 +356,19 @@ export function ProductsAdminClient() {
       setNotice({ tone: "error", text: "Descripción completa muy corta." });
       return null;
     }
-    if (!Number.isFinite(parsedCurrentPrice) || parsedCurrentPrice < 0) {
+    if (hasCurrentPrice && (!Number.isFinite(parsedCurrentPrice as number) || (parsedCurrentPrice as number) < 0)) {
       setNotice({ tone: "error", text: "Precio actual inválido." });
+      return null;
+    }
+    if (useOfferPrice && !hasCurrentPrice) {
+      setNotice({ tone: "error", text: "Para marcar oferta necesitás cargar el precio actual." });
       return null;
     }
     if (useOfferPrice && parsedPreviousPrice === undefined) {
       setNotice({ tone: "error", text: "Si el producto está en oferta, completá el precio anterior." });
       return null;
     }
-    if (parsedPreviousPrice !== undefined && parsedPreviousPrice < parsedCurrentPrice) {
+    if (parsedPreviousPrice !== undefined && hasCurrentPrice && parsedPreviousPrice < (parsedCurrentPrice as number)) {
       setNotice({ tone: "error", text: "El precio anterior debe ser mayor o igual al actual." });
       return null;
     }
@@ -398,7 +406,7 @@ export function ProductsAdminClient() {
       name: form.name.trim(),
       shortDescription: form.shortDescription.trim(),
       description: form.description.trim(),
-      currentPrice: parsedCurrentPrice,
+      currentPrice: hasCurrentPrice ? (parsedCurrentPrice as number) : null,
       ...(useOfferPrice ? { previousPrice: parsedPreviousPrice } : {}),
       sku: form.sku.trim(),
       stock: parsedStock,
@@ -408,6 +416,7 @@ export function ProductsAdminClient() {
       isActive: form.isActive,
       brandId: form.brandId,
       categoryId: form.categoryId,
+      availability: form.availability,
       images,
       ...(variants.length > 0 ? { variants } : {}),
       ...(specs.length > 0 ? { specs } : {}),
@@ -600,7 +609,7 @@ export function ProductsAdminClient() {
             <section className="rounded-xl border border-zinc-200 p-3 sm:p-4">
               <h4 className="text-sm font-bold uppercase tracking-widest text-zinc-600">Precio, stock y clasificación</h4>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <input type="number" step="0.01" min="0" required placeholder="Precio actual" value={form.currentPrice} onChange={(event) => setField("currentPrice", event.target.value)} className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900" />
+                <input type="number" step="0.01" min="0" placeholder="Precio actual (vacío = Consultar precio)" value={form.currentPrice} onChange={(event) => setField("currentPrice", event.target.value)} className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900" />
                 <input
                   type="number"
                   step="0.01"
@@ -620,6 +629,11 @@ export function ProductsAdminClient() {
                 <select required value={form.categoryId} onChange={(event) => setField("categoryId", event.target.value)} className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900">
                   <option value="">Categoría</option>
                   {categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+                </select>
+                <select required value={form.availability} onChange={(event) => setField("availability", event.target.value as ProductFormState["availability"])} className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900">
+                  <option value="IN_STOCK">Disponibilidad: en stock</option>
+                  <option value="OUT_OF_STOCK">Disponibilidad: sin stock</option>
+                  <option value="ORDER_ONLY">Disponibilidad: a pedido</option>
                 </select>
               </div>
               <div className="mt-3 flex flex-wrap gap-4 text-sm text-zinc-700">

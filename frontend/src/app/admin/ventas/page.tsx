@@ -204,7 +204,7 @@ export default function AdminVentasPage() {
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-2.5">
               <p className="text-xs font-semibold text-blue-700">Precio actual</p>
-              <p className="mt-0.5 text-lg font-bold text-blue-900">{fmt(selectedProduct.currentPrice)}</p>
+              <p className="mt-0.5 text-lg font-bold text-blue-900">{fmt(selectedProduct.currentPrice ?? 0)}</p>
             </div>
             {quantity && !isNaN(parseInt(quantity)) && (
               <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-2.5">

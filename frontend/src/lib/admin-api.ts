@@ -12,8 +12,9 @@ export interface AdminProductItem {
   name: string;
   shortDescription: string;
   description: string;
-  currentPrice: string | number;
+  currentPrice: string | number | null;
   previousPrice?: string | number | null;
+  availability?: "IN_STOCK" | "OUT_OF_STOCK" | "ORDER_ONLY";
   sku: string;
   stock: number;
   isFeatured: boolean;
