@@ -88,7 +88,10 @@ export function Storefront() {
           return;
         }
 
-        const maxProductPrice = Math.max(...catalogProducts.map((item) => item.price), 950000);
+        const definedPrices = catalogProducts.flatMap((item) =>
+          item.price !== undefined ? [item.price] : [],
+        );
+        const maxProductPrice = Math.max(...definedPrices, 950000);
 
         const inferredBrands = [...new Set(catalogProducts.map((product) => product.brand))];
         const mergedBrands = [...new Set([...catalogBrands, ...inferredBrands])].sort();
@@ -156,17 +159,25 @@ export function Storefront() {
         category === "all" ||
         toCanonicalCategorySlug(product.category) === toCanonicalCategorySlug(category);
       const matchBrand = brand === "all" || product.brand === brand;
-      const matchPrice = product.price <= maxPrice;
+      const matchPrice = product.price === undefined || product.price <= maxPrice;
       const matchFavorite = !onlySaved || favorites.includes(product.id);
       return matchSearch && matchCategory && matchBrand && matchPrice && matchFavorite;
     });
 
     switch (sort) {
       case "precio-asc":
-        result = [...result].sort((a, b) => a.price - b.price);
+        result = [...result].sort((a, b) => {
+          if (a.price === undefined) return 1;
+          if (b.price === undefined) return -1;
+          return a.price - b.price;
+        });
         break;
       case "precio-desc":
-        result = [...result].sort((a, b) => b.price - a.price);
+        result = [...result].sort((a, b) => {
+          if (a.price === undefined) return 1;
+          if (b.price === undefined) return -1;
+          return b.price - a.price;
+        });
         break;
       case "mas-vendidos":
         result = [...result].sort((a, b) => b.sold - a.sold);
