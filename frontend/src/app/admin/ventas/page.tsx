@@ -85,6 +85,10 @@ export default function AdminVentasPage() {
     setError(null);
     setSuccess(null);
     if (!selectedProduct || !quantity) { setError("Selecciona producto y cantidad"); return; }
+    if (selectedProduct.currentPrice === null || selectedProduct.currentPrice === undefined) {
+      setError("Este producto no tiene precio definido. Cargale un precio desde el panel de productos antes de registrar la venta.");
+      return;
+    }
     const qty = parseInt(quantity, 10);
     if (isNaN(qty) || qty <= 0) { setError("Cantidad debe ser mayor a 0"); return; }
     setSubmitting(true);
@@ -204,9 +208,13 @@ export default function AdminVentasPage() {
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-2.5">
               <p className="text-xs font-semibold text-blue-700">Precio actual</p>
-              <p className="mt-0.5 text-lg font-bold text-blue-900">{fmt(selectedProduct.currentPrice ?? 0)}</p>
+              <p className="mt-0.5 text-lg font-bold text-blue-900">
+                {selectedProduct.currentPrice !== null && selectedProduct.currentPrice !== undefined
+                  ? fmt(selectedProduct.currentPrice)
+                  : "Sin definir"}
+              </p>
             </div>
-            {quantity && !isNaN(parseInt(quantity)) && (
+            {quantity && !isNaN(parseInt(quantity)) && selectedProduct.currentPrice !== null && selectedProduct.currentPrice !== undefined && (
               <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-2.5">
                 <p className="text-xs font-semibold text-emerald-700">Ganancia estimada</p>
                 <p className="mt-0.5 text-lg font-bold text-emerald-900">
@@ -234,7 +242,7 @@ export default function AdminVentasPage() {
 
         <button
           type="submit"
-          disabled={submitting || !selectedProduct || !quantity}
+          disabled={submitting || !selectedProduct || !quantity || selectedProduct?.currentPrice === null || selectedProduct?.currentPrice === undefined}
           className="w-full rounded-lg bg-zinc-950 py-2 text-xs sm:text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {submitting ? "Registrando…" : "Registrar venta"}

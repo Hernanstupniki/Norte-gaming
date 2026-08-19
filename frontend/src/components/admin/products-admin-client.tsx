@@ -859,7 +859,11 @@ export function ProductsAdminClient() {
                 <div className="mt-2 flex items-center justify-between gap-2">
                   <div>
                     <p className="text-xs text-zinc-600">Precio</p>
-                    <p className="text-sm font-semibold text-zinc-900">{formatArs(Number(product.currentPrice || 0))}</p>
+                    <p className="text-sm font-semibold text-zinc-900">
+                      {product.currentPrice !== null && product.currentPrice !== undefined
+                        ? formatArs(Number(product.currentPrice))
+                        : "Sin definir"}
+                    </p>
                   </div>
                   <span
                     className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
@@ -922,7 +926,11 @@ export function ProductsAdminClient() {
                     <td className="px-2 sm:px-3 py-2 text-zinc-700">{product.sku}</td>
                     <td className="px-2 sm:px-3 py-2 text-zinc-700">{product.brand?.name || "-"}</td>
                     <td className="px-2 sm:px-3 py-2 text-zinc-700">{product.category?.name || "-"}</td>
-                    <td className="px-2 sm:px-3 py-2 text-zinc-700">{formatArs(Number(product.currentPrice || 0))}</td>
+                    <td className="px-2 sm:px-3 py-2 text-zinc-700">
+                      {product.currentPrice !== null && product.currentPrice !== undefined
+                        ? formatArs(Number(product.currentPrice))
+                        : "Sin definir"}
+                    </td>
                     <td className="px-2 sm:px-3 py-2 text-zinc-700">
                       <span
                         className={`inline-flex min-w-12 justify-center rounded-full px-2 py-1 text-xs font-semibold ${
