@@ -237,6 +237,11 @@ export class OrdersService {
           `Producto no disponible: ${item.product.name}`,
         );
       }
+      if (item.product.currentPrice === null) {
+        throw new BadRequestException(
+          `${item.product.name} no tiene precio definido; consultá disponibilidad por WhatsApp`,
+        );
+      }
       if (item.quantity > item.product.stock) {
         throw new BadRequestException(
           `Stock insuficiente para ${item.product.name}`,
@@ -291,7 +296,7 @@ export class OrdersService {
               productName: item.product.name,
               productSku: item.product.sku,
               quantity: item.quantity,
-              unitPrice: item.product.currentPrice,
+              unitPrice: item.product.currentPrice!,
               totalPrice: new Prisma.Decimal(
                 Number(item.product.currentPrice) * item.quantity,
               ),

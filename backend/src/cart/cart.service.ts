@@ -25,6 +25,11 @@ export class CartService {
     if (!product) {
       throw new NotFoundException('Producto no encontrado o inactivo');
     }
+    if (product.currentPrice === null) {
+      throw new BadRequestException(
+        'Este producto no tiene precio definido; consultá disponibilidad por WhatsApp',
+      );
+    }
     return product;
   }
 
@@ -92,7 +97,7 @@ export class CartService {
     if (existing) {
       await this.prisma.cartItem.update({
         where: { id: existing.id },
-        data: { quantity: finalQty, unitPrice: product.currentPrice },
+        data: { quantity: finalQty, unitPrice: product.currentPrice! },
       });
     } else {
       await this.prisma.cartItem.create({
@@ -100,7 +105,7 @@ export class CartService {
           cartId: cart.id,
           productId: dto.productId,
           quantity: dto.quantity,
-          unitPrice: product.currentPrice,
+          unitPrice: product.currentPrice!,
         },
       });
     }
@@ -118,6 +123,11 @@ export class CartService {
     if (!item) {
       throw new NotFoundException('Item no encontrado en tu carrito');
     }
+    if (item.product.currentPrice === null) {
+      throw new BadRequestException(
+        'Este producto no tiene precio definido; consultá disponibilidad por WhatsApp',
+      );
+    }
 
     if (dto.quantity > item.product.stock) {
       throw new BadRequestException(
@@ -129,7 +139,7 @@ export class CartService {
       where: { id: item.id },
       data: {
         quantity: dto.quantity,
-        unitPrice: item.product.currentPrice,
+        unitPrice: item.product.currentPrice!,
       },
     });
 
