@@ -38,7 +38,7 @@ export function ImportedProductCard({ product }: { product: Product }) {
         <h3 className="line-clamp-2 text-sm font-bold leading-tight text-white">{product.name}</h3>
         {spec ? <p className="text-xs leading-tight text-zinc-500">{spec}</p> : null}
         <p className="mt-auto flex items-center gap-1 pt-2.5 text-xs font-bold uppercase tracking-wider text-red-500">
-          <span aria-hidden="true">+</span> A pedido
+          <span aria-hidden="true">+</span> Bajo reserva
         </p>
       </div>
     </Link>
