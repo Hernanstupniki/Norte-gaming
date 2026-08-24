@@ -61,7 +61,7 @@ export function Navbar() {
   }, [mobileOpen]);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-zinc-300 bg-zinc-100">
+    <header className="sticky top-0 z-30 border-b border-zinc-300 bg-zinc-100 lg:border-zinc-700">
       <div className="mx-auto flex w-full max-w-7xl items-center gap-4 px-4 py-4 md:px-6 lg:hidden">
         <div className="flex items-center gap-2">
           <Link href="/" className="font-[var(--font-space-mono)] text-base font-bold uppercase tracking-[0.24em] text-zinc-950 md:text-lg">

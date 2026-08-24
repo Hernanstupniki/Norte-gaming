@@ -44,7 +44,7 @@ export default async function ImportadosPage() {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-black">
+      <section className="relative overflow-hidden border-t border-zinc-800 bg-black">
         <div className="relative mx-auto grid w-full max-w-7xl items-center gap-8 px-4 py-12 md:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:py-14">
           <div>
             <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.35em] text-red-500">
