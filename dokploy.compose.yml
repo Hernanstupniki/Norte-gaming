@@ -78,6 +78,7 @@ services:
       NODE_ENV: production
       NEXT_PUBLIC_API_URL: https://nortegaming.com/api
       INTERNAL_API_URL: http://api:4000/api
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
     networks:
       - norte_internal
       - proxy
