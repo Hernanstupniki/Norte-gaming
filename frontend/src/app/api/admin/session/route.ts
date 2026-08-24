@@ -1,35 +1,27 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { jwtVerify } from "jose";
 import { ADMIN_SESSION_COOKIE } from "@/lib/admin-session";
 
 type SessionBody = {
   token?: string;
 };
 
-const getServerApiBaseUrl = () =>
-  process.env.INTERNAL_API_URL ||
-  process.env.NEXT_INTERNAL_API_URL ||
-  "http://norte-gaming-api:4000/api";
-
-type MeResponse = {
-  role?: string;
+const getAccessSecret = () => {
+  const secret = process.env.JWT_ACCESS_SECRET;
+  if (!secret) {
+    throw new Error("Falta configurar JWT_ACCESS_SECRET en el frontend");
+  }
+  return new TextEncoder().encode(secret);
 };
 
 const isAdminToken = async (token: string) => {
-  const response = await fetch(`${getServerApiBaseUrl()}/auth/me`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
+  try {
+    const { payload } = await jwtVerify(token, getAccessSecret());
+    return payload.role === "ADMIN";
+  } catch {
     return false;
   }
-
-  const payload = (await response.json().catch(() => ({}))) as MeResponse;
-  return payload.role === "ADMIN";
 };
 
 export async function POST(request: Request) {
