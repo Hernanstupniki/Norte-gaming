@@ -13,6 +13,10 @@ const badgeStyles: Record<string, string> = {
   "a-pedido": "bg-red-600 text-white",
 };
 
+const badgeLabels: Record<string, string> = {
+  "a-pedido": "Bajo reserva",
+};
+
 export function ProductCard({ product }: { product: Product }) {
   const outOfStock = product.stock <= 0;
   const orderOnly = product.availability === "order-only" || product.price === undefined;
@@ -56,7 +60,7 @@ export function ProductCard({ product }: { product: Product }) {
                 key={badge}
                 className={`rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-wider ${badgeStyles[badge]}`}
               >
-                {badge.replace("-", " ")}
+                {badgeLabels[badge] ?? badge.replace("-", " ")}
               </span>
             ))}
           </div>
