@@ -1,10 +1,7 @@
-"use client";
-
 import Link from "next/link";
 import { Product } from "@/types";
 import { resolvePublicImageUrl } from "@/lib/public-image-url";
 import { formatARS } from "@/lib/utils";
-import { useStore } from "@/context/store-context";
 
 const DisplayIcon = () => (
   <svg className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24" aria-hidden="true">
@@ -34,23 +31,6 @@ const GenericSpecIcon = () => (
   </svg>
 );
 
-const HeartIcon = ({ filled }: { filled: boolean }) => (
-  <svg
-    className="h-4 w-4"
-    fill={filled ? "currentColor" : "none"}
-    stroke="currentColor"
-    strokeWidth={1.8}
-    viewBox="0 0 24 24"
-    aria-hidden="true"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 20.25c-.3 0-.6-.09-.85-.27C7.2 17.1 3 13.68 3 9.5 3 6.87 5.11 4.75 7.75 4.75c1.53 0 2.98.73 3.9 1.9.06.08.19.08.25 0 .92-1.17 2.37-1.9 3.9-1.9C18.44 4.75 20.5 6.87 20.5 9.5c0 4.18-4.2 7.6-8.15 10.48-.25.18-.55.27-.85.27z"
-    />
-  </svg>
-);
-
 const specIconFor = (label: string) => {
   const normalized = label.toLowerCase();
   if (/pantalla|display|screen/.test(normalized)) return <DisplayIcon />;
@@ -60,10 +40,8 @@ const specIconFor = (label: string) => {
 };
 
 export function ImportedProductCard({ product }: { product: Product }) {
-  const { favorites, toggleFavorite } = useStore();
   const imageSrc = resolvePublicImageUrl(product.images[0]);
   const specs = product.specs.filter((spec) => spec.value.trim().length > 0).slice(0, 3);
-  const isFavorite = favorites.includes(product.id);
 
   return (
     <Link
@@ -71,18 +49,6 @@ export function ImportedProductCard({ product }: { product: Product }) {
       className="group flex flex-col overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 transition hover:-translate-y-0.5 hover:border-zinc-700"
     >
       <div className="relative flex h-[140px] items-center justify-center overflow-hidden bg-zinc-900">
-        <button
-          type="button"
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            toggleFavorite(product.id);
-          }}
-          className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur transition hover:bg-black/60"
-          aria-label={isFavorite ? "Quitar de guardados" : "Guardar"}
-        >
-          <HeartIcon filled={isFavorite} />
-        </button>
         {imageSrc ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
