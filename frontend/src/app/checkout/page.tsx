@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useStore } from "@/context/store-context";
 import { formatARS } from "@/lib/utils";
+import { Select } from "@/components/common/select";
 import {
   addMyCartItem,
   clearMyCart,
@@ -748,17 +749,12 @@ export default function CheckoutPage() {
                       <span className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-500">
                         Provincia
                       </span>
-                      <select
+                      <Select
+                        aria-label="Provincia"
                         value={addressForm.province}
-                        onChange={(e) => updateAddress("province")(e.target.value)}
-                        className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm hover:border-zinc-400 focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-100"
-                      >
-                        {AR_PROVINCES.map((p) => (
-                          <option key={p} value={p}>
-                            {p}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(value) => updateAddress("province")(value)}
+                        options={AR_PROVINCES.map((p) => ({ value: p, label: p }))}
+                      />
                     </label>
                   </div>
                   <Field

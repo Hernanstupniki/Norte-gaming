@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { adminListUsers, adminSetUserStatus, adminGetUserById, adminUpdateUser, AdminUserItem } from "@/lib/admin-api";
+import { Select } from "@/components/common/select";
 
 export function UsersAdminClient() {
   const [users, setUsers] = useState<AdminUserItem[]>([]);
@@ -220,10 +221,15 @@ export function UsersAdminClient() {
             <input className="border rounded-lg px-3 py-2" value={selectedUser.lastName ?? ""} placeholder="Apellido" onChange={(e) => onFieldChange('lastName', e.target.value)} />
             <input className="border rounded-lg px-3 py-2 md:col-span-2" value={selectedUser.email} placeholder="Email" disabled />
             <input className="border rounded-lg px-3 py-2" value={selectedUser.phone ?? ""} placeholder="Teléfono" onChange={(e) => onFieldChange('phone', e.target.value)} />
-            <select className="border rounded-lg px-3 py-2" value={selectedUser.role ?? 'CLIENT'} onChange={(e) => onFieldChange('role', e.target.value)}>
-              <option value="CLIENT">CLIENT</option>
-              <option value="ADMIN">ADMIN</option>
-            </select>
+            <Select
+              aria-label="Rol"
+              value={selectedUser.role ?? 'CLIENT'}
+              onChange={(value) => onFieldChange('role', value)}
+              options={[
+                { value: "CLIENT", label: "CLIENT" },
+                { value: "ADMIN", label: "ADMIN" },
+              ]}
+            />
             <div className="flex items-center gap-3 md:col-span-2">
               <label className="flex items-center gap-2 text-sm font-medium text-zinc-900">
                 <input type="checkbox" checked={selectedUser.isActive} onChange={(e) => onFieldChange('isActive', e.target.checked)} />

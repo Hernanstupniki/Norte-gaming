@@ -17,6 +17,7 @@ import {
 } from "@/lib/admin-api";
 import { brands as carouselBrands } from "@/lib/mock-data";
 import { resolvePublicImageUrl } from "@/lib/public-image-url";
+import { Select } from "@/components/common/select";
 import { CreateProductDto, ProductImageInputDto, ProductSpecInputDto } from "@/types/backend";
 
 type NoticeTone = "success" | "error" | "info";
@@ -472,19 +473,30 @@ export function ProductForm({ product }: ProductFormProps) {
             />
             <input type="text" required minLength={2} maxLength={80} placeholder="SKU único" value={form.sku} onChange={(event) => setField("sku", event.target.value)} className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900" />
             <input type="number" min="0" required placeholder="Stock" value={form.stock} onChange={(event) => setField("stock", event.target.value)} className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900" />
-            <select required value={form.brandId} onChange={(event) => setField("brandId", event.target.value)} className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900">
-              <option value="">Marca</option>
-              {brands.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-            </select>
-            <select required value={form.categoryId} onChange={(event) => setField("categoryId", event.target.value)} className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900">
-              <option value="">Categoría</option>
-              {categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-            </select>
-            <select required value={form.availability} onChange={(event) => setField("availability", event.target.value as ProductFormState["availability"])} className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900">
-              <option value="IN_STOCK">Disponibilidad: en stock</option>
-              <option value="OUT_OF_STOCK">Disponibilidad: sin stock</option>
-              <option value="ORDER_ONLY">Disponibilidad: a pedido</option>
-            </select>
+            <Select
+              aria-label="Marca"
+              placeholder="Marca"
+              value={form.brandId}
+              onChange={(value) => setField("brandId", value)}
+              options={brands.map((item) => ({ value: item.id, label: item.name }))}
+            />
+            <Select
+              aria-label="Categoría"
+              placeholder="Categoría"
+              value={form.categoryId}
+              onChange={(value) => setField("categoryId", value)}
+              options={categories.map((item) => ({ value: item.id, label: item.name }))}
+            />
+            <Select
+              aria-label="Disponibilidad"
+              value={form.availability}
+              onChange={(value) => setField("availability", value as ProductFormState["availability"])}
+              options={[
+                { value: "IN_STOCK", label: "Disponibilidad: en stock" },
+                { value: "OUT_OF_STOCK", label: "Disponibilidad: sin stock" },
+                { value: "ORDER_ONLY", label: "Disponibilidad: a pedido" },
+              ]}
+            />
           </div>
           <div className="mt-3 flex flex-wrap gap-4 text-sm text-zinc-700">
             <label className="flex items-center gap-2"><input type="checkbox" checked={form.isFeatured} onChange={(event) => setField("isFeatured", event.target.checked)} /> Destacado</label>

@@ -95,7 +95,7 @@ export default async function ImportadosPage() {
               Todavía no hay productos importados cargados.
             </p>
           ) : (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,175px)] sm:justify-start sm:gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,200px)] sm:justify-start sm:gap-4">
               {importedProducts.map((product) => (
                 <ImportedProductCard key={product.id} product={product} />
               ))}

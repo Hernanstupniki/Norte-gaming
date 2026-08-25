@@ -1,25 +1,88 @@
+"use client";
+
 import Link from "next/link";
 import { Product } from "@/types";
 import { resolvePublicImageUrl } from "@/lib/public-image-url";
+import { formatARS } from "@/lib/utils";
+import { useStore } from "@/context/store-context";
 
-const specSummary = (product: Product) => {
-  const values = product.specs
-    .slice(0, 2)
-    .map((spec) => spec.value)
-    .filter((value) => value.trim().length > 0);
-  return values.length > 0 ? values.join(" - ") : null;
+const DisplayIcon = () => (
+  <svg className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="3" y="4" width="18" height="12" rx="1.5" />
+    <path strokeLinecap="round" d="M9 20h6M12 16v4" />
+  </svg>
+);
+
+const MemoryIcon = () => (
+  <svg className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="5" y="5" width="14" height="14" rx="1.5" />
+    <path strokeLinecap="round" d="M9 5V2.5M15 5V2.5M9 21.5V19M15 21.5V19M5 9H2.5M5 15H2.5M21.5 9H19M21.5 15H19" />
+  </svg>
+);
+
+const StorageIcon = () => (
+  <svg className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24" aria-hidden="true">
+    <ellipse cx="12" cy="6" rx="8" ry="3" />
+    <path strokeLinecap="round" d="M4 6v12c0 1.657 3.582 3 8 3s8-1.343 8-3V6" />
+    <path strokeLinecap="round" d="M4 12c0 1.657 3.582 3 8 3s8-1.343 8-3" />
+  </svg>
+);
+
+const GenericSpecIcon = () => (
+  <svg className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24" aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+  </svg>
+);
+
+const HeartIcon = ({ filled }: { filled: boolean }) => (
+  <svg
+    className="h-4 w-4"
+    fill={filled ? "currentColor" : "none"}
+    stroke="currentColor"
+    strokeWidth={1.8}
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 20.25c-.3 0-.6-.09-.85-.27C7.2 17.1 3 13.68 3 9.5 3 6.87 5.11 4.75 7.75 4.75c1.53 0 2.98.73 3.9 1.9.06.08.19.08.25 0 .92-1.17 2.37-1.9 3.9-1.9C18.44 4.75 20.5 6.87 20.5 9.5c0 4.18-4.2 7.6-8.15 10.48-.25.18-.55.27-.85.27z"
+    />
+  </svg>
+);
+
+const specIconFor = (label: string) => {
+  const normalized = label.toLowerCase();
+  if (/pantalla|display|screen/.test(normalized)) return <DisplayIcon />;
+  if (/ram|memoria/.test(normalized)) return <MemoryIcon />;
+  if (/ssd|hdd|almacenamiento|disco|storage/.test(normalized)) return <StorageIcon />;
+  return <GenericSpecIcon />;
 };
 
 export function ImportedProductCard({ product }: { product: Product }) {
+  const { favorites, toggleFavorite } = useStore();
   const imageSrc = resolvePublicImageUrl(product.images[0]);
-  const spec = specSummary(product);
+  const specs = product.specs.filter((spec) => spec.value.trim().length > 0).slice(0, 3);
+  const isFavorite = favorites.includes(product.id);
 
   return (
     <Link
       href={`/producto/${product.slug}`}
       className="group flex flex-col overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 transition hover:-translate-y-0.5 hover:border-zinc-700"
     >
-      <div className="relative flex h-[135px] items-center justify-center overflow-hidden bg-zinc-900">
+      <div className="relative flex h-[140px] items-center justify-center overflow-hidden bg-zinc-900">
+        <button
+          type="button"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            toggleFavorite(product.id);
+          }}
+          className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur transition hover:bg-black/60"
+          aria-label={isFavorite ? "Quitar de guardados" : "Guardar"}
+        >
+          <HeartIcon filled={isFavorite} />
+        </button>
         {imageSrc ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -33,13 +96,39 @@ export function ImportedProductCard({ product }: { product: Product }) {
           </span>
         )}
       </div>
-      <div className="flex flex-1 flex-col gap-1 p-3.5">
-        <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-zinc-500">{product.brand}</p>
-        <h3 className="line-clamp-2 text-sm font-bold leading-tight text-white">{product.name}</h3>
-        {spec ? <p className="text-xs leading-tight text-zinc-500">{spec}</p> : null}
-        <p className="mt-auto flex items-center gap-1 pt-2.5 text-xs font-bold uppercase tracking-wider text-red-500">
-          <span aria-hidden="true">+</span> Bajo reserva
-        </p>
+
+      <div className="flex flex-1 flex-col gap-2 p-3.5">
+        <div className="space-y-0.5">
+          <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-zinc-500">{product.brand}</p>
+          <h3 className="line-clamp-2 text-sm font-bold leading-tight text-white">{product.name}</h3>
+        </div>
+
+        {specs.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] text-zinc-400">
+            {specs.map((spec, index) => (
+              <span key={`${spec.label}-${index}`} className="flex items-center gap-1">
+                {specIconFor(spec.label)}
+                {spec.value}
+              </span>
+            ))}
+          </div>
+        ) : null}
+
+        <div className="mt-auto pt-1">
+          {product.price !== undefined ? (
+            <p className="text-lg font-bold text-white">{formatARS(product.price)}</p>
+          ) : (
+            <p className="text-lg font-bold text-white">Consultar precio</p>
+          )}
+          {product.installments && product.price !== undefined ? (
+            <p className="text-[11px] text-zinc-500">{product.installments}</p>
+          ) : null}
+
+          <p className="mt-2.5 flex items-center gap-1.5 border-t border-zinc-800 pt-2.5 text-[11px] font-bold uppercase tracking-wider text-red-500">
+            <span className="h-1.5 w-1.5 rounded-full bg-red-500" aria-hidden="true" />
+            Bajo reserva
+          </p>
+        </div>
       </div>
     </Link>
   );

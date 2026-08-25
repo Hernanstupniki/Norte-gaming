@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { fetchCatalogBrands, fetchCatalogCategories, fetchCatalogProducts } from "@/lib/backend-api";
 import { formatARS } from "@/lib/utils";
 import { ProductCard } from "@/components/common/product-card";
+import { Select } from "@/components/common/select";
 import { useStore } from "@/context/store-context";
 import { Category, Product } from "@/types";
 
@@ -227,40 +228,38 @@ export function Storefront() {
 
           <div>
             <label className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Categoría</label>
-            <select
-              value={category}
-              onChange={(event) => {
-                setCategory(event.target.value);
-                closeMobileFilters();
-              }}
-              className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-            >
-              <option value="all">Todas</option>
-              {categories.map((item) => (
-                <option key={item.slug} value={item.slug}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
+            <div className="mt-1">
+              <Select
+                aria-label="Categoría"
+                value={category}
+                onChange={(value) => {
+                  setCategory(value);
+                  closeMobileFilters();
+                }}
+                options={[
+                  { value: "all", label: "Todas" },
+                  ...categories.map((item) => ({ value: item.slug, label: item.name })),
+                ]}
+              />
+            </div>
           </div>
 
           <div>
             <label className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Marca</label>
-            <select
-              value={brand}
-              onChange={(event) => {
-                setBrand(event.target.value);
-                closeMobileFilters();
-              }}
-              className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-            >
-              <option value="all">Todas</option>
-              {brands.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
+            <div className="mt-1">
+              <Select
+                aria-label="Marca"
+                value={brand}
+                onChange={(value) => {
+                  setBrand(value);
+                  closeMobileFilters();
+                }}
+                options={[
+                  { value: "all", label: "Todas" },
+                  ...brands.map((item) => ({ value: item, label: item })),
+                ]}
+              />
+            </div>
           </div>
 
           <div>
@@ -282,20 +281,23 @@ export function Storefront() {
 
           <div>
             <label className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Ordenar por</label>
-            <select
-              value={sort}
-              onChange={(event) => {
-                setSort(event.target.value as SortMode);
-                closeMobileFilters();
-              }}
-              className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-            >
-              <option value="destacados">Destacados</option>
-              <option value="precio-asc">Precio menor a mayor</option>
-              <option value="precio-desc">Precio mayor a menor</option>
-              <option value="mas-vendidos">Recomendados</option>
-              <option value="nuevos">Nuevos</option>
-            </select>
+            <div className="mt-1">
+              <Select
+                aria-label="Ordenar por"
+                value={sort}
+                onChange={(value) => {
+                  setSort(value as SortMode);
+                  closeMobileFilters();
+                }}
+                options={[
+                  { value: "destacados", label: "Destacados" },
+                  { value: "precio-asc", label: "Precio menor a mayor" },
+                  { value: "precio-desc", label: "Precio mayor a menor" },
+                  { value: "mas-vendidos", label: "Recomendados" },
+                  { value: "nuevos", label: "Nuevos" },
+                ]}
+              />
+            </div>
           </div>
         </div>
       </aside>

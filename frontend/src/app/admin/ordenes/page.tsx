@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { formatARS } from "@/lib/utils";
+import { Select } from "@/components/common/select";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 
@@ -291,15 +292,12 @@ export default function AdminOrdenesPage() {
                     <div className={`grid gap-3 ${(editStatus[order.id] ?? order.status) === "SHIPPED" ? "sm:grid-cols-3" : "sm:grid-cols-1 max-w-xs"}`}>
                       <div>
                         <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-500">Estado</label>
-                        <select
+                        <Select
+                          aria-label="Estado"
                           value={editStatus[order.id] ?? order.status}
-                          onChange={(e) => setEditStatus((prev) => ({ ...prev, [order.id]: e.target.value }))}
-                          className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-900 focus:outline-none"
-                        >
-                          {STATUS_OPTIONS.map((s) => (
-                            <option key={s.value} value={s.value}>{s.label}</option>
-                          ))}
-                        </select>
+                          onChange={(value) => setEditStatus((prev) => ({ ...prev, [order.id]: value }))}
+                          options={STATUS_OPTIONS}
+                        />
                       </div>
                       {(editStatus[order.id] ?? order.status) === "SHIPPED" && (
                         <>
