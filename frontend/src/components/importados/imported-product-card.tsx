@@ -10,10 +10,26 @@ const DisplayIcon = () => (
   </svg>
 );
 
+const ProcessorIcon = () => (
+  <svg className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="7" y="7" width="10" height="10" rx="1.5" />
+    <path strokeLinecap="round" d="M9 3.5v2.5M12 3.5v2.5M15 3.5v2.5M9 18v2.5M12 18v2.5M15 18v2.5M3.5 9h2.5M3.5 12h2.5M3.5 15h2.5M18 9h2.5M18 12h2.5M18 15h2.5" />
+  </svg>
+);
+
+const GpuIcon = () => (
+  <svg className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="2.5" y="7" width="19" height="9" rx="1.5" />
+    <circle cx="8" cy="11.5" r="2" />
+    <circle cx="14.5" cy="11.5" r="2" />
+    <path strokeLinecap="round" d="M5 16v2.5M19 16v2.5" />
+  </svg>
+);
+
 const MemoryIcon = () => (
   <svg className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24" aria-hidden="true">
-    <rect x="5" y="5" width="14" height="14" rx="1.5" />
-    <path strokeLinecap="round" d="M9 5V2.5M15 5V2.5M9 21.5V19M15 21.5V19M5 9H2.5M5 15H2.5M21.5 9H19M21.5 15H19" />
+    <rect x="3" y="6" width="18" height="9" rx="1" />
+    <path strokeLinecap="round" d="M6 15v3M9 15v3M12 15v3M15 15v3M18 15v3" />
   </svg>
 );
 
@@ -33,6 +49,8 @@ const GenericSpecIcon = () => (
 
 const specIconFor = (label: string) => {
   const normalized = label.toLowerCase();
+  if (/procesador|cpu|processor/.test(normalized)) return <ProcessorIcon />;
+  if (/gráfica|grafica|gpu|video/.test(normalized)) return <GpuIcon />;
   if (/pantalla|display|screen/.test(normalized)) return <DisplayIcon />;
   if (/ram|memoria/.test(normalized)) return <MemoryIcon />;
   if (/ssd|hdd|almacenamiento|disco|storage/.test(normalized)) return <StorageIcon />;
@@ -41,7 +59,7 @@ const specIconFor = (label: string) => {
 
 export function ImportedProductCard({ product }: { product: Product }) {
   const imageSrc = resolvePublicImageUrl(product.images[0]);
-  const specs = product.specs.filter((spec) => spec.value.trim().length > 0).slice(0, 3);
+  const specs = product.specs.filter((spec) => spec.value.trim().length > 0).slice(0, 4);
 
   return (
     <Link
