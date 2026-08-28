@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useStore } from "@/context/store-context";
 import { formatARS } from "@/lib/utils";
@@ -107,12 +107,7 @@ const AR_PROVINCES = [
 
 // ─── Validation ───────────────────────────────────────────────────────────────
 
-function validateForm(
-  buyer: BuyerForm,
-  address: AddressForm,
-  isNew: boolean,
-  shippingId: string,
-): FieldErrors {
+function validateBuyerStep(buyer: BuyerForm): FieldErrors {
   const errors: FieldErrors = {};
 
   if (buyer.name.trim().length < 3) {
@@ -122,6 +117,16 @@ function validateForm(
   if (buyer.phone.replace(/\D/g, "").length < 8) {
     errors.phone = "Ingresá un teléfono válido para poder contactarte por tu pedido.";
   }
+
+  return errors;
+}
+
+function validateDeliveryStep(
+  address: AddressForm,
+  isNew: boolean,
+  shippingId: string,
+): FieldErrors {
+  const errors: FieldErrors = {};
 
   if (isNew) {
     if (!address.street.trim()) errors.street = "Ingresá el nombre de la calle.";
@@ -189,33 +194,67 @@ function Field({
   );
 }
 
-// ─── Section header ───────────────────────────────────────────────────────────
+// ─── Stepper ──────────────────────────────────────────────────────────────────
 
-function SectionHeader({
-  n,
-  title,
-  muted,
+const CHECKOUT_STEPS = [
+  { n: 1, label: "Tus datos" },
+  { n: 2, label: "Entrega" },
+  { n: 3, label: "Pago" },
+  { n: 4, label: "Resumen" },
+] as const;
+
+function Stepper({
+  current,
+  maxReached,
+  onNavigate,
 }: {
-  n: number;
-  title: string;
-  muted?: boolean;
+  current: number;
+  maxReached: number;
+  onNavigate: (step: number) => void;
 }) {
   return (
-    <div className="flex items-center gap-3 border-b border-zinc-100 px-6 py-4">
-      <span
-        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-black text-white ${
-          muted ? "bg-zinc-300 text-zinc-600" : "bg-zinc-900"
-        }`}
-      >
-        {n}
-      </span>
-      <h2
-        className={`text-sm font-black uppercase tracking-[0.15em] ${
-          muted ? "text-zinc-500" : "text-zinc-800"
-        }`}
-      >
-        {title}
-      </h2>
+    <div className="mb-8 flex items-center">
+      {CHECKOUT_STEPS.map((s, index) => {
+        const isCompleted = s.n < current;
+        const isCurrent = s.n === current;
+        const clickable = s.n <= maxReached && s.n !== current;
+        return (
+          <div key={s.n} className="flex flex-1 items-center last:flex-none">
+            <button
+              type="button"
+              disabled={!clickable}
+              onClick={() => clickable && onNavigate(s.n)}
+              className="flex items-center gap-2.5 disabled:cursor-default"
+            >
+              <span
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 text-xs font-black transition-colors ${
+                  isCompleted || isCurrent
+                    ? "border-red-600 bg-red-600 text-white"
+                    : "border-zinc-300 bg-white text-zinc-400"
+                }`}
+              >
+                {isCompleted ? (
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  s.n
+                )}
+              </span>
+              <span
+                className={`hidden text-xs font-black uppercase tracking-widest sm:inline ${
+                  isCompleted || isCurrent ? "text-zinc-900" : "text-zinc-400"
+                }`}
+              >
+                {s.label}
+              </span>
+            </button>
+            {index < CHECKOUT_STEPS.length - 1 ? (
+              <span className={`mx-3 h-0.5 flex-1 ${isCompleted ? "bg-red-600" : "bg-zinc-200"}`} />
+            ) : null}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -262,10 +301,8 @@ export default function CheckoutPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [successOrderTotal, setSuccessOrderTotal] = useState<number>(0);
   const [successPaymentId, setSuccessPaymentId] = useState<string>("");
-
-  const buyerRef = useRef<HTMLElement>(null);
-  const addressRef = useRef<HTMLElement>(null);
-  const shippingRef = useRef<HTMLElement>(null);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [maxStepReached, setMaxStepReached] = useState(1);
 
   const selectedPayment =
     PAYMENT_METHODS.find((m) => m.id === selectedPaymentId) ?? PAYMENT_METHODS[0];
@@ -401,6 +438,43 @@ export default function CheckoutPage() {
     setFieldErrors((prev) => ({ ...prev, [key]: "" }));
   };
 
+  const goToStep = (target: number) => {
+    if (target > maxStepReached) return;
+    setTopError(null);
+    setStep(target as 1 | 2 | 3 | 4);
+  };
+
+  const advanceTo = (target: 2 | 3 | 4) => {
+    setFieldErrors({});
+    setTopError(null);
+    setStep(target);
+    setMaxStepReached((prev) => Math.max(prev, target));
+  };
+
+  const handleContinueStep1 = () => {
+    const errors = validateBuyerStep(buyerForm);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setTopError("Revisá los campos marcados en rojo antes de continuar.");
+      return;
+    }
+    advanceTo(2);
+  };
+
+  const handleContinueStep2 = () => {
+    const errors = validateDeliveryStep(addressForm, isNew, selectedShippingId);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setTopError("Revisá los campos marcados en rojo antes de continuar.");
+      return;
+    }
+    advanceTo(3);
+  };
+
+  const handleContinueStep3 = () => {
+    advanceTo(4);
+  };
+
   const handleConfirm = async () => {
     if (!auth.isLoggedIn || !auth.accessToken) {
       setTopError("Tenés que iniciar sesión para finalizar la compra.");
@@ -411,17 +485,13 @@ export default function CheckoutPage() {
       return;
     }
 
-    const errors = validateForm(buyerForm, addressForm, isNew, selectedShippingId);
+    const buyerErrors = validateBuyerStep(buyerForm);
+    const deliveryErrors = validateDeliveryStep(addressForm, isNew, selectedShippingId);
+    const errors = { ...buyerErrors, ...deliveryErrors };
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       setTopError("Revisá los campos marcados en rojo antes de continuar.");
-      if (errors.name || errors.phone) {
-        buyerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-      } else if (errors.street || errors.number || errors.city || errors.postalCode) {
-        addressRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-      } else if (errors.shipping) {
-        shippingRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
+      setStep(buyerErrors.name || buyerErrors.phone ? 1 : 2);
       return;
     }
 
@@ -657,14 +727,17 @@ export default function CheckoutPage() {
         )
       )}
 
+      <Stepper current={step} maxReached={maxStepReached} onNavigate={goToStep} />
+
       <div className="grid w-full gap-8 lg:grid-cols-[1fr_360px] lg:items-start">
         {/* ── Left column ─────────────────────────────────────────────────── */}
         <div className="space-y-5">
 
-          {/* 1. Datos del comprador */}
-          <section ref={buyerRef} className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            <SectionHeader n={1} title="Datos del comprador" />
-            <div className="grid gap-4 p-6 sm:grid-cols-2">
+          {/* 1. Tus datos */}
+          {step === 1 && (
+          <section className="rounded-2xl border-2 border-zinc-900 bg-white p-6 shadow-[6px_6px_0_#11111115]">
+            <h2 className="mb-5 text-2xl font-black tracking-tight text-zinc-900">Tus datos</h2>
+            <div className="grid gap-4 sm:grid-cols-2">
               <Field
                 label="Nombre completo"
                 value={buyerForm.name}
@@ -686,13 +759,45 @@ export default function CheckoutPage() {
                   Las confirmaciones se envían a este email. Para cambiarlo, actualizá tu cuenta.
                 </p>
               </div>
+              <div className="sm:col-span-2">
+                <label className="block">
+                  <span className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-zinc-500">
+                    Notas del pedido
+                    <span className="ml-1 font-normal normal-case tracking-normal text-zinc-400">(opcional)</span>
+                  </span>
+                  <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    rows={3}
+                    placeholder="Horario de entrega, indicaciones para el repartidor, aclaraciones especiales..."
+                    className="w-full resize-none rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm placeholder:text-zinc-400 hover:border-zinc-400 focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-100"
+                  />
+                </label>
+              </div>
+            </div>
+            <div className="mt-6 flex items-center justify-between">
+              <Link
+                href="/carrito"
+                className="rounded-xl border-2 border-zinc-200 px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900"
+              >
+                ← Seguí comprando
+              </Link>
+              <button
+                type="button"
+                onClick={handleContinueStep1}
+                className="rounded-xl border-2 border-zinc-900 bg-zinc-900 px-5 py-2.5 text-xs font-black uppercase tracking-widest text-white transition-colors hover:bg-zinc-800"
+              >
+                Continuar →
+              </button>
             </div>
           </section>
+          )}
 
-          {/* 2. Dirección */}
-          <section ref={addressRef} className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            <SectionHeader n={2} title="Dirección de entrega" />
-            <div className="p-6">
+          {/* 2. Entrega */}
+          {step === 2 && (
+          <section className="rounded-2xl border-2 border-zinc-900 bg-white p-6 shadow-[6px_6px_0_#11111115]">
+            <h2 className="mb-5 text-2xl font-black tracking-tight text-zinc-900">Entrega</h2>
+            <div>
               {/* Saved addresses */}
               {addresses.length > 0 && (
                 <div className="mb-5">
@@ -811,12 +916,9 @@ export default function CheckoutPage() {
                 </div>
               )}
             </div>
-          </section>
 
-          {/* 3. Envío */}
-          <section ref={shippingRef} className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            <SectionHeader n={3} title="Envío" />
-            <div className="p-6 space-y-4">
+            <div className="mt-6 space-y-4">
+              <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">Método de envío</p>
               {isLoading ? (
                 <div className="flex items-center gap-2 text-sm text-zinc-400">
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-600" />
@@ -935,12 +1037,31 @@ export default function CheckoutPage() {
                 </>
               )}
             </div>
-          </section>
 
-          {/* 4. Pago */}
-          <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            <SectionHeader n={4} title="Método de pago" />
-            <div className="p-6">
+            <div className="mt-6 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => goToStep(1)}
+                className="rounded-xl border-2 border-zinc-200 px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900"
+              >
+                ← Atrás
+              </button>
+              <button
+                type="button"
+                onClick={handleContinueStep2}
+                className="rounded-xl border-2 border-zinc-900 bg-zinc-900 px-5 py-2.5 text-xs font-black uppercase tracking-widest text-white transition-colors hover:bg-zinc-800"
+              >
+                Continuar →
+              </button>
+            </div>
+          </section>
+          )}
+
+          {/* 3. Pago */}
+          {step === 3 && (
+          <section className="rounded-2xl border-2 border-zinc-900 bg-white p-6 shadow-[6px_6px_0_#11111115]">
+            <h2 className="mb-5 text-2xl font-black tracking-tight text-zinc-900">Pago</h2>
+            <div>
               <div className="grid gap-2.5">
                 {PAYMENT_METHODS.map((pm) => {
                   const sel = selectedPaymentId === pm.id;
@@ -989,21 +1110,102 @@ export default function CheckoutPage() {
                 {selectedPayment.contextMsg}
               </div>
             </div>
-          </section>
 
-          {/* 5. Notas (opcional) */}
-          <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            <SectionHeader n={5} title="Notas del pedido" muted />
-            <div className="border-t border-zinc-100 px-6 pb-6 pt-4">
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={3}
-                placeholder="Horario de entrega, indicaciones para el repartidor, aclaraciones especiales..."
-                className="w-full resize-none rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm placeholder:text-zinc-400 hover:border-zinc-400 focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-100"
-              />
+            <div className="mt-6 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => goToStep(2)}
+                className="rounded-xl border-2 border-zinc-200 px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900"
+              >
+                ← Atrás
+              </button>
+              <button
+                type="button"
+                onClick={handleContinueStep3}
+                className="rounded-xl border-2 border-zinc-900 bg-zinc-900 px-5 py-2.5 text-xs font-black uppercase tracking-widest text-white transition-colors hover:bg-zinc-800"
+              >
+                Continuar →
+              </button>
             </div>
           </section>
+          )}
+
+          {/* 4. Resumen */}
+          {step === 4 && (
+          <section className="rounded-2xl border-2 border-zinc-900 bg-white p-6 shadow-[6px_6px_0_#11111115]">
+            <h2 className="mb-5 text-2xl font-black tracking-tight text-zinc-900">Revisá tu pedido</h2>
+            <div className="divide-y divide-zinc-100">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 py-3">
+                <span className="text-sm text-zinc-500">Cliente</span>
+                <span className="text-sm font-semibold text-zinc-900">
+                  {buyerForm.name}{buyerForm.phone ? ` · ${buyerForm.phone}` : ""}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 py-3">
+                <span className="text-sm text-zinc-500">Correo electrónico</span>
+                <span className="text-sm font-semibold text-zinc-900">{auth.email}</span>
+              </div>
+
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 py-3">
+                <span className="text-sm text-zinc-500">Entrega</span>
+                <span className="text-right text-sm font-semibold text-zinc-900">
+                  {selectedShipping ? selectedShipping.name : "Sin método de envío"}
+                  {(() => {
+                    const addr = isNew
+                      ? addressForm
+                      : addresses.find((a) => a.id === selectedAddressId);
+                    if (!addr || !addr.street) return null;
+                    return ` · ${addr.street} ${addr.number}, ${addr.postalCode} ${addr.city}, ${addr.province}`;
+                  })()}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 py-3">
+                <span className="text-sm text-zinc-500">Pago</span>
+                <span className="text-sm font-semibold text-zinc-900">{selectedPayment.label}</span>
+              </div>
+
+              {notes.trim() ? (
+                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 py-3">
+                  <span className="text-sm text-zinc-500">Notas</span>
+                  <span className="text-right text-sm font-semibold text-zinc-900">{notes}</span>
+                </div>
+              ) : null}
+            </div>
+
+            <p className="mt-4 text-xs text-zinc-400">
+              Al confirmar, el pedido se registra y el total definitivo se valida en el servidor.
+            </p>
+
+            <div className="mt-6 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => goToStep(3)}
+                className="rounded-xl border-2 border-zinc-200 px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900"
+              >
+                ← Atrás
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirm}
+                disabled={isSubmitting || isLoading}
+                className="flex items-center justify-center gap-2 rounded-xl border-2 border-zinc-900 bg-zinc-900 px-5 py-3 text-xs font-black uppercase tracking-widest text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-400"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    Confirmando...
+                  </>
+                ) : selectedPaymentId === "mercado-pago" ? (
+                  "Confirmar y pagar con MP"
+                ) : (
+                  "Confirmar pedido"
+                )}
+              </button>
+            </div>
+          </section>
+          )}
         </div>
 
         {/* ── Right column: Resumen ────────────────────────────────────────── */}
@@ -1136,33 +1338,6 @@ export default function CheckoutPage() {
                     : "No seleccionado"}
                 </span>
               </div>
-            </div>
-
-            {/* CTA */}
-            <div className="space-y-2.5 p-5">
-              <button
-                type="button"
-                onClick={handleConfirm}
-                disabled={isSubmitting || isLoading}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-zinc-900 bg-zinc-900 px-4 py-3.5 text-xs font-black uppercase tracking-widest text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-400"
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                    Confirmando...
-                  </>
-                ) : selectedPaymentId === "mercado-pago" ? (
-                  "Confirmar y pagar con MP"
-                ) : (
-                  "Confirmar pedido"
-                )}
-              </button>
-              <Link
-                href="/carrito"
-                className="flex w-full items-center justify-center rounded-xl border-2 border-zinc-200 px-4 py-3 text-xs font-bold uppercase tracking-widest text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900"
-              >
-                Volver al carrito
-              </Link>
             </div>
 
             {/* Trust */}
