@@ -1137,9 +1137,7 @@ export default function CheckoutPage() {
             <div className="divide-y divide-zinc-100">
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 py-3">
                 <span className="text-sm text-zinc-500">Cliente</span>
-                <span className="text-sm font-semibold text-zinc-900">
-                  {buyerForm.name}{buyerForm.phone ? ` · ${buyerForm.phone}` : ""}
-                </span>
+                <span className="text-sm font-semibold text-zinc-900">{buyerForm.name}</span>
               </div>
 
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 py-3">
@@ -1175,7 +1173,7 @@ export default function CheckoutPage() {
             </div>
 
             <p className="mt-4 text-xs text-zinc-400">
-              Al confirmar, el pedido se registra y el total definitivo se valida en el servidor.
+              Al confirmar, se registra el pedido y queda a la espera de validación.
             </p>
 
             <div className="mt-6 flex items-center justify-between">
