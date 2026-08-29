@@ -15,6 +15,11 @@ services:
         aliases:
           - db
           - norte-gaming-db
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d norte_gaming"]
       interval: 10s
@@ -22,9 +27,7 @@ services:
       retries: 10
 
   api:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: ghcr.io/hernanstupniki/norte-gaming-api:${IMAGE_TAG:-latest}
     container_name: norte-gaming-api-dokploy
     restart: unless-stopped
     depends_on:
@@ -52,9 +55,23 @@ services:
     volumes:
       - /root/Norte-gaming/backend/uploads:/app/uploads
     command: sh -c "npx prisma migrate deploy; node dist/src/main.js"
+    mem_limit: 384m
+    cpus: "0.50"
+    pids_limit: 128
     networks:
       - norte_internal
       - proxy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:4000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
@@ -66,11 +83,7 @@ services:
       - traefik.http.services.norte-api-dokploy.loadbalancer.server.port=4000
 
   web:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_API_URL: https://nortegaming.com/api
+    image: ghcr.io/hernanstupniki/norte-gaming-web:${IMAGE_TAG:-latest}
     container_name: norte-gaming-web-dokploy
     restart: unless-stopped
     depends_on:
@@ -78,12 +91,25 @@ services:
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_API_URL: https://nortegaming.com/api
+    mem_limit: 512m
+    cpus: "0.50"
+    pids_limit: 128
     networks:
       - proxy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
-
       - traefik.http.routers.norte-web-dokploy.rule=Host(`nortegaming.com`)
       - traefik.http.routers.norte-web-dokploy.entrypoints=web,websecure
       - traefik.http.routers.norte-web-dokploy.tls=true

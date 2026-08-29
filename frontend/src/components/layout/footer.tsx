@@ -7,7 +7,8 @@ export function Footer() {
         <div>
           <p className="text-lg font-black uppercase tracking-[0.2em]">Norte Gaming</p>
           <p className="mt-3 text-sm text-zinc-600">
-            Periféricos gamer premium con productos originales, precio competitivo y atención personalizada.
+            Periféricos gamer originales para todo el país, con precios competitivos y atención personalizada antes y
+            después de tu compra.
           </p>
         </div>
         <div>
@@ -22,17 +23,7 @@ export function Footer() {
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.2em]">Contacto</p>
           <ul className="mt-3 space-y-2 text-sm text-zinc-600">
-            <li>
-              WhatsApp:{" "}
-              <a
-                href="https://wa.me/5493757658938"
-                target="_blank"
-                rel="noreferrer"
-                className="underline-offset-2 hover:underline"
-              >
-                +54 9 3757-658938
-              </a>
-            </li>
+            <li>Contacto directo: formulario web y email</li>
             <li>
               Instagram:{" "}
               <a
@@ -44,9 +35,9 @@ export function Footer() {
                 @nortegaming_
               </a>
             </li>
-            <li>Mail: NorteGamingba@gmail.com</li>
+            <li>Mail: nortegamingba@gmail.com</li>
             <li>Envíos: toda Argentina</li>
-            <li>Soporte: Lun a Sáb 10 a 19 hs</li>
+            <li>Soporte: activo 24/7 (las 24 horas todos los días)</li>
           </ul>
         </div>
         <div>
@@ -57,10 +48,6 @@ export function Footer() {
             <li>Correo Argentino / Andreani / OCA</li>
             <li>Retiro en punto de entrega</li>
           </ul>
-          <input
-            placeholder="Tu email para novedades"
-            className="mt-4 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-          />
         </div>
       </div>
       <div className="border-t border-zinc-200 px-4 py-4 text-center text-xs uppercase tracking-[0.2em] text-zinc-500">

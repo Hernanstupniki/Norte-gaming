@@ -77,7 +77,7 @@ export class UploadsController {
       );
     }
 
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const baseUrl = (process.env.BACKEND_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
     const url = `${baseUrl}/uploads/products/${file.filename}`;
 
     return {

@@ -1,18 +1,18 @@
 import { BrandStrip } from "@/components/home/brand-strip";
 import { CategoryGrid } from "@/components/home/category-grid";
-import { FaqPreview } from "@/components/home/faq-preview";
 import { Hero } from "@/components/home/hero";
+import { ImportedPromo } from "@/components/home/imported-promo";
 import { ProductShowcase } from "@/components/home/product-showcase";
-import { PromoBanner } from "@/components/home/promo-banner";
 import { TrustGrid } from "@/components/home/trust-grid";
-import { products } from "@/lib/mock-data";
+import { fetchCatalogProducts } from "@/lib/backend-api";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const products = await fetchCatalogProducts().catch(() => []);
+
   const featured = products.filter((item) => item.isFeatured).slice(0, 4);
-  const offers = products.filter((item) => item.badges.includes("oferta")).slice(0, 4);
-  const launchPicks = [...products]
-    .sort((a, b) => b.rating - a.rating)
-    .slice(0, 4);
+  const activeOffers = products.filter((item) => Boolean(item.previousPrice)).slice(0, 4);
+  const fallbackOffers = [...products].sort((a, b) => b.rating - a.rating).slice(0, 4);
+  const offers = activeOffers.length > 0 ? activeOffers : fallbackOffers;
 
   return (
     <>
@@ -20,26 +20,19 @@ export default function HomePage() {
       <BrandStrip />
       <CategoryGrid />
       <ProductShowcase
-        eyebrow="Selección"
-        title="Productos destacados"
-        description="Lo mejor del catálogo Norte Gaming para subir el nivel de tu setup."
+        eyebrow="Destacados"
+        title="Variedad en periféricos gamer"
+        description="Encontrá productos originales para mejorar tu setup, con asesoramiento real y atención rápida desde el sitio."
         products={featured}
       />
+      <ImportedPromo />
       <ProductShowcase
-        eyebrow="Descuentos"
+        eyebrow="Ofertas"
         title="Ofertas activas"
-        description="Promociones por tiempo limitado con financiación."
+        description="Productos en oferta por tiempo limitado."
         products={offers}
       />
-      <PromoBanner />
-      <ProductShowcase
-        eyebrow="Lanzamiento"
-        title="Recomendados para empezar"
-        description="Selección curada para los primeros pedidos de Norte Gaming."
-        products={launchPicks}
-      />
       <TrustGrid />
-      <FaqPreview />
     </>
   );
 }

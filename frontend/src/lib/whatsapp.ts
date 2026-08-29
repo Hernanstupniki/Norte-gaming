@@ -7,12 +7,16 @@ const buildWhatsAppHref = (message: string) =>
   `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(message)}`;
 
 export const buildProductWhatsAppHref = (product: Product) => {
+  const priceLine =
+    product.price !== undefined
+      ? `- Precio: ${formatARS(product.price)}`
+      : "- Precio: A consultar";
+
   const message = [
     "Hola Norte Gaming, quiero consultar por este producto:",
     `- Producto: ${product.name}`,
     `- Marca: ${product.brand}`,
-    `- Precio: ${formatARS(product.price)}`,
-    `- Link: http://localhost:3000/producto/${product.slug}`,
+    priceLine,
   ].join("\n");
 
   return buildWhatsAppHref(message);
@@ -23,14 +27,27 @@ export const buildCartWhatsAppHref = (
   subtotal: number,
 ) => {
   const lines = items.map(
-    ({ product, quantity }) => `- ${product.name} x${quantity} (${formatARS(product.price * quantity)})`,
+    ({ product, quantity }) =>
+      `- ${product.name} x${quantity} (${
+        product.price !== undefined ? formatARS(product.price * quantity) : "Consultar precio"
+      })`,
   );
 
   const message = [
-    "Hola Norte Gaming, quiero coordinar la compra de estos productos:",
+    "Hola Norte Gaming, quiero consultar por estos productos:",
     ...lines,
     `Total estimado: ${formatARS(subtotal)}`,
   ].join("\n");
+
+  return buildWhatsAppHref(message);
+};
+
+export const buildAvailabilityWhatsAppHref = (product: Product) => {
+  const variantSuffix = product.variants?.length
+    ? ` ${product.variants.join(" / ")}`
+    : "";
+
+  const message = `Hola Norte Gaming 👋 Quería consultar disponibilidad y precio del ${product.name}${variantSuffix}.`;
 
   return buildWhatsAppHref(message);
 };

@@ -1,81 +1,81 @@
 "use client";
 
 import Link from "next/link";
-import { useStore } from "@/context/store-context";
 import { formatARS } from "@/lib/utils";
-import { buildProductWhatsAppHref } from "@/lib/whatsapp";
+import { buildAvailabilityWhatsAppHref } from "@/lib/whatsapp";
 import { Product } from "@/types";
 import { ProductThumbnail } from "./product-thumbnail";
 
 const badgeStyles: Record<string, string> = {
-  oferta: "bg-red-600 text-white",
   destacado: "bg-black text-white",
-  nuevo: "bg-zinc-200 text-zinc-900",
   "mas-vendido": "bg-white text-zinc-900 border border-zinc-300",
+  "sin-stock": "bg-red-100 text-red-700 border border-red-300",
+  "a-pedido": "bg-red-600 text-white",
+};
+
+const badgeLabels: Record<string, string> = {
+  "a-pedido": "Bajo reserva",
 };
 
 export function ProductCard({ product }: { product: Product }) {
-  const { addToCart, auth, favorites, toggleFavorite } = useStore();
-  const isFavorite = favorites.includes(product.id);
-  const whatsappHref = buildProductWhatsAppHref(product);
+  const outOfStock = product.stock <= 0;
+  const orderOnly = product.availability === "order-only" || product.price === undefined;
 
   return (
     <article className="group flex h-full min-w-0 flex-col rounded-2xl border-2 border-black/10 bg-white p-3 sm:p-4 shadow-[6px_6px_0_#17171712] transition hover:-translate-y-0.5 hover:shadow-[8px_8px_0_#17171720]">
-      <Link href={`/producto/${product.slug}`} className="block space-y-3">
+      <Link href={`/producto/${product.slug}`} className="block space-y-2.5">
         <ProductThumbnail label={product.name} imageSrc={product.images[0]} className="h-44" />
-        <div className="min-h-7 flex flex-wrap content-start gap-2">
-          {product.badges.map((badge) => (
-            <span
-              key={badge}
-              className={`rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-wider ${badgeStyles[badge]}`}
-            >
-              {badge.replace("-", " ")}
-            </span>
-          ))}
-        </div>
-        <div className="min-h-24 space-y-1">
+        <div className="space-y-1">
           <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">{product.brand}</p>
           <h3 className="line-clamp-2 text-base font-semibold text-zinc-950">{product.name}</h3>
-          <p className="line-clamp-2 text-xs text-zinc-600">{product.shortDescription}</p>
         </div>
       </Link>
 
-      <div className="mt-4 flex flex-1 flex-col justify-end space-y-3">
-        <div className="min-h-28">
-          {product.previousPrice ? (
-            <p className="text-xs text-zinc-500 line-through">{formatARS(product.previousPrice)}</p>
+      <div className="mt-3 flex flex-1 flex-col">
+        <div>
+          {product.previousPrice && product.price !== undefined ? (
+            <p className="text-xs text-red-500 line-through">{formatARS(product.previousPrice)}</p>
           ) : null}
-          <p className="text-2xl font-bold text-zinc-950">{formatARS(product.price)}</p>
-          <p className="text-xs text-zinc-600">{product.installments}</p>
-          <p className="mt-1 text-xs text-zinc-500">Stock: {product.stock}</p>
+          {product.price !== undefined ? (
+            <p className="text-2xl font-bold text-zinc-950">{formatARS(product.price)}</p>
+          ) : (
+            <p className="text-2xl font-bold text-zinc-950">Consultar precio</p>
+          )}
+          {product.installments && product.price !== undefined ? <p className="text-xs text-zinc-600">{product.installments}</p> : null}
+          {orderOnly ? (
+            <p className="mt-1 text-xs font-semibold text-zinc-700">Disponible a pedido</p>
+          ) : (
+            <p className={`mt-1 text-xs ${outOfStock ? "font-semibold text-red-600" : "text-zinc-500"}`}>
+              {outOfStock ? "Sin stock" : "Disponible"}
+            </p>
+          )}
+          {product.freeShipping && (
+            <p className="mt-1 text-xs font-semibold text-green-600">Envío gratis</p>
+          )}
         </div>
-
-        <div className="mt-auto flex flex-col gap-2 sm:flex-row sm:items-end">
-          <button
-            type="button"
-            onClick={() => addToCart(product.id, product)}
-            className="w-full rounded-lg border-2 border-black bg-black px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white transition duration-150 hover:bg-zinc-900 active:translate-y-[2px] active:scale-[0.99] sm:flex-1"
-          >
-            Agregar
-          </button>
+        {product.badges.length > 0 ? (
+          <div className="mt-auto pt-3 flex flex-wrap gap-2">
+            {product.badges.map((badge) => (
+              <span
+                key={badge}
+                className={`rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-wider ${badgeStyles[badge]}`}
+              >
+                {badgeLabels[badge] ?? badge.replace("-", " ")}
+              </span>
+            ))}
+          </div>
+        ) : null}
+        {orderOnly ? (
           <a
-            href={whatsappHref}
+            href={buildAvailabilityWhatsAppHref(product)}
             target="_blank"
-            rel="noreferrer"
-            className="w-full rounded-lg border-2 border-[#25D366] bg-[#25D366] px-3 py-2 text-center text-xs font-semibold uppercase tracking-widest text-black transition duration-150 hover:brightness-95 active:translate-y-[2px] active:scale-[0.99] sm:w-auto"
+            rel="noopener noreferrer"
+            onClick={(event) => event.stopPropagation()}
+            className="mt-3 block w-full rounded-md border-2 border-red-700 bg-red-600 px-3 py-2.5 text-center text-xs font-bold uppercase tracking-widest text-white transition hover:bg-red-700"
           >
-            WhatsApp
+            Consultar disponibilidad
           </a>
-          {auth.isLoggedIn ? (
-            <button
-              type="button"
-              onClick={() => toggleFavorite(product.id)}
-              className="w-full rounded-lg border-2 border-black px-3 py-2 text-xs font-semibold uppercase tracking-widest text-zinc-950 transition duration-150 hover:bg-zinc-100 active:translate-y-[2px] active:scale-[0.99] sm:w-auto"
-            >
-              {isFavorite ? "Guardado" : "Guardar"}
-            </button>
-          ) : null}
-        </div>
+        ) : null}
       </div>
     </article>
   );

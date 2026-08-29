@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { fetchCatalogBrands, fetchCatalogCategories, fetchCatalogProducts } from "@/lib/backend-api";
 import { formatARS } from "@/lib/utils";
 import { ProductCard } from "@/components/common/product-card";
+import { Select } from "@/components/common/select";
 import { useStore } from "@/context/store-context";
 import { Category, Product } from "@/types";
 
@@ -51,7 +52,7 @@ export function Storefront() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [search, setSearch] = useState(params.get("q") || "");
   const [category, setCategory] = useState(params.get("categoria") || "all");
-  const [brand, setBrand] = useState("all");
+  const [brand, setBrand] = useState(params.get("marca") || "all");
   const [maxPrice, setMaxPrice] = useState(950000);
   const [priceLimit, setPriceLimit] = useState(950000);
   const [sort, setSort] = useState<SortMode>("destacados");
@@ -66,6 +67,7 @@ export function Storefront() {
 
   useEffect(() => {
     setCategory(params.get("categoria") || "all");
+    setBrand(params.get("marca") || "all");
     setSearch(params.get("q") || "");
   }, [params]);
 
@@ -87,7 +89,10 @@ export function Storefront() {
           return;
         }
 
-        const maxProductPrice = Math.max(...catalogProducts.map((item) => item.price), 950000);
+        const definedPrices = catalogProducts.flatMap((item) =>
+          item.price !== undefined ? [item.price] : [],
+        );
+        const maxProductPrice = Math.max(...definedPrices, 950000);
 
         const inferredBrands = [...new Set(catalogProducts.map((product) => product.brand))];
         const mergedBrands = [...new Set([...catalogBrands, ...inferredBrands])].sort();
@@ -148,34 +153,45 @@ export function Storefront() {
 
   const filtered = useMemo(() => {
     let result = products.filter((product) => {
-      const matchSearch = `${product.name} ${product.brand}`
+      const matchSearch = `${product.name} ${product.brand} ${product.category}`
         .toLowerCase()
         .includes(search.toLowerCase());
       const matchCategory =
         category === "all" ||
         toCanonicalCategorySlug(product.category) === toCanonicalCategorySlug(category);
       const matchBrand = brand === "all" || product.brand === brand;
-      const matchPrice = product.price <= maxPrice;
+      const matchPrice = product.price === undefined || product.price <= maxPrice;
       const matchFavorite = !onlySaved || favorites.includes(product.id);
       return matchSearch && matchCategory && matchBrand && matchPrice && matchFavorite;
     });
 
     switch (sort) {
       case "precio-asc":
-        result = [...result].sort((a, b) => a.price - b.price);
+        result = [...result].sort((a, b) => {
+          if (a.price === undefined) return 1;
+          if (b.price === undefined) return -1;
+          return a.price - b.price;
+        });
         break;
       case "precio-desc":
-        result = [...result].sort((a, b) => b.price - a.price);
+        result = [...result].sort((a, b) => {
+          if (a.price === undefined) return 1;
+          if (b.price === undefined) return -1;
+          return b.price - a.price;
+        });
         break;
       case "mas-vendidos":
         result = [...result].sort((a, b) => b.sold - a.sold);
         break;
       case "nuevos":
-        result = [...result].sort((a, b) => Number(b.badges.includes("nuevo")) - Number(a.badges.includes("nuevo")));
+        result = [...result].sort((a, b) => Number(Boolean(b.isFeatured)) - Number(Boolean(a.isFeatured)));
         break;
       default:
         result = [...result].sort((a, b) => Number(Boolean(b.isFeatured)) - Number(Boolean(a.isFeatured)));
     }
+
+    // Productos sin stock siempre al fondo, respetando el orden aplicado arriba
+    result = [...result].sort((a, b) => Number(a.stock <= 0) - Number(b.stock <= 0));
 
     return result;
   }, [brand, category, maxPrice, onlySaved, favorites, products, search, sort]);
@@ -212,40 +228,38 @@ export function Storefront() {
 
           <div>
             <label className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Categoría</label>
-            <select
-              value={category}
-              onChange={(event) => {
-                setCategory(event.target.value);
-                closeMobileFilters();
-              }}
-              className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-            >
-              <option value="all">Todas</option>
-              {categories.map((item) => (
-                <option key={item.slug} value={item.slug}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
+            <div className="mt-1">
+              <Select
+                aria-label="Categoría"
+                value={category}
+                onChange={(value) => {
+                  setCategory(value);
+                  closeMobileFilters();
+                }}
+                options={[
+                  { value: "all", label: "Todas" },
+                  ...categories.map((item) => ({ value: item.slug, label: item.name })),
+                ]}
+              />
+            </div>
           </div>
 
           <div>
             <label className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Marca</label>
-            <select
-              value={brand}
-              onChange={(event) => {
-                setBrand(event.target.value);
-                closeMobileFilters();
-              }}
-              className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-            >
-              <option value="all">Todas</option>
-              {brands.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
+            <div className="mt-1">
+              <Select
+                aria-label="Marca"
+                value={brand}
+                onChange={(value) => {
+                  setBrand(value);
+                  closeMobileFilters();
+                }}
+                options={[
+                  { value: "all", label: "Todas" },
+                  ...brands.map((item) => ({ value: item, label: item })),
+                ]}
+              />
+            </div>
           </div>
 
           <div>
@@ -267,20 +281,23 @@ export function Storefront() {
 
           <div>
             <label className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Ordenar por</label>
-            <select
-              value={sort}
-              onChange={(event) => {
-                setSort(event.target.value as SortMode);
-                closeMobileFilters();
-              }}
-              className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
-            >
-              <option value="destacados">Destacados</option>
-              <option value="precio-asc">Precio menor a mayor</option>
-              <option value="precio-desc">Precio mayor a menor</option>
-              <option value="mas-vendidos">Recomendados</option>
-              <option value="nuevos">Nuevos</option>
-            </select>
+            <div className="mt-1">
+              <Select
+                aria-label="Ordenar por"
+                value={sort}
+                onChange={(value) => {
+                  setSort(value as SortMode);
+                  closeMobileFilters();
+                }}
+                options={[
+                  { value: "destacados", label: "Destacados" },
+                  { value: "precio-asc", label: "Precio menor a mayor" },
+                  { value: "precio-desc", label: "Precio mayor a menor" },
+                  { value: "mas-vendidos", label: "Recomendados" },
+                  { value: "nuevos", label: "Nuevos" },
+                ]}
+              />
+            </div>
           </div>
         </div>
       </aside>

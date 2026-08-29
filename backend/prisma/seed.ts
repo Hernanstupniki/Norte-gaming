@@ -76,6 +76,11 @@ async function main() {
       update: {},
       create: { name: 'SteelSeries', slug: 'steelseries', description: 'Equipamiento competitivo SteelSeries' },
     }),
+    prisma.brand.upsert({
+      where: { slug: 'jbl' },
+      update: {},
+      create: { name: 'JBL', slug: 'jbl', description: 'Audio y periféricos JBL para gaming y multimedia' },
+    }),
   ]);
 
   const [mouses, teclados, mouse, teclado, mousepad, auricular, monitores, accesorios] = await Promise.all([
@@ -225,31 +230,51 @@ async function main() {
     },
   });
 
+  // Envío Estándar: precio base hasta 1kg. El precio real es el doble (Norte Gaming cubre el 50%).
   await prisma.shippingMethod.upsert({
-    where: { name: 'Envio Estandar' },
-    update: {},
+    where: { name: 'Envío Estándar' },
+    update: {
+      description: 'Entrega a todo el país · 3 a 5 días hábiles',
+      cost: 23500,
+      provinces: [],
+      isActive: true,
+    },
     create: {
-      name: 'Envio Estandar',
-      description: 'Entrega estimada de 3 a 5 dias habiles',
-      cost: 4500,
+      name: 'Envío Estándar',
+      description: 'Entrega a todo el país · 3 a 5 días hábiles',
+      cost: 23500,
+      provinces: [],
       isActive: true,
     },
   });
 
+  // Envío Gratis: se auto-asigna en el checkout cuando el pedido supera $150.000.
   await prisma.shippingMethod.upsert({
-    where: { name: 'Envio Express' },
-    update: {},
-    create: {
-      name: 'Envio Express',
-      description: 'Entrega en 24 a 48hs',
-      cost: 8900,
+    where: { name: 'Envío Gratis' },
+    update: {
+      description: 'Entrega a todo el país · 3 a 5 días hábiles',
+      cost: 0,
+      provinces: [],
       isActive: true,
     },
+    create: {
+      name: 'Envío Gratis',
+      description: 'Entrega a todo el país · 3 a 5 días hábiles',
+      cost: 0,
+      provinces: [],
+      isActive: true,
+    },
+  });
+
+  // Desactivar métodos de envío anteriores que ya no se usan
+  await prisma.shippingMethod.updateMany({
+    where: { name: { in: ['Envio Estandar', 'Envio Express'] } },
+    data: { isActive: false },
   });
 
   await prisma.coupon.upsert({
     where: { code: 'NORTE10' },
-    update: {},
+    update: { isActive: false },
     create: {
       code: 'NORTE10',
       name: 'Descuento Bienvenida',
@@ -259,7 +284,7 @@ async function main() {
       minOrderAmount: 50000,
       maxDiscount: 30000,
       maxUsesPerUser: 1,
-      isActive: true,
+      isActive: false,
     },
   });
 

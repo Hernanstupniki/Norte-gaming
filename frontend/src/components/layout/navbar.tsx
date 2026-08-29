@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useStore } from "@/context/store-context";
 import { categories } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
-const links = [
-  ...categories.slice(0, -1).map((cat) => ({ href: `/tienda?categoria=${cat.slug}`, label: cat.name })),
-  { href: "/nosotros", label: "Nosotros" },
+const links: Array<{ href: string; label: string; accent?: boolean }> = [
+  ...categories.map((cat) => ({ href: `/tienda?categoria=${cat.slug}`, label: cat.name })),
+  { href: "/importados", label: "Importados", accent: true },
   { href: "/faq", label: "Preguntas frecuentes" },
   { href: "/contacto", label: "Contacto" },
   { href: "/tienda", label: "Ver todo" },
@@ -20,10 +20,10 @@ export function Navbar() {
   const [searchTerm, setSearchTerm] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
-  const { auth, cartCount, openCart, logout } = useStore();
-  const navLinks = auth.isLoggedIn
-    ? [...links, { href: "/guardados", label: "Guardados" }]
-    : links;
+  const mobileMenuRef = useRef<HTMLDivElement | null>(null);
+  const mobileButtonRef = useRef<HTMLButtonElement | null>(null);
+  const { auth, cartCount, openCart } = useStore();
+  const navLinks = links;
 
   const submitSearch = () => {
     const q = searchTerm.trim();
@@ -36,16 +36,37 @@ export function Navbar() {
     setMobileOpen(false);
   };
 
+  // Close mobile menu when clicking outside or pressing Escape
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const onDocumentClick = (e: MouseEvent) => {
+      const target = e.target as Node | null;
+      if (!target) return;
+      if (mobileMenuRef.current && mobileMenuRef.current.contains(target)) return;
+      if (mobileButtonRef.current && mobileButtonRef.current.contains(target)) return;
+      setMobileOpen(false);
+    };
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileOpen(false);
+    };
+
+    document.addEventListener('click', onDocumentClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('click', onDocumentClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [mobileOpen]);
+
   return (
-    <header className="sticky top-0 z-30 border-b border-zinc-300 bg-zinc-100">
+    <header className="sticky top-0 z-30 border-b border-zinc-300 bg-zinc-100 lg:border-zinc-700">
       <div className="mx-auto flex w-full max-w-7xl items-center gap-4 px-4 py-4 md:px-6 lg:hidden">
         <div className="flex items-center gap-2">
           <Link href="/" className="font-[var(--font-space-mono)] text-base font-bold uppercase tracking-[0.24em] text-zinc-950 md:text-lg">
             Norte Gaming
           </Link>
-          <span className="rounded border border-red-700 bg-red-700/10 px-1.5 py-0.5 font-[var(--font-space-mono)] text-[10px] font-bold uppercase tracking-[0.12em] text-red-700">
-            Beta
-          </span>
         </div>
 
         <div className="ml-auto flex items-center gap-3">
@@ -62,22 +83,16 @@ export function Navbar() {
             </svg>
           </button>
 
-          {auth.isLoggedIn ? (
-            <button
-              type="button"
-              onClick={logout}
-              className="text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-900"
-            >
-              Salir
-            </button>
-          ) : (
-            <Link href="/login" className="text-zinc-900" aria-label="Mi cuenta">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="2" />
-                <path d="M5 20C5.8 16.9 8.4 15 12 15C15.6 15 18.2 16.9 19 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </Link>
-          )}
+          <Link
+            href={auth.isLoggedIn ? "/mi-cuenta" : "/login"}
+            className="text-zinc-900"
+            aria-label={auth.isLoggedIn ? "Ir a mi cuenta" : "Ingresar"}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="2" />
+              <path d="M5 20C5.8 16.9 8.4 15 12 15C15.6 15 18.2 16.9 19 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </Link>
 
           <button type="button" onClick={openCart} className="relative text-zinc-900" aria-label="Abrir carrito">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -94,6 +109,7 @@ export function Navbar() {
 
           <button
             type="button"
+            ref={mobileButtonRef}
             onClick={() => setMobileOpen((current) => !current)}
             className="text-zinc-900"
             aria-expanded={mobileOpen}
@@ -114,9 +130,6 @@ export function Navbar() {
             <Link href="/" className="font-[var(--font-space-mono)] text-xl font-bold uppercase tracking-[0.22em] text-white">
               Norte Gaming
             </Link>
-            <span className="rounded border border-red-500 bg-red-500/10 px-2 py-0.5 font-[var(--font-space-mono)] text-[10px] font-bold uppercase tracking-[0.14em] text-red-300">
-              Beta
-            </span>
           </div>
 
           <div className="mx-auto flex w-full max-w-2xl items-center">
@@ -129,7 +142,7 @@ export function Navbar() {
                   submitSearch();
                 }
               }}
-              placeholder="Busca mouse, teclado, auris..."
+                placeholder="Buscá mousepads, auriculares, monitores..."
               className="h-11 w-full rounded-l-md border border-zinc-700 bg-zinc-100 px-4 font-[var(--font-space-mono)] text-sm text-zinc-900 outline-none placeholder:text-zinc-500"
             />
             <button
@@ -146,22 +159,16 @@ export function Navbar() {
           </div>
 
           <div className="flex h-11 items-center gap-5 text-zinc-200">
-            {auth.isLoggedIn ? (
-              <button
-                type="button"
-                onClick={logout}
-                className="text-[11px] font-bold uppercase tracking-[0.14em] transition hover:text-red-400"
-              >
-                Salir
-              </button>
-            ) : (
-              <Link href="/login" className="transition hover:text-red-400" aria-label="Mi cuenta">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="2" />
-                  <path d="M5 20C5.8 16.9 8.4 15 12 15C15.6 15 18.2 16.9 19 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </Link>
-            )}
+            <Link
+              href={auth.isLoggedIn ? "/mi-cuenta" : "/login"}
+              className="transition hover:text-red-400"
+              aria-label={auth.isLoggedIn ? "Ir a mi cuenta" : "Ingresar"}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="2" />
+                <path d="M5 20C5.8 16.9 8.4 15 12 15C15.6 15 18.2 16.9 19 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </Link>
             <button
               type="button"
               onClick={openCart}
@@ -194,6 +201,7 @@ export function Navbar() {
                 pathname === link.href && "text-red-300 after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-red-400",
               )}
             >
+              {link.accent ? <span className="mr-1 text-red-500">•</span> : null}
               {link.label}
             </Link>
           ))}
@@ -211,24 +219,17 @@ export function Navbar() {
                 submitSearch();
               }
             }}
-            placeholder="Buscar perifericos"
+            placeholder="Buscar periféricos"
             className="w-full rounded-md border border-zinc-400 bg-white px-3 py-2 font-[var(--font-space-mono)] text-sm outline-none placeholder:text-zinc-500"
           />
         </div>
       ) : null}
 
       {mobileOpen ? (
-        <div className="border-t border-zinc-300 bg-zinc-100 p-4 lg:hidden">
+        <div ref={mobileMenuRef} className="border-t border-zinc-300 bg-zinc-100 p-4 lg:hidden">
           <div className="mb-3 flex items-center gap-2">
             <Link
-              href="/tienda"
-              onClick={() => setMobileOpen(false)}
-              className="text-xs font-semibold uppercase tracking-widest text-zinc-700"
-            >
-              Ver todo
-            </Link>
-            <Link
-              href={auth.isLoggedIn ? "/guardados" : "/login"}
+              href="/login"
               onClick={() => setMobileOpen(false)}
               className="text-xs font-semibold uppercase tracking-widest text-zinc-700"
             >
@@ -246,26 +247,6 @@ export function Navbar() {
             </button>
           </div>
 
-          <input
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                event.preventDefault();
-                submitSearch();
-              }
-            }}
-            placeholder="Buscar perifericos"
-            className="mb-3 w-full rounded-md border border-zinc-400 bg-white px-3 py-2 text-sm outline-none placeholder:text-zinc-500"
-          />
-          <button
-            type="button"
-            onClick={submitSearch}
-            className="mb-3 w-full rounded-md border-2 border-black bg-black px-3 py-2 text-xs font-semibold uppercase tracking-widest text-white"
-          >
-            Buscar
-          </button>
-
           <div className="grid gap-2">
             {navLinks.map((link) => (
               <Link
@@ -277,6 +258,7 @@ export function Navbar() {
                   pathname === link.href && "border-zinc-900 text-zinc-950",
                 )}
               >
+                {link.accent ? <span className="mr-1 text-red-600">•</span> : null}
                 {link.label}
               </Link>
             ))}

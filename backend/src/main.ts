@@ -3,12 +3,24 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { existsSync, mkdirSync } from 'fs';
+import helmet from 'helmet';
 import { join } from 'path';
 import { AppModule } from './app.module';
 import { PrismaClientExceptionFilter } from './common/filters/prisma-client-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.set('trust proxy', 1);
+  app.disable('x-powered-by');
+
+  app.use(
+    helmet({
+      // CSP is better enforced by the frontend app/server; disabling here avoids blocking upload/docs responses.
+      contentSecurityPolicy: false,
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
+
   const uploadsRoot = join(process.cwd(), 'uploads');
   const productUploads = join(uploadsRoot, 'products');
   if (!existsSync(productUploads)) {
@@ -17,8 +29,12 @@ async function bootstrap() {
 
   app.useStaticAssets(uploadsRoot, { prefix: '/uploads/' });
   app.setGlobalPrefix('api');
+  const corsOrigin = process.env.CORS_ORIGIN?.trim();
+  if (process.env.NODE_ENV === 'production' && !corsOrigin) {
+    throw new Error('CORS_ORIGIN es obligatorio en produccion');
+  }
   app.enableCors({
-    origin: process.env.CORS_ORIGIN?.split(',') ?? ['http://localhost:3000'],
+    origin: corsOrigin?.split(',').map((origin) => origin.trim()).filter(Boolean) ?? ['http://localhost:3000'],
     credentials: true,
   });
   app.useGlobalPipes(
@@ -37,7 +53,9 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  if (process.env.NODE_ENV !== 'production') {
+    SwaggerModule.setup('docs', app, document);
+  }
 
   await app.listen(Number(process.env.PORT) || 4000);
 }

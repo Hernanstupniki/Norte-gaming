@@ -50,6 +50,24 @@ export class ProductsService {
     specs: { orderBy: { position: 'asc' as const } },
   };
 
+  private async generateUniqueSlug(name: string, excludeId?: string) {
+    const base = toSlug(name);
+    let slug = base;
+    let i = 1;
+
+    while (true) {
+      const found = await this.prisma.product.findFirst({ where: { slug } });
+      if (!found || (excludeId && found.id === excludeId)) {
+        return slug;
+      }
+      slug = `${base}-${i}`;
+      i += 1;
+      if (i > 1000) break;
+    }
+
+    return `${base}-${Date.now()}`;
+  }
+
   async list(query: ProductsQueryDto, role?: Role) {
     const where: Prisma.ProductWhereInput = {
       deletedAt: null,
@@ -129,12 +147,20 @@ export class ProductsService {
       throw new NotFoundException('Producto no encontrado');
     }
 
+    if (role !== Role.ADMIN) {
+      await this.prisma.product.update({
+        where: { id: product.id },
+        data: { viewCount: { increment: 1 } },
+      });
+    }
+
     return this.filterMissingUploadImages(product);
   }
 
   async create(dto: CreateProductDto) {
     if (
       dto.previousPrice !== undefined &&
+      dto.currentPrice != null &&
       dto.previousPrice < dto.currentPrice
     ) {
       throw new BadRequestException(
@@ -142,13 +168,15 @@ export class ProductsService {
       );
     }
 
+    const slug = await this.generateUniqueSlug(dto.name);
+
     return this.prisma.product.create({
       data: {
         name: dto.name,
-        slug: toSlug(dto.name),
+        slug,
         shortDescription: dto.shortDescription,
         description: dto.description,
-        currentPrice: new Prisma.Decimal(dto.currentPrice),
+        currentPrice: dto.currentPrice != null ? new Prisma.Decimal(dto.currentPrice) : null,
         previousPrice:
           dto.previousPrice !== undefined
             ? new Prisma.Decimal(dto.previousPrice)
@@ -157,6 +185,8 @@ export class ProductsService {
         stock: dto.stock,
         isFeatured: dto.isFeatured ?? false,
         isOnOffer: dto.isOnOffer ?? false,
+        freeShipping: dto.freeShipping ?? false,
+        availability: dto.availability ?? 'IN_STOCK',
         brandId: dto.brandId,
         categoryId: dto.categoryId,
         images: {
@@ -196,26 +226,36 @@ export class ProductsService {
         await tx.productSpec.deleteMany({ where: { productId: id } });
       }
 
+      const previousPriceValue =
+        dto.isOnOffer === false
+          ? null
+          : dto.previousPrice !== undefined
+            ? new Prisma.Decimal(dto.previousPrice)
+            : undefined;
+      const newSlug = dto.name ? await this.generateUniqueSlug(dto.name, id) : undefined;
+
       return tx.product.update({
         where: { id },
         data: {
           name: dto.name,
-          slug: dto.name ? toSlug(dto.name) : undefined,
+          slug: newSlug,
           shortDescription: dto.shortDescription,
           description: dto.description,
           currentPrice:
-            dto.currentPrice !== undefined
-              ? new Prisma.Decimal(dto.currentPrice)
-              : undefined,
+            dto.currentPrice === undefined
+              ? undefined
+              : dto.currentPrice === null
+                ? null
+                : new Prisma.Decimal(dto.currentPrice),
           previousPrice:
-            dto.previousPrice !== undefined
-              ? new Prisma.Decimal(dto.previousPrice)
-              : undefined,
+            previousPriceValue,
           sku: dto.sku,
           stock: dto.stock,
           isFeatured: dto.isFeatured,
           isOnOffer: dto.isOnOffer,
+          freeShipping: dto.freeShipping,
           isActive: dto.isActive,
+          availability: dto.availability,
           brandId: dto.brandId,
           categoryId: dto.categoryId,
           images: dto.images
@@ -254,5 +294,115 @@ export class ProductsService {
       where: { id },
       data: { deletedAt: new Date(), isActive: false },
     });
+  }
+
+  async registerSale(productId: string, quantity: number, unitPrice: number) {
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Producto no encontrado');
+    }
+
+    const totalPrice = quantity * unitPrice;
+
+    // Crear registro de venta
+    const saleRecord = await this.prisma.salesRecord.create({
+      data: {
+        productId,
+        quantity,
+        unitPrice: new Prisma.Decimal(unitPrice.toString()),
+        totalPrice: new Prisma.Decimal(totalPrice.toString()),
+      },
+      include: {
+        product: true,
+      },
+    });
+
+    // Actualizar soldCount del producto
+    await this.prisma.product.update({
+      where: { id: productId },
+      data: {
+        soldCount: product.soldCount + quantity,
+      },
+    });
+
+    return saleRecord;
+  }
+
+  async updateSale(saleId: string, quantity: number) {
+    const sale = await this.prisma.salesRecord.findUnique({ where: { id: saleId } });
+    if (!sale) throw new NotFoundException('Registro de venta no encontrado');
+    const totalPrice = quantity * Number(sale.unitPrice);
+    const diff = quantity - sale.quantity;
+    const [updated] = await this.prisma.$transaction([
+      this.prisma.salesRecord.update({
+        where: { id: saleId },
+        data: {
+          quantity,
+          totalPrice: new Prisma.Decimal(totalPrice.toString()),
+        },
+        include: { product: { select: { id: true, name: true, sku: true } } },
+      }),
+      this.prisma.product.update({
+        where: { id: sale.productId },
+        data: { soldCount: { increment: diff } },
+      }),
+    ]);
+    return updated;
+  }
+
+  async deleteSale(saleId: string) {
+    const sale = await this.prisma.salesRecord.findUnique({ where: { id: saleId } });
+    if (!sale) throw new NotFoundException('Registro de venta no encontrado');
+    await this.prisma.$transaction([
+      this.prisma.salesRecord.delete({ where: { id: saleId } }),
+      this.prisma.product.update({
+        where: { id: sale.productId },
+        data: { soldCount: { decrement: sale.quantity } },
+      }),
+    ]);
+    return { deleted: true };
+  }
+
+  async getSalesHistory(limit = 100) {
+    const sales = await this.prisma.salesRecord.findMany({
+      include: {
+        product: {
+          select: {
+            id: true,
+            name: true,
+            sku: true,
+            currentPrice: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
+
+    return sales;
+  }
+
+  async findBySku(sku: string) {
+    const product = await this.prisma.product.findFirst({
+      where: { sku, deletedAt: null },
+      include: this.includeData,
+    });
+
+    if (!product) return null;
+    return this.filterMissingUploadImages(product);
+  }
+
+  async getMostViewedProducts(limit = 10) {
+    const products = await this.prisma.product.findMany({
+      where: { deletedAt: null },
+      include: this.includeData,
+      orderBy: [{ viewCount: 'desc' }, { updatedAt: 'desc' }],
+      take: limit,
+    });
+
+    return products.map((product) => this.filterMissingUploadImages(product));
   }
 }

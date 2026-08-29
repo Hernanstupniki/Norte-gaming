@@ -1,0 +1,9 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Norte Gaming favicon">
+  <rect width="512" height="512" fill="#111111"/>
+  <!-- Left stroke of N (white) -->
+  <rect x="100" y="120" width="72" height="272" fill="#ffffff"/>
+  <!-- Diagonal stroke (white) -->
+  <polygon points="172,120 244,120 412,392 340,392" fill="#ffffff"/>
+  <!-- Right stroke of N (red) -->
+  <rect x="340" y="120" width="72" height="272" fill="#dc2626"/>
+</svg>

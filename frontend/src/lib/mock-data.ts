@@ -3,6 +3,7 @@ import { Category, FAQItem, Product, Review, StatItem } from "@/types";
 export const brands = [
   "Logitech",
   "HyperX",
+  "JBL",
   "Razer",
   "Corsair",
   "SteelSeries",
@@ -50,7 +51,7 @@ export const categories: Category[] = [
   {
     slug: "accesorios",
     name: "Accesorios",
-    description: "Webcams, soportes y extras para tu setup.",
+    description: "Webcams, soportes y extras para completar tu setup.",
     heroLabel: "Tu setup completo",
   },
 ];
@@ -62,10 +63,7 @@ export const stats: StatItem[] = [
   { label: "Envíos realizados", value: "+32.000" },
 ];
 
-const toInstallments = (price: number) => {
-  const monthly = Math.round(price / 12);
-  return `12x de $${monthly.toLocaleString("es-AR")} sin interés`;
-};
+const toInstallments = (_price: number) => "Distintos medios de pago disponibles";
 
 export const products: Product[] = [
   {
@@ -78,7 +76,7 @@ export const products: Product[] = [
     previousPrice: 329999,
     stock: 8,
     installments: toInstallments(289999),
-    badges: ["oferta", "destacado"],
+    badges: ["destacado"],
     shortDescription: "TKL inalámbrico para esports con switches intercambiables.",
     description:
       "Diseñado para competitivo, el Pro X TKL combina respuesta ultrarrápida, conexión LIGHTSPEED y construcción premium en aluminio.",
@@ -92,6 +90,7 @@ export const products: Product[] = [
     rating: 4.9,
     reviewCount: 82,
     sold: 210,
+    availability: "in-stock",
     isFeatured: true,
   },
   {
@@ -117,6 +116,7 @@ export const products: Product[] = [
     rating: 4.8,
     reviewCount: 124,
     sold: 396,
+    availability: "in-stock",
     isFeatured: true,
   },
   {
@@ -129,7 +129,7 @@ export const products: Product[] = [
     previousPrice: 239999,
     stock: 19,
     installments: toInstallments(219999),
-    badges: ["oferta"],
+    badges: [],
     shortDescription: "Comodidad total y micrófono claro con batería extendida.",
     description:
       "Ideal para largas sesiones de juego, con almohadillas memory foam y audio espacial para ventaja táctica.",
@@ -143,6 +143,7 @@ export const products: Product[] = [
     rating: 4.7,
     reviewCount: 67,
     sold: 190,
+    availability: "in-stock",
   },
   {
     id: "p4",
@@ -154,7 +155,7 @@ export const products: Product[] = [
     previousPrice: 979999,
     stock: 5,
     installments: toInstallments(899999),
-    badges: ["destacado", "nuevo"],
+    badges: ["destacado"],
     shortDescription: "27 pulgadas QHD IPS con 300Hz para esports premium.",
     description:
       "Panel veloz y colores precisos para competir y crear. Incluye sincronización adaptativa y baja latencia de entrada.",
@@ -168,6 +169,7 @@ export const products: Product[] = [
     rating: 4.9,
     reviewCount: 33,
     sold: 74,
+    availability: "in-stock",
     isFeatured: true,
   },
   {
@@ -193,6 +195,7 @@ export const products: Product[] = [
     rating: 4.6,
     reviewCount: 58,
     sold: 280,
+    availability: "in-stock",
   },
   {
     id: "p6",
@@ -204,10 +207,10 @@ export const products: Product[] = [
     previousPrice: 78999,
     stock: 41,
     installments: toInstallments(69999),
-    badges: ["oferta"],
+    badges: [],
     shortDescription: "Compacto 60% con switches mecánicos y RGB.",
     description:
-      "Excelente opción calidad/precio para armar setup competitivo sin romper presupuesto.",
+      "Ideal para empezar o mejorar tu setup con un teclado confiable, buen tacto y gran rendimiento por su rango de precio.",
     specs: [
       { label: "Formato", value: "60%" },
       { label: "Switch", value: "Redragon Red" },
@@ -218,6 +221,7 @@ export const products: Product[] = [
     rating: 4.5,
     reviewCount: 212,
     sold: 612,
+    availability: "in-stock",
   },
   {
     id: "p7",
@@ -242,6 +246,7 @@ export const products: Product[] = [
     rating: 4.8,
     reviewCount: 101,
     sold: 244,
+    availability: "in-stock",
     isFeatured: true,
   },
   {
@@ -253,7 +258,7 @@ export const products: Product[] = [
     price: 529999,
     stock: 7,
     installments: toInstallments(529999),
-    badges: ["nuevo"],
+    badges: [],
     shortDescription: "QHD 27 pulgadas con 180Hz y panel rapid IPS.",
     description:
       "Un equilibrio ideal entre rendimiento competitivo y fidelidad de color para uso mixto gaming/productividad.",
@@ -267,6 +272,7 @@ export const products: Product[] = [
     rating: 4.7,
     reviewCount: 41,
     sold: 98,
+    availability: "in-stock",
   },
   {
     id: "p9",
@@ -291,6 +297,7 @@ export const products: Product[] = [
     rating: 4.6,
     reviewCount: 28,
     sold: 66,
+    availability: "in-stock",
   },
   {
     id: "p10",
@@ -315,6 +322,7 @@ export const products: Product[] = [
     rating: 4.9,
     reviewCount: 95,
     sold: 222,
+    availability: "in-stock",
     isFeatured: true,
   },
   {
@@ -326,7 +334,7 @@ export const products: Product[] = [
     price: 159999,
     stock: 18,
     installments: toInstallments(159999),
-    badges: ["nuevo"],
+    badges: [],
     shortDescription: "Shape ambidiestro con latencia mínima.",
     description:
       "Pensado para aimers competitivos que necesitan ligereza extrema y tracking estable.",
@@ -340,6 +348,7 @@ export const products: Product[] = [
     rating: 4.7,
     reviewCount: 38,
     sold: 84,
+    availability: "in-stock",
   },
   {
     id: "p12",
@@ -350,7 +359,7 @@ export const products: Product[] = [
     price: 89999,
     stock: 29,
     installments: toInstallments(89999),
-    badges: ["oferta"],
+    badges: [],
     shortDescription: "Stand premium para auriculares con base de carga.",
     description:
       "Orden y estética para el escritorio con un accesorio sólido y funcional.",
@@ -364,6 +373,7 @@ export const products: Product[] = [
     rating: 4.4,
     reviewCount: 21,
     sold: 63,
+    availability: "in-stock",
   },
 ];
 
@@ -386,7 +396,7 @@ export const faqItems: FAQItem[] = [
   {
     question: "¿Cómo funcionan cambios y devoluciones?",
     answer:
-      "Tenés 10 días para solicitar cambios o devoluciones por falla o disconformidad, según nuestras condiciones de compra.",
+      "Tenés 10 días para solicitar cambios o devoluciones por falla, según nuestras condiciones de compra.",
   },
   {
     question: "¿Cómo sé si hay stock real?",
@@ -396,7 +406,7 @@ export const faqItems: FAQItem[] = [
   {
     question: "¿Cuánto tarda en llegar mi compra?",
     answer:
-      "AMBA: 24/48 hs hábiles. Interior del país: entre 2 y 6 días hábiles según destino y operador logístico.",
+      "La entrega suele demorar entre 4 y 7 días hábiles, según destino y operador logístico.",
   },
 ];
 
@@ -437,19 +447,19 @@ export const reviews: Review[] = [
 
 export const benefitItems = [
   {
-    title: "Productos originales",
-    description: "Catálogo seleccionado con productos originales y publicación transparente.",
+    title: "Atención directa",
+    description: "Respondemos rápido para ayudarte a elegir según lo que jugás y lo que necesitás.",
   },
   {
-    title: "Envíos a todo el país",
-    description: "Cobertura nacional con seguimiento y opciones de retiro.",
+    title: "Seguimiento del pedido",
+    description: "Te acompañamos desde la compra hasta la entrega con información clara del envío.",
   },
   {
-    title: "Atención personalizada",
-    description: "Asesoramiento humano por WhatsApp y soporte postventa real.",
+    title: "Asesoramiento por presupuesto",
+    description: "Te recomendamos opciones que realmente valen la pena dentro de tu rango.",
   },
   {
-    title: "Mejor precio del país",
-    description: "Política de precio competitivo con promociones actualizadas.",
+    title: "Gaming real",
+    description: "Productos elegidos para rendimiento real, no catálogo inflado con relleno.",
   },
 ];

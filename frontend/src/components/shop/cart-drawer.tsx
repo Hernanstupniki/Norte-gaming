@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useStore } from "@/context/store-context";
 import { formatARS } from "@/lib/utils";
-import { buildCartWhatsAppHref } from "@/lib/whatsapp";
 
 export function CartDrawer() {
   const {
@@ -14,7 +13,6 @@ export function CartDrawer() {
     removeFromCart,
     subtotal,
   } = useStore();
-  const whatsappHref = buildCartWhatsAppHref(cartProducts, subtotal);
 
   return (
     <>
@@ -25,11 +23,11 @@ export function CartDrawer() {
         onClick={closeCart}
       />
       <aside
-        className={`fixed right-0 top-0 z-50 h-full w-full max-w-md border-l-2 border-black bg-white p-6 transition-transform duration-300 ${
+        className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col overflow-hidden border-l-2 border-black bg-white p-6 transition-transform duration-300 ${
           isCartOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-bold uppercase tracking-widest">Tu carrito</h3>
           <button
             type="button"
@@ -40,7 +38,7 @@ export function CartDrawer() {
           </button>
         </div>
 
-        <div className="space-y-4 overflow-y-auto pb-28">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain pb-4 pr-1 [touch-action:pan-y]">
           {cartProducts.length === 0 ? (
             <p className="rounded-lg border border-dashed border-zinc-300 p-5 text-sm text-zinc-500">
               Tu carrito está vacío. Explorá el catálogo para sumar periféricos.
@@ -50,7 +48,9 @@ export function CartDrawer() {
               <div key={product.id} className="rounded-xl border border-zinc-200 p-3">
                 <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">{product.brand}</p>
                 <p className="text-sm font-semibold text-zinc-950">{product.name}</p>
-                <p className="text-sm font-bold">{formatARS(product.price)}</p>
+                <p className="text-sm font-bold">
+                  {product.price !== undefined ? formatARS(product.price) : "Consultar precio"}
+                </p>
                 <div className="mt-3 flex items-center justify-between">
                   <div className="inline-flex items-center overflow-hidden rounded border border-black">
                     <button
@@ -82,7 +82,7 @@ export function CartDrawer() {
           )}
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 border-t-2 border-black bg-white p-6">
+        <div className="mt-4 shrink-0 border-t-2 border-black bg-white pt-4">
           <div className="mb-4 flex items-center justify-between text-sm">
             <span className="text-zinc-600">Subtotal</span>
             <span className="text-lg font-bold text-zinc-950">{formatARS(subtotal)}</span>
@@ -98,19 +98,10 @@ export function CartDrawer() {
             <Link
               href="/checkout"
               onClick={closeCart}
-              className="rounded-lg border-2 border-zinc-400 bg-zinc-100 px-4 py-2 text-center text-xs font-semibold uppercase tracking-widest text-zinc-700"
+              className="rounded-lg border-2 border-red-700 bg-red-600 px-4 py-2 text-center text-xs font-semibold uppercase tracking-widest text-white"
             >
-              Ver resumen
+              Ir a pagar
             </Link>
-            <a
-              href={whatsappHref}
-              target="_blank"
-              rel="noreferrer"
-              onClick={closeCart}
-              className="rounded-lg border-2 border-[#25D366] bg-[#25D366] px-4 py-2 text-center text-xs font-semibold uppercase tracking-widest text-black"
-            >
-              Coordinar por WhatsApp
-            </a>
           </div>
         </div>
       </aside>

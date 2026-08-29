@@ -8,16 +8,28 @@ import { UpdateBrandDto } from './dto/update-brand.dto';
 export class BrandsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private readonly hiddenBrandSlugs = ['logitech-g', 'reddragon'];
+  private readonly hiddenBrandNames = ['Logitech G', 'Reddragon'];
+
   listActive() {
     return this.prisma.brand.findMany({
-      where: { isActive: true, deletedAt: null },
+      where: {
+        isActive: true,
+        deletedAt: null,
+        slug: { notIn: this.hiddenBrandSlugs },
+        name: { notIn: this.hiddenBrandNames },
+      },
       orderBy: { name: 'asc' },
     });
   }
 
   listAllAdmin() {
     return this.prisma.brand.findMany({
-      where: { deletedAt: null },
+      where: {
+        deletedAt: null,
+        slug: { notIn: this.hiddenBrandSlugs },
+        name: { notIn: this.hiddenBrandNames },
+      },
       orderBy: { createdAt: 'desc' },
     });
   }

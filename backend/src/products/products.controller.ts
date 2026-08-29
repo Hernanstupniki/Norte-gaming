@@ -15,6 +15,7 @@ import { Public } from '../common/public.decorator';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ProductsQueryDto } from './dto/products-query.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { RegisterSaleDto } from './dto/register-sale.dto';
 import { ProductsService } from './products.service';
 
 @ApiTags('products')
@@ -35,6 +36,20 @@ export class ProductsController {
     return this.productsService.list(query, Role.ADMIN);
   }
 
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN)
+  @Get('admin/sales-history')
+  getSalesHistory() {
+    return this.productsService.getSalesHistory();
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN)
+  @Get('admin/most-viewed')
+  getMostViewedProducts(@Query('limit') limit?: string) {
+    return this.productsService.getMostViewedProducts(limit ? Number(limit) : 10);
+  }
+
   @Public()
   @Get(':slug')
   bySlugPublic(@Param('slug') slug: string) {
@@ -50,6 +65,13 @@ export class ProductsController {
 
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
+  @Get('admin/by-sku/:sku')
+  bySkuAdmin(@Param('sku') sku: string) {
+    return this.productsService.findBySku(sku);
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN)
   @Post()
   create(@Body() dto: CreateProductDto) {
     return this.productsService.create(dto);
@@ -60,6 +82,27 @@ export class ProductsController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateProductDto) {
     return this.productsService.update(id, dto);
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN)
+  @Post('admin/register-sale')
+  registerSale(@Body() dto: RegisterSaleDto) {
+    return this.productsService.registerSale(dto.productId, dto.quantity, dto.unitPrice);
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN)
+  @Patch('admin/sales/:id')
+  updateSale(@Param('id') id: string, @Body() body: { quantity: number }) {
+    return this.productsService.updateSale(id, body.quantity);
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN)
+  @Delete('admin/sales/:id')
+  deleteSale(@Param('id') id: string) {
+    return this.productsService.deleteSale(id);
   }
 
   @ApiBearerAuth()

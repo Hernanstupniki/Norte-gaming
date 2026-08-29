@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 import { products } from "@/lib/mock-data";
-import { getWishlistProductIds, logoutUser, toggleWishlist, UserSession } from "@/lib/user-api";
+import { getWishlistProductIds, logoutUser, refreshAccessToken, toggleWishlist, UserSession } from "@/lib/user-api";
 import { CartItem, Product } from "@/types";
 
 interface AuthState {
@@ -34,6 +34,7 @@ interface StoreContextValue {
   addToCart: (productId: string, productData?: Product) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
+  clearCart: () => void;
   toggleFavorite: (productId: string) => void;
   dismissFavoriteNotice: () => void;
   setCatalogProducts: (catalogProducts: Product[]) => void;
@@ -120,6 +121,34 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     window.localStorage.setItem(STORAGE_KEY, payload);
   }, [auth, cart, favorites, hasHydrated]);
 
+  // Auto-refresh access token before it expires
+  useEffect(() => {
+    if (!hasHydrated || !auth.refreshToken || !auth.accessToken) return;
+
+    const scheduleRefresh = () => {
+      // Decode exp from JWT without a library
+      try {
+        const payload = JSON.parse(atob(auth.accessToken.split(".")[1]));
+        const expiresInMs = payload.exp * 1000 - Date.now();
+        const refreshInMs = Math.max(expiresInMs - 60_000, 0); // 1 min before expiry
+        return setTimeout(async () => {
+          const tokens = await refreshAccessToken(auth.refreshToken);
+          if (tokens) {
+            setAuth((prev) => ({ ...prev, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken }));
+          } else {
+            // Refresh token also expired — log out silently
+            setAuth((prev) => ({ ...prev, userId: "", role: "", accessToken: "", refreshToken: "", email: "", name: "", isLoggedIn: false }));
+          }
+        }, refreshInMs);
+      } catch {
+        return undefined;
+      }
+    };
+
+    const timer = scheduleRefresh();
+    return () => { if (timer) clearTimeout(timer); };
+  }, [auth.accessToken, auth.refreshToken, hasHydrated]);
+
   const setCatalogProducts = useCallback((catalogProducts: Product[]) => {
     setProductCatalog((previous) => ({
       ...previous,
@@ -151,6 +180,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const removeFromCart = (productId: string) => {
     setCart((previous) => previous.filter((item) => item.productId !== productId));
+  };
+
+  const clearCart = () => {
+    setCart([]);
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
@@ -261,8 +294,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const subtotal = useMemo(
     () =>
+      // Undefined-price items (order-only products) don't contribute to this
+      // client-side subtotal estimate. The authoritative total is always
+      // computed server-side at order creation, which the backend guard protects.
       cartProducts.reduce(
-        (sum, entry) => sum + entry.product.price * entry.quantity,
+        (sum, entry) => sum + (entry.product.price ?? 0) * entry.quantity,
         0,
       ),
     [cartProducts],
@@ -279,6 +315,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     addToCart,
     removeFromCart,
     updateQuantity,
+    clearCart,
     toggleFavorite,
     dismissFavoriteNotice: () => setFavoriteNotice(null),
     setCatalogProducts,

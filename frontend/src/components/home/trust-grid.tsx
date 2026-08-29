@@ -5,9 +5,9 @@ export function TrustGrid() {
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-16 md:px-6">
       <SectionTitle
-        eyebrow="Confianza"
-        title="Comprá con respaldo real"
-        description="Norte Gaming combina precio competitivo con servicio humano y productos originales en cada compra."
+        eyebrow="Respaldo"
+        title="Comprá con atención real"
+        description="Atención rápida, productos originales y envíos a todo el país para que compres con confianza desde el primer mensaje."
       />
       <div className="mt-8 grid gap-4 md:grid-cols-5">
         {benefitItems.map((item) => (

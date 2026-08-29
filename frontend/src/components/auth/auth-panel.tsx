@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
+import { FormEvent, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useStore } from "@/context/store-context";
-import { loginUser, registerUser } from "@/lib/user-api";
+import { forgotPasswordUser, loginUser, registerUser, resetPasswordUser } from "@/lib/user-api";
 
 interface AuthPanelProps {
   mode: "login" | "register";
@@ -12,18 +12,43 @@ interface AuthPanelProps {
 
 export function AuthPanel({ mode }: AuthPanelProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login } = useStore();
+  const [loginView, setLoginView] = useState<"login" | "forgot" | "reset">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [resetToken, setResetToken] = useState("");
+  const [resetFromEmailLink, setResetFromEmailLink] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (mode !== "login") return;
+
+    const tokenFromUrl = searchParams.get("recoverToken")?.trim();
+    if (!tokenFromUrl) return;
+
+    setResetToken(tokenFromUrl);
+    setResetFromEmailLink(true);
+    setLoginView("reset");
+    setInfo("Completá tu nueva contraseña para finalizar la recuperación.");
+  }, [mode, searchParams]);
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
+
+    if (mode === "login" && loginView !== "login") {
+      return;
+    }
+
     setLoading(true);
     setError(null);
+    setInfo(null);
 
     try {
       const session =
@@ -49,10 +74,64 @@ export function AuthPanel({ mode }: AuthPanelProps) {
     }
   };
 
+  const onForgotSubmit = async () => {
+    setLoading(true);
+    setError(null);
+    setInfo(null);
+
+    try {
+      const result = await forgotPasswordUser(email);
+      setInfo(`${result.message} Revisá tu Gmail y abrí el enlace para continuar.`);
+      if (result.mockToken) {
+        setResetToken(result.mockToken);
+        setResetFromEmailLink(false);
+        setLoginView("reset");
+      }
+    } catch (submitError) {
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "No se pudo iniciar la recuperación",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onResetSubmit = async () => {
+    if (newPassword !== confirmPassword) {
+      setError("Las contraseñas no coinciden");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setInfo(null);
+
+    try {
+      const result = await resetPasswordUser(resetToken.trim(), newPassword);
+      setInfo(result.message);
+      setPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setResetToken("");
+      setResetFromEmailLink(false);
+      setLoginView("login");
+    } catch (submitError) {
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "No se pudo restablecer la contraseña",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const title = mode === "login" ? "Ingresar" : "Crear cuenta";
   const description =
     mode === "login"
-      ? "Accedé a tus guardados, historial y seguimiento de compras."
+      ? "Accedé a tu carrito, historial y seguimiento de compras."
       : "Registrate para una experiencia de compra más rápida y personalizada.";
 
   return (
@@ -86,36 +165,136 @@ export function AuthPanel({ mode }: AuthPanelProps) {
               />
             </>
           ) : null}
-          <input
-            required
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="Email"
-            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm"
-          />
-          <input
-            required
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="Contraseña"
-            minLength={8}
-            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm"
-          />
-          <button
-            disabled={loading}
-            className="w-full rounded-md border-2 border-black bg-black px-4 py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-60"
-          >
-            {mode === "login" ? "Ingresar" : "Registrarme"}
-          </button>
+          {mode === "login" && loginView === "forgot" ? (
+            <div className="space-y-3">
+              <input
+                required
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="Email"
+                className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => void onForgotSubmit()}
+                disabled={loading}
+                className="w-full rounded-md border-2 border-black bg-black px-4 py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-60"
+              >
+                {loading ? "Enviando..." : "Enviar recuperación"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setLoginView("login");
+                  setError(null);
+                  setInfo(null);
+                }}
+                className="w-full rounded-md border border-zinc-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-zinc-700"
+              >
+                Volver al login
+              </button>
+            </div>
+          ) : mode === "login" && loginView === "reset" ? (
+            <div className="space-y-3">
+              {!resetFromEmailLink ? (
+                <input
+                  required
+                  type="text"
+                  value={resetToken}
+                  onChange={(event) => setResetToken(event.target.value)}
+                  placeholder="Token de recuperación"
+                  className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm"
+                />
+              ) : null}
+              <input
+                required
+                type="password"
+                minLength={8}
+                value={newPassword}
+                onChange={(event) => setNewPassword(event.target.value)}
+                placeholder="Nueva contraseña"
+                className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm"
+              />
+              <input
+                required
+                type="password"
+                minLength={8}
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                placeholder="Confirmar contraseña"
+                className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => void onResetSubmit()}
+                disabled={loading}
+                className="w-full rounded-md border-2 border-black bg-black px-4 py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-60"
+              >
+                {loading ? "Restableciendo..." : "Restablecer contraseña"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setLoginView("login");
+                  setError(null);
+                  setResetFromEmailLink(false);
+                }}
+                className="w-full rounded-md border border-zinc-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-zinc-700"
+              >
+                Volver al login
+              </button>
+            </div>
+          ) : (
+            <>
+              <input
+                required
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="Email"
+                className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm"
+              />
+              <input
+                required
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="Contraseña"
+                minLength={8}
+                className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm"
+              />
+              <button
+                disabled={loading}
+                className="w-full rounded-md border-2 border-black bg-black px-4 py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-60"
+              >
+                {mode === "login" ? "Ingresar" : "Registrarme"}
+              </button>
+            </>
+          )}
 
           {error ? <p className="text-xs text-red-600">{error}</p> : null}
+          {info ? <p className="text-xs text-green-700">{info}</p> : null}
 
           {mode === "login" ? (
-            <p className="text-center text-xs text-zinc-600">
-              ¿No tenés cuenta? <Link href="/registro" className="font-semibold text-zinc-900">Registrate</Link>
-            </p>
+            <div className="space-y-1 text-center text-xs text-zinc-600">
+              {loginView === "login" ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoginView("forgot");
+                    setError(null);
+                    setInfo(null);
+                  }}
+                  className="font-semibold text-zinc-900 underline"
+                >
+                  Olvidé mi contraseña
+                </button>
+              ) : null}
+              <p>
+                ¿No tenés cuenta? <Link href="/registro" className="font-semibold text-zinc-900">Registrate</Link>
+              </p>
+            </div>
           ) : (
             <p className="text-center text-xs text-zinc-600">
               ¿Ya tenés cuenta? <Link href="/login" className="font-semibold text-zinc-900">Ingresá</Link>

@@ -2,6 +2,7 @@ import {
   ArrayMinSize,
   IsArray,
   IsBoolean,
+  IsEnum,
   IsInt,
   IsNumber,
   IsOptional,
@@ -12,6 +13,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ProductAvailability } from '@prisma/client';
 import { ProductImageInputDto } from './product-image-input.dto';
 import { ProductSpecInputDto } from './product-spec-input.dto';
 
@@ -30,10 +32,11 @@ export class CreateProductDto {
   @MinLength(20)
   description: string;
 
+  @IsOptional()
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
-  currentPrice: number;
+  currentPrice?: number | null;
 
   @IsOptional()
   @Type(() => Number)
@@ -52,6 +55,12 @@ export class CreateProductDto {
   stock: number;
 
   @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  soldCount?: number;
+
+  @IsOptional()
   @Type(() => Boolean)
   @IsBoolean()
   isFeatured?: boolean;
@@ -64,7 +73,16 @@ export class CreateProductDto {
   @IsOptional()
   @Type(() => Boolean)
   @IsBoolean()
+  freeShipping?: boolean;
+
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional()
+  @IsEnum(ProductAvailability)
+  availability?: ProductAvailability;
 
   @IsString()
   brandId: string;
@@ -77,6 +95,11 @@ export class CreateProductDto {
   @ValidateNested({ each: true })
   @Type(() => ProductImageInputDto)
   images: ProductImageInputDto[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  variants?: string[];
 
   @IsOptional()
   @IsArray()

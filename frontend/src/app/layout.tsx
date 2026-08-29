@@ -25,6 +25,16 @@ export const metadata: Metadata = {
   title: "Norte Gaming | Periféricos gamer premium",
   description:
     "Tienda online de periféricos gamer en Argentina. Mejor precio, productos originales y atención personalizada.",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon-48x48.png", sizes: "48x48", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    shortcut: "/favicon.svg",
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/manifest.webmanifest",
 };
 
 export default function RootLayout({

@@ -1,65 +1,227 @@
-import Link from "next/link";
-import { ProductThumbnail } from "@/components/common/product-thumbnail";
+"use client";
 
-const badges = ["Mejor precio", "Productos originales", "Envío rápido", "Atención personalizada"];
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
+const CARDS = [
+  {
+    num: "001",
+    title: "AJAZZ AJ199\nWIRELESS",
+    status: "LANZAMIENTO",
+    subtitle: "Mouse Gamer AJAZZ AJ199 Wireless",
+    imageSrc: "/AJAZZ AJ199.png",
+    href: "/producto/mouse-gamer-ajazz-aj199-wireless",
+  },
+  {
+    num: "002",
+    title: "ONIKUMA\nMT706",
+    status: "YA DISPONIBLE!",
+    subtitle: "Teclado Gamer Mecánico Onikuma MT706 Wireless",
+    imageSrc: "/Onikuma MT706.png",
+    href: "/producto/teclado-gamer-mecanico-onikuma-mt706-wireless",
+  },
+  {
+    num: "003",
+    title: "CORSAIR HS55\nSURROUND V2",
+    status: "DESTACADO",
+    subtitle: "Auriculares Corsair HS55 Surround V2",
+    imageSrc: "/Corsair HS55 Surround V2.png",
+    href: "/producto/auricular-gamer-corsair-hs55-surround-v2",
+  },
+];
+
+function Crosshair() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="text-red-600">
+      <circle cx="9" cy="9" r="3.5" stroke="currentColor" strokeWidth="1.2" />
+      <line x1="9" y1="0" x2="9" y2="5" stroke="currentColor" strokeWidth="1.2" />
+      <line x1="9" y1="13" x2="9" y2="18" stroke="currentColor" strokeWidth="1.2" />
+      <line x1="0" y1="9" x2="5" y2="9" stroke="currentColor" strokeWidth="1.2" />
+      <line x1="13" y1="9" x2="18" y2="9" stroke="currentColor" strokeWidth="1.2" />
+    </svg>
+  );
+}
+
+function GamingCard({ card }: { card: typeof CARDS[0] }) {
+  const titleLines = card.title.split("\n");
+
+  return (
+    <Link
+      href={card.href}
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-zinc-700 bg-black transition-transform duration-200 hover:-translate-y-1 hover:border-zinc-500"
+    >
+      {/* Inner frame */}
+      <span className="pointer-events-none absolute inset-[7px] rounded-xl border border-zinc-700/50" />
+
+      {/* Corner HUD brackets — outer */}
+      <span className="absolute left-3 top-3 h-4 w-4 border-l-[2px] border-t-[2px] border-white/25" />
+      <span className="absolute right-3 top-3 h-4 w-4 border-r-[2px] border-t-[2px] border-white/25" />
+      <span className="absolute bottom-3 left-3 h-4 w-4 border-b-[2px] border-l-[2px] border-white/25" />
+      <span className="absolute bottom-3 right-3 h-4 w-4 border-b-[2px] border-r-[2px] border-white/25" />
+
+      {/* Corner + symbols */}
+      <span className="absolute left-[22px] top-[11px] text-[10px] font-bold text-white/20">+</span>
+      <span className="absolute right-[22px] top-[11px] text-[10px] font-bold text-white/20">+</span>
+
+      {/* Top: NORTE GAMING label */}
+      <div className="relative px-5 pt-5">
+        <p className="flex items-center justify-center gap-2 text-[9px] font-black uppercase tracking-[0.35em] text-red-500">
+          <span className="h-px w-6 bg-red-600/60" />
+          Norte Gaming
+          <span className="h-px w-6 bg-red-600/60" />
+        </p>
+      </div>
+
+      {/* Product title */}
+      <div className="px-5 pt-3">
+        {titleLines.map((line, i) => (
+          <h2
+            key={i}
+            className="block text-center text-[1.6rem] font-black uppercase leading-none tracking-tight text-white md:text-[1.8rem]"
+            style={{ fontStretch: "condensed" }}
+          >
+            {line}
+          </h2>
+        ))}
+      </div>
+
+      {/* Card number */}
+      <span className="absolute right-4 top-1/3 -translate-y-1/2 text-[10px] font-mono font-bold text-zinc-600">
+        {card.num}
+      </span>
+
+      {/* Left red dots */}
+      <div className="absolute left-4 top-1/2 flex -translate-y-1/2 flex-col gap-[5px]">
+        {[...Array(4)].map((_, i) => (
+          <span key={i} className="h-[5px] w-[5px] rounded-full bg-red-600 opacity-80" />
+        ))}
+      </div>
+
+      {/* Crosshair top-left */}
+      <div className="absolute left-[14px] top-[38px]">
+        <Crosshair />
+      </div>
+
+      {/* Product image */}
+      <div className="relative mx-auto flex h-96 w-full max-w-[85%] items-center justify-center py-6">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={card.imageSrc}
+          alt={card.subtitle}
+          className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
+          onError={(e) => {
+            (e.target as HTMLImageElement).style.opacity = "0.15";
+          }}
+        />
+      </div>
+
+      {/* Bottom info */}
+      <div className="mt-auto px-5 pb-5">
+        {/* Status */}
+        <div className="mb-2 flex items-center gap-2">
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-red-500">
+            {card.status}
+          </span>
+          <span className="flex-1 border-b border-red-600/40" />
+        </div>
+
+        {/* Subtitle */}
+        <p className="mb-4 text-[11px] text-zinc-400">{card.subtitle}</p>
+
+        {/* CTA button */}
+        <button className="w-full rounded-sm border-2 border-white bg-red-600 py-3 text-[11px] font-black uppercase tracking-[0.2em] text-white shadow-[3px_3px_0_#000] transition-all group-hover:shadow-[1px_1px_0_#000]">
+          Comprar ahora
+        </button>
+      </div>
+
+      {/* Bottom hazard strip */}
+      <div
+        className="h-2 w-full opacity-30"
+        style={{
+          background:
+            "repeating-linear-gradient(45deg, #444, #444 3px, #111 3px, #111 8px)",
+        }}
+      />
+    </Link>
+  );
+}
 
 export function Hero() {
+  const [active, setActive] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    if (isPaused) return;
+    const timer = setInterval(() => {
+      setActive((prev) => (prev + 1) % CARDS.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [isPaused]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.touches[0].clientX);
+    setIsPaused(true);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStart === null) return;
+    const diff = touchStart - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) setActive((prev) => (prev + 1) % CARDS.length);
+      else setActive((prev) => (prev - 1 + CARDS.length) % CARDS.length);
+    }
+    setTouchStart(null);
+    setTimeout(() => setIsPaused(false), 3000);
+  };
+
   return (
     <section className="relative overflow-hidden border-b border-zinc-200 bg-gradient-to-b from-zinc-50 to-white">
       <div className="absolute inset-0 opacity-35 [background-image:linear-gradient(to_right,#d4d4d8_1px,transparent_1px),linear-gradient(to_bottom,#d4d4d8_1px,transparent_1px)] [background-size:28px_28px]" />
-      <div className="relative mx-auto grid w-full max-w-7xl items-center gap-10 px-4 py-16 md:grid-cols-2 md:px-6 md:py-20">
-        <div>
-          <p className="inline-flex border border-zinc-300 bg-white px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-zinc-600">
-            Norte Gaming / Argentina
-          </p>
-          <h1 className="mt-5 text-4xl font-black leading-tight tracking-tight text-zinc-950 md:text-5xl">
-            Los mejores periféricos gaming al mejor precio
-          </h1>
-          <p className="mt-5 max-w-xl text-base text-zinc-600 md:text-lg">
-            Productos originales, rendimiento competitivo y compra simple. Equipá tu setup con marcas seleccionadas y atención personalizada.
-          </p>
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Link
-              href="/tienda"
-              className="rounded-md border-2 border-red-600 bg-red-600 px-5 py-3 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-[4px_4px_0_#111] transition hover:-translate-y-0.5"
+      <div className="relative mx-auto w-full max-w-7xl px-4 py-10 md:px-6">
+
+        {/* Desktop: grid */}
+        <div className="hidden gap-5 lg:grid lg:grid-cols-3">
+          {CARDS.map((card) => (
+            <GamingCard key={card.num} card={card} />
+          ))}
+        </div>
+
+        {/* Mobile/tablet: carousel */}
+        <div className="lg:hidden">
+          <div
+            className="relative overflow-hidden"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div
+              className="flex transition-transform duration-500 ease-in-out"
+              style={{ transform: `translateX(-${active * 100}%)` }}
             >
-              Ver catálogo
-            </Link>
-            <Link
-              href="/nosotros"
-              className="rounded-md border-2 border-black bg-white px-5 py-3 text-xs font-bold uppercase tracking-[0.2em] text-zinc-950 shadow-[4px_4px_0_#111] transition hover:-translate-y-0.5"
-            >
-              Conocer más
-            </Link>
+              {CARDS.map((card) => (
+                <div key={card.num} className="w-full shrink-0 px-1">
+                  <GamingCard card={card} />
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="mt-6 flex flex-wrap gap-2">
-            {badges.map((badge) => (
-              <span
-                key={badge}
-                className="rounded-full border border-zinc-300 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-600"
-              >
-                {badge}
-              </span>
+
+          {/* Dots */}
+          <div className="mt-4 flex justify-center gap-2">
+            {CARDS.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setActive(i)}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  i === active ? "w-6 bg-red-600" : "w-2 bg-zinc-400"
+                }`}
+              />
             ))}
           </div>
         </div>
 
-        <div className="relative">
-          <ProductThumbnail
-            label="Setup Norte Gaming"
-            imageSrc="/hero-teclado.jpg"
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="h-80 border-2 border-black shadow-[12px_12px_0_#11111115]"
-          />
-          <div className="absolute -left-4 top-4 rounded-md border-2 border-black bg-white px-3 py-2 text-xs font-bold uppercase tracking-widest shadow-[3px_3px_0_#111]">
-            Setup Ready
-          </div>
-          <div className="absolute -bottom-4 right-5 rounded-md border-2 border-red-600 bg-red-600 px-3 py-2 text-xs font-bold uppercase tracking-widest text-white shadow-[3px_3px_0_#111]">
-            Envio gratis +$150.000
-          </div>
-        </div>
       </div>
-
     </section>
   );
 }
