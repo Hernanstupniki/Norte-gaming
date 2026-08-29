@@ -1,26 +1,90 @@
-name: CI/CD Pipeline
+name: CI/CD
 
 on:
   push:
     branches:
       - main
       - nuevabranch
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: production-${{ github.repository }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
   REGISTRY: ghcr.io
 
 jobs:
-  build-and-push:
+  quality-backend:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Lint backend
+        working-directory: ./backend
+        run: npm run lint:check
+
+      - name: Test backend
+        working-directory: ./backend
+        run: npm run test
+
+      - name: Build backend
+        working-directory: ./backend
+        run: npm run build
+
+  quality-frontend:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Lint frontend
+        working-directory: ./frontend
+        run: npm run lint
+
+      - name: Build frontend
+        working-directory: ./frontend
+        run: npm run build
+
+  publish:
+    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/nuevabranch')
+    needs:
+      - quality-backend
+      - quality-frontend
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -35,17 +99,34 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Extract metadata for Backend API
+        id: meta-api
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/hernanstupniki/norte-gaming-api
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=sha,format=long,prefix=sha-
+
       - name: Build and push Backend API Image
         uses: docker/build-push-action@v5
         with:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
-          tags: |
-            ghcr.io/hernanstupniki/norte-gaming-api:latest
-            ghcr.io/hernanstupniki/norte-gaming-api:sha-${{ github.sha }}
+          tags: ${{ steps.meta-api.outputs.tags }}
+          labels: ${{ steps.meta-api.outputs.labels }}
           cache-from: type=gha,scope=api
           cache-to: type=gha,mode=max,scope=api
+
+      - name: Extract metadata for Frontend Web
+        id: meta-web
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/hernanstupniki/norte-gaming-web
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=sha,format=long,prefix=sha-
 
       - name: Build and push Frontend Web Image
         uses: docker/build-push-action@v5
@@ -55,15 +136,29 @@ jobs:
           build-args: |
             NEXT_PUBLIC_API_URL=https://nortegaming.com/api
           push: true
-          tags: |
-            ghcr.io/hernanstupniki/norte-gaming-web:latest
-            ghcr.io/hernanstupniki/norte-gaming-web:sha-${{ github.sha }}
+          tags: ${{ steps.meta-web.outputs.tags }}
+          labels: ${{ steps.meta-web.outputs.labels }}
           cache-from: type=gha,scope=web
           cache-to: type=gha,mode=max,scope=web
 
-      - name: Trigger Dokploy AutoDeploy Webhook (if configured)
-        if: env.DOKPLOY_WEBHOOK_URL != ''
-        env:
-          DOKPLOY_WEBHOOK_URL: ${{ secrets.DOKPLOY_WEBHOOK_URL }}
+      - name: Verify immutable images
         run: |
-          curl -f -X POST "$DOKPLOY_WEBHOOK_URL" || echo "Webhook call skipped or optional"
+          docker buildx imagetools inspect "${REGISTRY}/hernanstupniki/norte-gaming-api:sha-${GITHUB_SHA}" >/dev/null
+          docker buildx imagetools inspect "${REGISTRY}/hernanstupniki/norte-gaming-web:sha-${GITHUB_SHA}" >/dev/null
+
+  deploy:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      DOKPLOY_URL: ${{ vars.DOKPLOY_URL }}
+      DOKPLOY_COMPOSE_ID: ${{ vars.DOKPLOY_COMPOSE_ID }}
+      DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+      HEALTHCHECK_URLS: https://nortegaming.com/api/health https://nortegaming.com/
+    steps:
+      - name: Checkout deployment script
+        uses: actions/checkout@v4
+
+      - name: Deploy and verify Dokploy
+        run: bash .github/scripts/deploy-dokploy-compose.sh

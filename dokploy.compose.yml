@@ -55,6 +55,9 @@ services:
     volumes:
       - /root/Norte-gaming/backend/uploads:/app/uploads
     command: sh -c "npx prisma migrate deploy; node dist/src/main.js"
+    mem_limit: 384m
+    cpus: "0.50"
+    pids_limit: 128
     networks:
       - norte_internal
       - proxy
@@ -63,6 +66,12 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:4000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
@@ -82,6 +91,9 @@ services:
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_API_URL: https://nortegaming.com/api
+    mem_limit: 512m
+    cpus: "0.50"
+    pids_limit: 128
     networks:
       - proxy
     logging:
@@ -89,6 +101,12 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
