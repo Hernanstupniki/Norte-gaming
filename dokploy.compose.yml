@@ -75,7 +75,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
-      - traefik.http.routers.norte-api-dokploy.rule=Host(`nortegaming.com`) && (PathPrefix(`/api`) || PathPrefix(`/docs`) || PathPrefix(`/uploads`))
+      - traefik.http.routers.norte-api-dokploy.rule=Host(`nortegaming.com`) && PathPrefix(`/api`, `/docs`, `/uploads`)
       - traefik.http.routers.norte-api-dokploy.entrypoints=web,websecure
       - traefik.http.routers.norte-api-dokploy.tls=true
       - traefik.http.routers.norte-api-dokploy.tls.certresolver=mytlschallenge
