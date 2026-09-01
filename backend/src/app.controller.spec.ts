@@ -19,4 +19,21 @@ describe('AppController', () => {
       expect(appController.getHello()).toBe('Hello World!');
     });
   });
+
+  describe('health', () => {
+    it('reports the exact deployed commit', () => {
+      process.env.APP_COMMIT_SHA = 'test-commit';
+
+      expect(appController.getHealth()).toEqual(
+        expect.objectContaining({
+          ok: true,
+          status: 'ok',
+          service: 'api',
+          commit: 'test-commit',
+        }),
+      );
+
+      delete process.env.APP_COMMIT_SHA;
+    });
+  });
 });

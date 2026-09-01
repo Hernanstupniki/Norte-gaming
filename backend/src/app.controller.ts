@@ -15,6 +15,12 @@ export class AppController {
   @Public()
   @Get('health')
   getHealth() {
-    return { status: 'ok', timestamp: new Date().toISOString() };
+    return {
+      ok: true,
+      status: 'ok',
+      service: 'api',
+      commit: process.env.APP_COMMIT_SHA?.trim() || 'unknown',
+      timestamp: new Date().toISOString(),
+    };
   }
 }

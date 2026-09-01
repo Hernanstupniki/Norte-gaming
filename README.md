@@ -1,2 +1,51 @@
 
-<!-- CI/CD webhook verification test 2026-08-30 -->
+# Norte Gaming
+
+Monorepo del ecommerce Norte Gaming:
+
+- `backend/`: API NestJS, Prisma y PostgreSQL.
+- `frontend/`: aplicación Next.js.
+- `dokploy.compose.yml`: definición de producción para Dokploy.
+
+## Calidad
+
+```bash
+cd backend
+npm ci
+npm run lint:check
+npm test
+npm run build
+
+cd ../frontend
+npm ci
+npm run lint
+npm run build
+```
+
+## CI/CD de producción
+
+`nuevabranch` es la única rama que publica imágenes `latest` y despliega.
+Los pull requests hacia `main` o `nuevabranch` sólo ejecutan controles de
+calidad.
+
+Por cada commit productivo, GitHub Actions:
+
+1. valida backend y frontend;
+2. crea como máximo una imagen inmutable por servicio:
+   `norte-gaming-api:sha-<commit>` y `norte-gaming-web:sha-<commit>`;
+3. comprueba `APP_COMMIT_SHA`, la revisión OCI y el digest;
+4. promueve esos mismos manifests a `latest`, sin reconstruirlos;
+5. activa Dokploy y espera que API y Web informen el mismo commit.
+
+Dokploy fuerza el pull únicamente de API y Web. PostgreSQL conserva su
+contenedor y el volumen externo `backend_postgres_data`; la VPS no compila las
+imágenes.
+
+## Identidad y salud
+
+- API: `https://nortegaming.com/api/health`
+- Web: `https://nortegaming.com/health`
+
+Ambas respuestas incluyen `ok`, `status`, `service`, `commit` y `timestamp`.
+El pipeline no considera terminado un despliegue hasta que las dos están
+saludables y `commit` coincide exactamente con el SHA que lo inició.

@@ -28,6 +28,7 @@ services:
 
   api:
     image: ghcr.io/hernanstupniki/norte-gaming-api:${IMAGE_TAG:-latest}
+    pull_policy: always
     container_name: norte-gaming-api-dokploy
     restart: unless-stopped
     depends_on:
@@ -85,6 +86,7 @@ services:
 
   web:
     image: ghcr.io/hernanstupniki/norte-gaming-web:${IMAGE_TAG:-latest}
+    pull_policy: always
     container_name: norte-gaming-web-dokploy
     restart: unless-stopped
     depends_on:
@@ -105,7 +107,7 @@ services:
         max-size: "10m"
         max-file: "3"
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/ || exit 1"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/health || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3

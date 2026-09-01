@@ -53,6 +53,12 @@ npm run dev
 http://localhost:3000
 ```
 
+Health: `http://localhost:3000/health`. En producción informa el
+`APP_COMMIT_SHA` exacto de la imagen Web y no utiliza caché.
+
+La imagen productiva se construye en GitHub Actions desde `nuevabranch`, se
+publica en GHCR y Dokploy sólo la descarga; la VPS no ejecuta el build.
+
 ## Integración futura (pendiente)
 
 - Backend con Supabase
