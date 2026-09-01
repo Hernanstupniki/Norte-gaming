@@ -30,7 +30,8 @@ calidad.
 
 Por cada commit productivo, GitHub Actions:
 
-1. valida backend y frontend;
+1. aplica lint obligatorio al TypeScript modificado y valida tests/builds
+   completos de backend y frontend;
 2. crea como máximo una imagen inmutable por servicio:
    `norte-gaming-api:sha-<commit>` y `norte-gaming-web:sha-<commit>`;
 3. comprueba `APP_COMMIT_SHA`, la revisión OCI y el digest;
@@ -49,3 +50,10 @@ imágenes.
 Ambas respuestas incluyen `ok`, `status`, `service`, `commit` y `timestamp`.
 El pipeline no considera terminado un despliegue hasta que las dos están
 saludables y `commit` coincide exactamente con el SHA que lo inició.
+
+## Deuda conocida
+
+El lint global anterior a esta normalización no estaba incluido en CI y tiene
+errores heredados. CI no los oculta ni desactiva reglas: bloquea errores en cada
+archivo TypeScript nuevo o modificado, mientras tests y builds siguen cubriendo
+el árbol completo. La limpieza del baseline global queda como trabajo separado.

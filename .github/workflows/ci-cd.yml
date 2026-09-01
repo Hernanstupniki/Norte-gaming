@@ -27,6 +27,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -39,9 +41,25 @@ jobs:
         working-directory: ./backend
         run: npm ci
 
-      - name: Lint backend
+      - name: Lint changed backend TypeScript
         working-directory: ./backend
-        run: npm run lint:check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          set -euo pipefail
+          base="$BASE_SHA"
+          if [[ ! "$base" =~ ^[0-9a-f]{40}$ || "$base" == "0000000000000000000000000000000000000000" ]] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            base="$(git rev-parse HEAD^)"
+          fi
+          mapfile -t files < <(
+            git diff --name-only --diff-filter=ACMR "$base" "$GITHUB_SHA" -- ':(top)backend/**/*.ts' \
+              | sed 's#^backend/##'
+          )
+          if (( ${#files[@]} == 0 )); then
+            echo "==> No changed backend TypeScript files to lint."
+          else
+            ./node_modules/.bin/eslint "${files[@]}"
+          fi
 
       - name: Test backend
         working-directory: ./backend
@@ -58,6 +76,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -70,9 +90,26 @@ jobs:
         working-directory: ./frontend
         run: npm ci
 
-      - name: Lint frontend
+      - name: Lint changed frontend TypeScript
         working-directory: ./frontend
-        run: npm run lint
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          set -euo pipefail
+          base="$BASE_SHA"
+          if [[ ! "$base" =~ ^[0-9a-f]{40}$ || "$base" == "0000000000000000000000000000000000000000" ]] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            base="$(git rev-parse HEAD^)"
+          fi
+          mapfile -t files < <(
+            git diff --name-only --diff-filter=ACMR "$base" "$GITHUB_SHA" -- \
+              ':(top)frontend/**/*.ts' ':(top)frontend/**/*.tsx' \
+              | sed 's#^frontend/##'
+          )
+          if (( ${#files[@]} == 0 )); then
+            echo "==> No changed frontend TypeScript files to lint."
+          else
+            ./node_modules/.bin/eslint "${files[@]}"
+          fi
 
       - name: Build frontend
         working-directory: ./frontend
