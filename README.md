@@ -38,6 +38,10 @@ Por cada commit productivo, GitHub Actions:
 4. promueve esos mismos manifests a `latest`, sin reconstruirlos;
 5. activa Dokploy y espera que API y Web informen el mismo commit.
 
+La identidad del commit se agrega después de las capas de dependencias y
+compilación. Por eso un commit vacío cambia la metadata verificable sin
+invalidar ni duplicar esas capas pesadas.
+
 Dokploy fuerza el pull únicamente de API y Web. PostgreSQL conserva su
 contenedor y el volumen externo `backend_postgres_data`; la VPS no compila las
 imágenes.
