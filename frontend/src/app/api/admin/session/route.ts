@@ -8,7 +8,7 @@ type SessionBody = {
 };
 
 const getAccessSecret = () => {
-  const secret = process.env.JWT_ACCESS_SECRET;
+  const secret = process.env.JWT_ACCESS_SECRET?.trim();
   if (!secret) {
     throw new Error("Falta configurar JWT_ACCESS_SECRET en el frontend");
   }
