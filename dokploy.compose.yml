@@ -9,19 +9,26 @@ services:
       POSTGRES_PASSWORD: ${AUTHENTICATION_API_KEY}
       TZ: ${GENERIC_TIMEZONE:-America/Argentina/Buenos_Aires}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - backend_postgres_data:/var/lib/postgresql/data
     networks:
-      - norte_internal
+      norte_internal:
+        aliases:
+          - db
+          - norte-gaming-db
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d norte_gaming"]
-      interval: 10s
+      interval: 30s
       timeout: 5s
       retries: 10
 
   api:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: ghcr.io/hernanstupniki/norte-gaming-api:${IMAGE_TAG:-latest}
+    pull_policy: always
     container_name: norte-gaming-api-dokploy
     restart: unless-stopped
     depends_on:
@@ -33,43 +40,53 @@ services:
       TZ: ${GENERIC_TIMEZONE:-America/Argentina/Buenos_Aires}
       DATABASE_URL: postgresql://postgres:${AUTHENTICATION_API_KEY}@db:5432/norte_gaming?schema=public
       BACKEND_URL: ${BACKEND_URL:-https://nortegaming.com}
-      FRONTEND_URL: ${FRONTEND_URL:-https://nortegaming.com}
-      CORS_ORIGIN: ${CORS_ORIGIN:-https://nortegaming.com}
+      CORS_ORIGIN: https://nortegaming.com
+      FRONTEND_URL: https://nortegaming.com
       MERCADO_PAGO_ACCESS_TOKEN: ${MERCADO_PAGO_ACCESS_TOKEN}
-      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-${AUTHENTICATION_API_KEY}}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-${AUTHENTICATION_API_KEY}}
       JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-7d}
       JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-30d}
-      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
-      SMTP_PORT: ${SMTP_PORT:-587}
-      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_SECURE: ${SMTP_SECURE}
       SMTP_USER: ${SMTP_USER}
       SMTP_PASS: ${SMTP_PASS}
       CONTACT_RECEIVER_EMAIL: ${CONTACT_RECEIVER_EMAIL}
     volumes:
-      - /srv/norte-gaming/uploads:/app/uploads
+      - /root/Norte-gaming/backend/uploads:/app/uploads
     command: sh -c "npx prisma migrate deploy; node dist/src/main.js"
+    mem_limit: 384m
+    cpus: "0.50"
+    pids_limit: 128
     networks:
-      norte_internal:
-        aliases:
-          - norte-gaming-api
-      proxy:
+      - norte_internal
+      - proxy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:4000/api/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
-      - "traefik.http.routers.norte-api-dokploy.rule=Host(`nortegaming.com`) && (PathPrefix(`/api`) || PathPrefix(`/docs`) || PathPrefix(`/uploads`))"
+      - traefik.http.routers.norte-api-dokploy.rule=Host(`nortegaming.com`) && (PathPrefix(`/api`) || PathPrefix(`/docs`) || PathPrefix(`/uploads`))
       - traefik.http.routers.norte-api-dokploy.entrypoints=web,websecure
       - traefik.http.routers.norte-api-dokploy.tls=true
       - traefik.http.routers.norte-api-dokploy.tls.certresolver=mytlschallenge
       - traefik.http.routers.norte-api-dokploy.priority=100
+      - traefik.http.routers.norte-api-dokploy.service=norte-api-dokploy
       - traefik.http.services.norte-api-dokploy.loadbalancer.server.port=4000
 
   web:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_API_URL: https://nortegaming.com/api
+    image: ghcr.io/hernanstupniki/norte-gaming-web:${IMAGE_TAG:-latest}
+    pull_policy: always
     container_name: norte-gaming-web-dokploy
     restart: unless-stopped
     depends_on:
@@ -78,29 +95,42 @@ services:
       NODE_ENV: production
       NEXT_PUBLIC_API_URL: https://nortegaming.com/api
       INTERNAL_API_URL: http://api:4000/api
-      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+    mem_limit: 512m
+    cpus: "0.50"
+    pids_limit: 128
     networks:
       - norte_internal
       - proxy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
-
-      - "traefik.http.routers.norte-web-dokploy.rule=Host(`nortegaming.com`)"
+      - traefik.http.routers.norte-web-dokploy.rule=Host(`nortegaming.com`)
       - traefik.http.routers.norte-web-dokploy.entrypoints=web,websecure
       - traefik.http.routers.norte-web-dokploy.tls=true
       - traefik.http.routers.norte-web-dokploy.tls.certresolver=mytlschallenge
       - traefik.http.routers.norte-web-dokploy.priority=1
       - traefik.http.services.norte-web-dokploy.loadbalancer.server.port=3000
 
-      - "traefik.http.routers.norte-web-admin-api-dokploy.rule=Host(`nortegaming.com`) && (Path(`/api/admin/session`) || PathPrefix(`/api/admin/proxy`))"
+      - traefik.http.routers.norte-web-admin-api-dokploy.rule=Host(`nortegaming.com`) && (Path(`/api/admin/session`) || PathPrefix(`/api/admin/proxy`))
       - traefik.http.routers.norte-web-admin-api-dokploy.entrypoints=web,websecure
       - traefik.http.routers.norte-web-admin-api-dokploy.tls=true
       - traefik.http.routers.norte-web-admin-api-dokploy.tls.certresolver=mytlschallenge
       - traefik.http.routers.norte-web-admin-api-dokploy.priority=300
+      - traefik.http.routers.norte-web-admin-api-dokploy.service=norte-web-dokploy
 
 volumes:
-  postgres_data:
+  backend_postgres_data:
     external: true
     name: backend_postgres_data
 

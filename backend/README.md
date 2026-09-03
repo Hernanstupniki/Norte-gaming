@@ -59,6 +59,9 @@ npm run start:dev
 
 API base URL: `http://localhost:4000/api`
 
+Health: `http://localhost:4000/api/health`. En una imagen de producción la
+respuesta incluye el `APP_COMMIT_SHA` exacto como `commit`.
+
 Swagger: `http://localhost:4000/docs`
 
 ## Docker
@@ -94,3 +97,5 @@ El seed crea:
 - Todos los endpoints excepto los marcados como publicos requieren JWT Bearer.
 - El backend aplica validacion global (`ValidationPipe`) y mapea errores comunes de Prisma.
 - Roles soportados: `ADMIN`, `CLIENT`.
+- Producción se construye en GitHub Actions desde `nuevabranch`; Dokploy sólo
+  descarga la imagen verificada desde GHCR y no compila en la VPS.

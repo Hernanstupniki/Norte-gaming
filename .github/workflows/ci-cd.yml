@@ -1,0 +1,355 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - nuevabranch
+  pull_request:
+    branches:
+      - main
+      - nuevabranch
+  workflow_dispatch:
+
+concurrency:
+  group: production-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  API_IMAGE_NAME: hernanstupniki/norte-gaming-api
+  WEB_IMAGE_NAME: hernanstupniki/norte-gaming-web
+
+jobs:
+  quality-backend:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Lint changed backend TypeScript
+        working-directory: ./backend
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          set -euo pipefail
+          base="$BASE_SHA"
+          if [[ ! "$base" =~ ^[0-9a-f]{40}$ || "$base" == "0000000000000000000000000000000000000000" ]] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            base="$(git rev-parse HEAD^)"
+          fi
+          mapfile -t files < <(
+            git diff --name-only --diff-filter=ACMR "$base" "$GITHUB_SHA" -- ':(top)backend/**/*.ts' \
+              | sed 's#^backend/##'
+          )
+          if (( ${#files[@]} == 0 )); then
+            echo "==> No changed backend TypeScript files to lint."
+          else
+            ./node_modules/.bin/eslint "${files[@]}"
+          fi
+
+      - name: Test backend
+        working-directory: ./backend
+        run: npm run test
+
+      - name: Build backend
+        working-directory: ./backend
+        run: npm run build
+
+  quality-frontend:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Lint changed frontend TypeScript
+        working-directory: ./frontend
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          set -euo pipefail
+          base="$BASE_SHA"
+          if [[ ! "$base" =~ ^[0-9a-f]{40}$ || "$base" == "0000000000000000000000000000000000000000" ]] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            base="$(git rev-parse HEAD^)"
+          fi
+          mapfile -t files < <(
+            git diff --name-only --diff-filter=ACMR "$base" "$GITHUB_SHA" -- \
+              ':(top)frontend/**/*.ts' ':(top)frontend/**/*.tsx' \
+              | sed 's#^frontend/##'
+          )
+          if (( ${#files[@]} == 0 )); then
+            echo "==> No changed frontend TypeScript files to lint."
+          else
+            ./node_modules/.bin/eslint "${files[@]}"
+          fi
+
+      - name: Build frontend
+        working-directory: ./frontend
+        run: npm run build
+
+  publish:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/nuevabranch'
+    needs:
+      - quality-backend
+      - quality-frontend
+    runs-on: ubuntu-latest
+    outputs:
+      api_sha_digest: ${{ steps.verify-api-sha.outputs.digest }}
+      api_latest_digest: ${{ steps.verify-api-latest.outputs.digest }}
+      web_sha_digest: ${{ steps.verify-web-sha.outputs.digest }}
+      web_latest_digest: ${{ steps.verify-web-latest.outputs.digest }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # --- BACKEND API ---
+      - name: Check if Backend API immutable SHA tag exists
+        id: check-api-sha
+        run: |
+          if docker buildx imagetools inspect "${REGISTRY}/${API_IMAGE_NAME}:sha-${GITHUB_SHA}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "==> Backend API tag sha-${GITHUB_SHA} already exists. Rebuilding is skipped."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build and push Backend API Image
+        if: steps.check-api-sha.outputs.exists == 'false'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          build-args: |
+            APP_COMMIT_SHA=${{ github.sha }}
+            OCI_SOURCE=https://github.com/${{ github.repository }}
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.API_IMAGE_NAME }}:sha-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.version=${{ github.sha }}
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+
+      - name: Verify Backend API immutable identity and digest
+        id: verify-api-sha
+        shell: bash
+        run: |
+          set -euo pipefail
+          image_ref="${REGISTRY}/${API_IMAGE_NAME}:sha-${GITHUB_SHA}"
+          docker pull "$image_ref" >/dev/null
+          revision="$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$image_ref")"
+          runtime_commit="$(docker image inspect --format '{{range .Config.Env}}{{println .}}{{end}}' "$image_ref" | sed -n 's/^APP_COMMIT_SHA=//p')"
+          if [[ "$revision" != "$GITHUB_SHA" || "$runtime_commit" != "$GITHUB_SHA" ]]; then
+            echo "::error::The immutable Backend API tag does not identify commit $GITHUB_SHA."
+            exit 1
+          fi
+          manifest="$(mktemp)"
+          trap 'rm -f "$manifest"' EXIT
+          docker buildx imagetools inspect --raw "$image_ref" > "$manifest"
+          digest="sha256:$(sha256sum "$manifest" | awk '{print $1}')"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+
+      - name: Promote Backend API SHA image to latest
+        run: |
+          set -euo pipefail
+          docker buildx imagetools create --prefer-index=false \
+            --tag "${REGISTRY}/${API_IMAGE_NAME}:latest" \
+            "${REGISTRY}/${API_IMAGE_NAME}@${{ steps.verify-api-sha.outputs.digest }}"
+
+      - name: Verify Backend API latest digest
+        id: verify-api-latest
+        shell: bash
+        run: |
+          set -euo pipefail
+          manifest="$(mktemp)"
+          trap 'rm -f "$manifest"' EXIT
+          docker buildx imagetools inspect --raw "${REGISTRY}/${API_IMAGE_NAME}:latest" > "$manifest"
+          digest="sha256:$(sha256sum "$manifest" | awk '{print $1}')"
+          if [[ "$digest" != "${{ steps.verify-api-sha.outputs.digest }}" ]]; then
+            echo "::error::Backend API latest does not match the immutable SHA image."
+            exit 1
+          fi
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+
+      # --- FRONTEND WEB ---
+      - name: Check if Frontend Web immutable SHA tag exists
+        id: check-web-sha
+        run: |
+          if docker buildx imagetools inspect "${REGISTRY}/${WEB_IMAGE_NAME}:sha-${GITHUB_SHA}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "==> Frontend Web tag sha-${GITHUB_SHA} already exists. Rebuilding is skipped."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build and push Frontend Web Image
+        if: steps.check-web-sha.outputs.exists == 'false'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          build-args: |
+            APP_COMMIT_SHA=${{ github.sha }}
+            OCI_SOURCE=https://github.com/${{ github.repository }}
+            NEXT_PUBLIC_API_URL=https://nortegaming.com/api
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.WEB_IMAGE_NAME }}:sha-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.version=${{ github.sha }}
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
+
+      - name: Verify Frontend Web immutable identity and digest
+        id: verify-web-sha
+        shell: bash
+        run: |
+          set -euo pipefail
+          image_ref="${REGISTRY}/${WEB_IMAGE_NAME}:sha-${GITHUB_SHA}"
+          docker pull "$image_ref" >/dev/null
+          revision="$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$image_ref")"
+          runtime_commit="$(docker image inspect --format '{{range .Config.Env}}{{println .}}{{end}}' "$image_ref" | sed -n 's/^APP_COMMIT_SHA=//p')"
+          if [[ "$revision" != "$GITHUB_SHA" || "$runtime_commit" != "$GITHUB_SHA" ]]; then
+            echo "::error::The immutable Frontend Web tag does not identify commit $GITHUB_SHA."
+            exit 1
+          fi
+          manifest="$(mktemp)"
+          trap 'rm -f "$manifest"' EXIT
+          docker buildx imagetools inspect --raw "$image_ref" > "$manifest"
+          digest="sha256:$(sha256sum "$manifest" | awk '{print $1}')"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+
+      - name: Promote Frontend Web SHA image to latest
+        run: |
+          set -euo pipefail
+          docker buildx imagetools create --prefer-index=false \
+            --tag "${REGISTRY}/${WEB_IMAGE_NAME}:latest" \
+            "${REGISTRY}/${WEB_IMAGE_NAME}@${{ steps.verify-web-sha.outputs.digest }}"
+
+      - name: Verify Frontend Web latest digest
+        id: verify-web-latest
+        shell: bash
+        run: |
+          set -euo pipefail
+          manifest="$(mktemp)"
+          trap 'rm -f "$manifest"' EXIT
+          docker buildx imagetools inspect --raw "${REGISTRY}/${WEB_IMAGE_NAME}:latest" > "$manifest"
+          digest="sha256:$(sha256sum "$manifest" | awk '{print $1}')"
+          if [[ "$digest" != "${{ steps.verify-web-sha.outputs.digest }}" ]]; then
+            echo "::error::Frontend Web latest does not match the immutable SHA image."
+            exit 1
+          fi
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Published production images"
+            echo "- Commit: \`$GITHUB_SHA\`"
+            echo "- API digest: \`${{ steps.verify-api-sha.outputs.digest }}\`"
+            echo "- Web digest: \`${{ steps.verify-web-sha.outputs.digest }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    needs: publish
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/nuevabranch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      API_HEALTHCHECK_URL: https://nortegaming.com/api/health
+      WEB_HEALTHCHECK_URL: https://nortegaming.com/health
+    steps:
+      - name: Trigger Dokploy Webhook
+        run: |
+          set -euo pipefail
+          echo "==> Triggering Dokploy deployment webhook..."
+          curl --fail-with-body --show-error --silent \
+            --connect-timeout 10 --max-time 300 --retry 3 \
+            -H "Content-Type: application/json" \
+            -H "x-github-event: push" \
+            -d '{"ref":"refs/heads/nuevabranch"}' \
+            -X POST "http://72.62.15.178:3000/api/deploy/compose/wo77pwWKuA1Jmek5jH55L"
+          echo ""
+          echo "==> Dokploy deployment triggered successfully."
+
+      - name: Verify deployed API and Web commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          deadline=$((SECONDS + 1200))
+          attempt=0
+          while (( SECONDS < deadline )); do
+            attempt=$((attempt + 1))
+            api_payload="$(curl --fail --show-error --silent --connect-timeout 3 --max-time 8 "$API_HEALTHCHECK_URL" 2>/dev/null || true)"
+            web_payload="$(curl --fail --show-error --silent --connect-timeout 3 --max-time 8 "$WEB_HEALTHCHECK_URL" 2>/dev/null || true)"
+            read -r api_healthy api_commit < <(
+              node -e '
+                try {
+                  const health = JSON.parse(process.argv[1]);
+                  console.log(`${health.ok === true} ${health.commit ?? ""}`);
+                } catch {
+                  console.log("false unknown");
+                }
+              ' "$api_payload"
+            )
+            read -r web_healthy web_commit < <(
+              node -e '
+                try {
+                  const health = JSON.parse(process.argv[1]);
+                  console.log(`${health.ok === true} ${health.commit ?? ""}`);
+                } catch {
+                  console.log("false unknown");
+                }
+              ' "$web_payload"
+            )
+            if [[ "$api_healthy" == "true" && "$api_commit" == "$GITHUB_SHA" && "$web_healthy" == "true" && "$web_commit" == "$GITHUB_SHA" ]]; then
+              echo "==> Production API and Web are healthy and run commit $GITHUB_SHA."
+              exit 0
+            fi
+            echo "Attempt $attempt: api=${api_healthy}/${api_commit:-unknown} web=${web_healthy}/${web_commit:-unknown}"
+            sleep 15
+          done
+          echo "::error::Production API and Web did not both report healthy commit $GITHUB_SHA within 20 minutes."
+          exit 1
