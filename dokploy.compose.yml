@@ -54,7 +54,7 @@ services:
       SMTP_PASS: ${SMTP_PASS}
       CONTACT_RECEIVER_EMAIL: ${CONTACT_RECEIVER_EMAIL}
     volumes:
-      - /root/Norte-gaming/backend/uploads:/app/uploads
+      - /srv/norte-gaming/uploads:/app/uploads
     command: sh -c "npx prisma migrate deploy; node dist/src/main.js"
     mem_limit: 384m
     cpus: "0.50"
@@ -95,6 +95,7 @@ services:
       NODE_ENV: production
       NEXT_PUBLIC_API_URL: https://nortegaming.com/api
       INTERNAL_API_URL: http://api:4000/api
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-${AUTHENTICATION_API_KEY}}
     mem_limit: 512m
     cpus: "0.50"
     pids_limit: 128
