@@ -6,11 +6,11 @@ import { useEffect, useState } from "react";
 const CARDS = [
   {
     num: "001",
-    title: "AJAZZ AJ199\nWIRELESS",
+    title: "AJAZZ AJ199\nMAX",
     status: "LANZAMIENTO",
-    subtitle: "Mouse Gamer AJAZZ AJ199 Wireless",
-    imageSrc: "/AJAZZ AJ199.png",
-    href: "/producto/mouse-gamer-ajazz-aj199-wireless",
+    subtitle: "Mouse AJAZZ AJ199 Max Nacodexx Wireless",
+    imageSrc: "/aj199_Max.png",
+    href: "/producto/mouse-ajazz-aj199-max-nacodexx-wireless",
   },
   {
     num: "002",
