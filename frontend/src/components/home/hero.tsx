@@ -14,11 +14,11 @@ const CARDS = [
   },
   {
     num: "002",
-    title: "ONIKUMA\nMT706",
+    title: "GRAVASTAR K1 LITE\nCRYSTAL AURORA",
     status: "YA DISPONIBLE!",
-    subtitle: "Teclado Gamer Mecánico Onikuma MT706 Wireless",
-    imageSrc: "/Onikuma MT706.png",
-    href: "/producto/teclado-gamer-mecanico-onikuma-mt706-wireless",
+    subtitle: "Teclado Wireless GravaStar Mercury K1 Lite RGB 75% - Crystal Aurora",
+    imageSrc: "/gravastar_aurora.png",
+    href: "/producto/teclado-wireless-gravastar-mercury-k1-lite-rgb-75-crystal-aurora",
   },
   {
     num: "003",
