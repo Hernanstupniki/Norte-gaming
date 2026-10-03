@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma, Role, User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
@@ -156,19 +160,50 @@ export class UsersService {
     });
   }
 
-  async adminUpdateUser(userId: string, dto: Partial<{
-    firstName?: string;
-    lastName?: string;
-    phone?: string;
-    role?: Role;
-    isActive?: boolean;
-  }>) {
-    const existing = await this.prisma.user.findFirst({ where: { id: userId, deletedAt: null } });
+  // Soft delete: orders keep pointing at this user, and the email is freed so it can register again.
+  async adminDeleteUser(userId: string, requesterId: string) {
+    if (userId === requesterId) {
+      throw new BadRequestException('No podés eliminar tu propia cuenta');
+    }
+
+    const existing = await this.prisma.user.findFirst({
+      where: { id: userId, deletedAt: null },
+    });
     if (!existing) {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    const allowed: any = {};
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        deletedAt: new Date(),
+        isActive: false,
+        refreshTokenHash: null,
+        email: `eliminado-${Date.now()}-${existing.email}`,
+      },
+    });
+
+    return { id: userId, deleted: true };
+  }
+
+  async adminUpdateUser(
+    userId: string,
+    dto: Partial<{
+      firstName?: string;
+      lastName?: string;
+      phone?: string;
+      role?: Role;
+      isActive?: boolean;
+    }>,
+  ) {
+    const existing = await this.prisma.user.findFirst({
+      where: { id: userId, deletedAt: null },
+    });
+    if (!existing) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    const allowed: Prisma.UserUpdateInput = {};
     if (dto.firstName !== undefined) allowed.firstName = dto.firstName;
     if (dto.lastName !== undefined) allowed.lastName = dto.lastName;
     if (dto.phone !== undefined) allowed.phone = dto.phone;

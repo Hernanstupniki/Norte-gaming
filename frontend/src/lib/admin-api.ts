@@ -456,7 +456,7 @@ export const adminGetUserById = async (userId: string) => {
 };
 
 export const adminUpdateUser = async (userId: string, payload: Partial<AdminUserItem>) => {
-  const body: any = {};
+  const body: Record<string, unknown> = {};
   if (payload.firstName !== undefined) body.firstName = payload.firstName;
   if (payload.lastName !== undefined) body.lastName = payload.lastName;
   if (payload.phone !== undefined) body.phone = payload.phone;
@@ -476,13 +476,17 @@ export const adminUpdateUser = async (userId: string, payload: Partial<AdminUser
   return response.json() as Promise<AdminUserItem>;
 };
 
+export const adminDeleteUser = async (userId: string) => {
+  const response = await fetch(getAdminProxyUrl(`users/${userId}`), { method: 'DELETE' });
+  if (!response.ok) {
+    throw new Error(await readApiError(response, 'No se pudo eliminar el usuario'));
+  }
+};
+
 export const adminGetProductBySlug = async (slug: string) => {
   const response = await fetch(getAdminProxyUrl(`products/admin/by-slug/${encodeURIComponent(slug)}`));
   if (!response.ok) {
-    const err = new Error('Not found');
-    // @ts-ignore
-    err.status = response.status;
-    throw err;
+    throw Object.assign(new Error('Not found'), { status: response.status });
   }
   return response.json() as Promise<AdminProductItem>;
 };
@@ -490,10 +494,7 @@ export const adminGetProductBySlug = async (slug: string) => {
 export const adminGetProductBySku = async (sku: string) => {
   const response = await fetch(getAdminProxyUrl(`products/admin/by-sku/${encodeURIComponent(sku)}`));
   if (!response.ok) {
-    const err = new Error('Not found');
-    // @ts-ignore
-    err.status = response.status;
-    throw err;
+    throw Object.assign(new Error('Not found'), { status: response.status });
   }
   return response.json() as Promise<AdminProductItem>;
 };

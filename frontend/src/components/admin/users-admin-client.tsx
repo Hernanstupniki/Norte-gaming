@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { adminListUsers, adminSetUserStatus, adminGetUserById, adminUpdateUser, AdminUserItem } from "@/lib/admin-api";
+import { adminListUsers, adminSetUserStatus, adminGetUserById, adminUpdateUser, adminDeleteUser, AdminUserItem } from "@/lib/admin-api";
 import { Select } from "@/components/common/select";
+
+const errorMessage = (err: unknown) => (err instanceof Error ? err.message : "");
 
 export function UsersAdminClient() {
   const [users, setUsers] = useState<AdminUserItem[]>([]);
@@ -19,8 +21,8 @@ export function UsersAdminClient() {
       const res = await adminListUsers({ page: p, limit, q });
       setUsers(res.data);
       setPage(res.page);
-    } catch (err: any) {
-      setError(err?.message || "Error cargando usuarios");
+    } catch (err) {
+      setError(errorMessage(err) || "Error cargando usuarios");
     } finally {
       setLoading(false);
     }
@@ -35,44 +37,91 @@ export function UsersAdminClient() {
     setUsers((prev) => prev.map((u) => (u.id === user.id ? { ...u, isActive: !u.isActive } : u)));
     try {
       await adminSetUserStatus(user.id, !user.isActive);
-    } catch (err: any) {
+    } catch (err) {
       setUsers(original);
-      setError(err?.message || "No se pudo actualizar el estado");
+      setError(errorMessage(err) || "No se pudo actualizar el estado");
     }
   };
 
   const [selectedUser, setSelectedUser] = useState<AdminUserItem | null>(null);
   const [editing, setEditing] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  const closeDetails = () => {
+    setEditing(false);
+    setSelectedUser(null);
+    setDetailError(null);
+  };
+
+  useEffect(() => {
+    if (!editing) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeDetails();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [editing]);
+
   const openDetails = async (userId: string) => {
-    setError(null);
+    setEditing(true);
+    setSelectedUser(null);
+    setDetailError(null);
+    setDetailLoading(true);
     try {
       const u = await adminGetUserById(userId);
       setSelectedUser(u);
-      setEditing(true);
-    } catch (err: any) {
-      setError(err?.message || "No se pudo cargar el usuario");
+    } catch (err) {
+      setDetailError(errorMessage(err) || "No se pudo cargar el usuario");
+    } finally {
+      setDetailLoading(false);
     }
   };
 
   const saveDetails = async () => {
     if (!selectedUser) return;
     setSaving(true);
-    setError(null);
+    setDetailError(null);
     try {
       const updated = await adminUpdateUser(selectedUser.id, selectedUser);
       setUsers((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
-      setSelectedUser(updated);
-      setEditing(false);
-    } catch (err: any) {
-      setError(err?.message || "No se pudo guardar el usuario");
+      closeDetails();
+    } catch (err) {
+      setDetailError(errorMessage(err) || "No se pudo guardar el usuario");
     } finally {
       setSaving(false);
     }
   };
 
-  const onFieldChange = (field: keyof AdminUserItem, value: any) => {
+  const [pendingDelete, setPendingDelete] = useState<AdminUserItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const askDelete = (user: AdminUserItem) => {
+    setDeleteError(null);
+    setPendingDelete(user);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await adminDeleteUser(pendingDelete.id);
+      setUsers((prev) => prev.filter((u) => u.id !== pendingDelete.id));
+      setPendingDelete(null);
+    } catch (err) {
+      setDeleteError(errorMessage(err) || "No se pudo eliminar el usuario");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const fullNameOf = (user: AdminUserItem) =>
+    `${user.firstName || ""}${user.lastName ? ` ${user.lastName}` : ""}`.trim() || user.email;
+
+  const onFieldChange = <K extends keyof AdminUserItem>(field: K, value: AdminUserItem[K]) => {
     setSelectedUser((prev) => (prev ? { ...prev, [field]: value } : prev));
   };
 
@@ -158,6 +207,12 @@ export function UsersAdminClient() {
                     >
                       Ver / Editar
                     </button>
+                    <button
+                      className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700"
+                      onClick={() => askDelete(user)}
+                    >
+                      Eliminar
+                    </button>
                   </div>
                 </article>
               );
@@ -204,6 +259,12 @@ export function UsersAdminClient() {
                         >
                           Ver / Editar
                         </button>
+                        <button
+                          className="px-3 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100"
+                          onClick={() => askDelete(user)}
+                        >
+                          Eliminar
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -213,9 +274,26 @@ export function UsersAdminClient() {
           </table>
         </div>
       </div>
-      {editing && selectedUser && (
-        <div className="bg-white border border-zinc-200 rounded-xl p-4 sm:p-5 mt-4 shadow-sm">
-          <h2 className="text-lg font-bold mb-3">Editar usuario</h2>
+      {editing && (
+        <div
+          className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4"
+          onClick={closeDetails}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-user-title"
+            className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-zinc-200 bg-white p-4 shadow-xl sm:p-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h2 id="edit-user-title" className="text-lg font-bold">Editar usuario</h2>
+            <button type="button" aria-label="Cerrar" className="rounded-lg px-2 py-1 text-xl leading-none text-zinc-500 hover:bg-zinc-100" onClick={closeDetails}>×</button>
+          </div>
+          {detailError && <div className="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{detailError}</div>}
+          {detailLoading && <div className="py-6 text-center text-sm text-zinc-600">Cargando usuario...</div>}
+          {selectedUser && (
+          <>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <input className="border rounded-lg px-3 py-2" value={selectedUser.firstName ?? ""} placeholder="Nombre" onChange={(e) => onFieldChange('firstName', e.target.value)} />
             <input className="border rounded-lg px-3 py-2" value={selectedUser.lastName ?? ""} placeholder="Apellido" onChange={(e) => onFieldChange('lastName', e.target.value)} />
@@ -240,7 +318,50 @@ export function UsersAdminClient() {
 
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">
             <button className="px-4 py-2 bg-zinc-900 text-white rounded-lg font-medium" onClick={() => void saveDetails()} disabled={saving}>{saving ? 'Guardando...' : 'Guardar'}</button>
-            <button className="px-4 py-2 bg-zinc-100 rounded-lg font-medium" onClick={() => { setEditing(false); setSelectedUser(null); }}>{'Cancelar'}</button>
+            <button className="px-4 py-2 bg-zinc-100 rounded-lg font-medium" onClick={closeDetails}>Cancelar</button>
+          </div>
+          </>
+          )}
+          </div>
+        </div>
+      )}
+
+      {pendingDelete && (
+        <div
+          className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => !deleting && setPendingDelete(null)}
+        >
+          <div
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="delete-user-title"
+            className="w-full max-w-md rounded-xl border border-zinc-200 bg-white p-5 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="delete-user-title" className="text-lg font-bold text-zinc-950">
+              ¿Eliminar a {fullNameOf(pendingDelete)}?
+            </h2>
+            <p className="mt-2 text-sm text-zinc-600">
+              La cuenta <span className="font-medium text-zinc-900">{pendingDelete.email}</span> deja de poder iniciar sesión y desaparece de esta lista.
+              Sus pedidos se conservan en el historial, y el email queda libre para registrarse de nuevo.
+            </p>
+            {deleteError && <div className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{deleteError}</div>}
+            <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <button
+                className="rounded-lg bg-zinc-100 px-4 py-2 font-medium"
+                onClick={() => setPendingDelete(null)}
+                disabled={deleting}
+              >
+                Cancelar
+              </button>
+              <button
+                className="rounded-lg bg-red-600 px-4 py-2 font-medium text-white hover:bg-red-700 disabled:opacity-60"
+                onClick={() => void confirmDelete()}
+                disabled={deleting}
+              >
+                {deleting ? "Eliminando..." : "Eliminar usuario"}
+              </button>
+            </div>
           </div>
         </div>
       )}
