@@ -22,11 +22,11 @@ const CARDS = [
   },
   {
     num: "003",
-    title: "CORSAIR HS55\nSURROUND V2",
+    title: "RAZER\nBLACKSHARK V2",
     status: "DESTACADO",
-    subtitle: "Auriculares Corsair HS55 Surround V2",
-    imageSrc: "/Corsair HS55 Surround V2.png",
-    href: "/producto/auricular-gamer-corsair-hs55-surround-v2",
+    subtitle: "Auricular Razer BlackShark V2",
+    imageSrc: "/razer_blackshark_v2.png",
+    href: "/producto/auricular-razer-blackshark-v2",
   },
 ];
 
