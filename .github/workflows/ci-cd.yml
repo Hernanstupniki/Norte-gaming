@@ -302,17 +302,36 @@ jobs:
       WEB_HEALTHCHECK_URL: https://nortegaming.com/health
     steps:
       - name: Trigger Dokploy Webhook
+        shell: bash
+        env:
+          DOKPLOY_WEBHOOK_URL: ${{ secrets.DOKPLOY_WEBHOOK_URL }}
         run: |
           set -euo pipefail
-          echo "==> Triggering Dokploy deployment webhook..."
-          curl --fail-with-body --show-error --silent \
-            --connect-timeout 10 --max-time 300 --retry 3 \
-            -H "Content-Type: application/json" \
-            -H "x-github-event: push" \
-            -d '{"ref":"refs/heads/nuevabranch"}' \
-            -X POST "http://72.62.15.178:3000/api/deploy/compose/wo77pwWKuA1Jmek5jH55L"
-          echo ""
-          echo "==> Dokploy deployment triggered successfully."
+          python3 - <<'PYWEBHOOK'
+          import json, os, urllib.request, urllib.error
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, *args, **kwargs):
+                  return None
+          url = os.environ.get("DOKPLOY_WEBHOOK_URL", "").strip()
+          if not url:
+              print("Missing repository Secret DOKPLOY_WEBHOOK_URL")
+              raise SystemExit(1)
+          try:
+              request = urllib.request.Request(url,
+                  data=json.dumps({"ref": os.environ["GITHUB_REF"]}).encode(),
+                  headers={"Content-Type": "application/json", "x-github-event": "push"}, method="POST")
+              with urllib.request.build_opener(NoRedirect()).open(request, timeout=60) as response:
+                  body = response.read(4097)
+                  if response.status != 200 or len(body) > 4096:
+                      raise ValueError("Unexpected response")
+                  payload = json.loads(body)
+                  if not isinstance(payload, dict) or payload.get("message") != "Compose deployed successfully":
+                      raise ValueError("Unexpected response")
+          except Exception:
+              print("Webhook failed or acceptance is unknown. Check Dokploy before retrying.")
+              raise SystemExit(1)
+          print("Dokploy accepted the request. Verify deployment completion separately.")
+          PYWEBHOOK
 
       - name: Verify deployed API and Web commit
         shell: bash
